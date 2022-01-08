@@ -261,6 +261,7 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Spam_W", cvars.keyspam_w);
 		INI_IMPORT_VARIABLE("Spam_S", cvars.keyspam_s);
 		INI_IMPORT_VARIABLE("Spam_Q", cvars.keyspam_q);
+		INI_IMPORT_VARIABLE("Spam_CTRL", cvars.keyspam_ctrl);
 	INI_IMPORT_END_SECTION();
 	
 	INI_IMPORT_BEGIN_SECTION("FOG");
@@ -454,6 +455,7 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Spam_W", cvars.keyspam_w);
 		INI_EXPORT_VARIABLE("Spam_S", cvars.keyspam_s);
 		INI_EXPORT_VARIABLE("Spam_Q", cvars.keyspam_q);
+		INI_EXPORT_VARIABLE("Spam_CTRL", cvars.keyspam_ctrl);
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("FOG");

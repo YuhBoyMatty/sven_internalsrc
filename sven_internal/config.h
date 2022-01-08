@@ -136,6 +136,7 @@ public:
 		bool keyspam_w = false;
 		bool keyspam_s = false;
 		bool keyspam_q = false;
+		bool keyspam_ctrl = false;
 
 		// Fog
 		bool fog = false;

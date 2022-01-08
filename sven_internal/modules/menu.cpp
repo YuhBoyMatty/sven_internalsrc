@@ -433,6 +433,8 @@ void ShowMainMenu()
 				ImGui::Checkbox("Spam W", &g_Config.cvars.keyspam_w); ImGui::SameLine();
 				ImGui::Checkbox("Spam S", &g_Config.cvars.keyspam_s);
 
+				ImGui::Checkbox("Spam CTRL", &g_Config.cvars.keyspam_ctrl);
+
 				ImGui::Text("");
 			}
 			
