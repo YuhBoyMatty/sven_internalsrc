@@ -227,7 +227,7 @@ CON_COMMAND_FUNC(sc_autojump, ConCommand_AutoJump, "sc_autojump - Toggle autojum
 	g_Config.cvars.autojump = !g_Config.cvars.autojump;
 }
 
-CON_COMMAND_FUNC(sc_doubleduck, ConCommand_DoubleDuck, "sc_doubleduck - Toggle jumpbug")
+CON_COMMAND_FUNC(sc_doubleduck, ConCommand_DoubleDuck, "sc_doubleduck - Toggle doubleduck")
 {
 	g_pEngineFuncs->Con_Printf(g_Config.cvars.doubleduck ? "Double Duck disabled\n" : "Double Duck enabled\n");
 	g_Config.cvars.doubleduck = !g_Config.cvars.doubleduck;
@@ -534,7 +534,7 @@ void CMisc::Helicopter(struct usercmd_s *cmd)
 		if (vHeliAngles.y > 180.f)
 			vHeliAngles.y -= 360.f;
 		
-		if (vHeliAngles.y < 180.f)
+		if (vHeliAngles.y < -180.f)
 			vHeliAngles.y += 360.f;
 
 		SetAnglesSilent(vHeliAngles, cmd);
