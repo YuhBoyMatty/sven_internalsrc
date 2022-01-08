@@ -119,6 +119,8 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 
 	if (file)
 	{
+		int nLine = 0;
+
 		bool bLoopVarFound = false;
 		bool bParsingOperators = false;
 		bool bDebug = static_cast<bool>(sc_ms_debug.GetCVar()->value);
@@ -135,22 +137,24 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 		while (fgets(buffer, sizeof(buffer), file))
 		{
 			std::cmatch match;
+			nLine++;
 
 			if (!bParsingOperators && !bLoopVarFound)
 			{
 				if (std::regex_search(buffer, match, regex_loop))
 				{
 					if (bDebug)
-						g_pEngineFuncs->Con_Printf("Found action | loop\n");
+						g_pEngineFuncs->Con_Printf("[%d] Found action | loop\n", nLine);
 
 					bLoopVarFound = true;
+					continue;
 				}
 			}
 
 			if (std::regex_search(buffer, match, regex_send))
 			{
 				if (bDebug)
-					g_pEngineFuncs->Con_Printf("Found action | send %s\n", match[1].str().c_str());
+					g_pEngineFuncs->Con_Printf("[%d] Found action | send %s\n", nLine, match[1].str().c_str());
 
 				CSpamOperatorSend *pOperator = new CSpamOperatorSend();
 
@@ -162,7 +166,7 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 			else if (std::regex_search(buffer, match, regex_sleep))
 			{
 				if (bDebug)
-					g_pEngineFuncs->Con_Printf("Found action | sleep %s\n", match[1].str().c_str());
+					g_pEngineFuncs->Con_Printf("[%d] Found action | sleep %s\n", nLine, match[1].str().c_str());
 
 				CSpamOperatorSleep *pOperator = new CSpamOperatorSleep();
 
