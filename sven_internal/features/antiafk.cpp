@@ -7,6 +7,7 @@
 
 #include "../game/utils.h"
 #include "../game/console.h"
+#include "../game/mathlib.h"
 #include "../config.h"
 
 //-----------------------------------------------------------------------------
@@ -16,21 +17,6 @@ extern playermove_s *g_pPlayerMove;
 //-----------------------------------------------------------------------------
 
 CAntiAFK g_AntiAFK;
-
-//cvar_s *antiafk = NULL;
-//cvar_s *antiafk_rotation_angle = NULL;
-
-//-----------------------------------------------------------------------------
-
-static inline float NormalizeDeg(float a)
-{
-	while (a >= 180.0)
-		a -= 360.0;
-	while (a < -180.0)
-		a += 360.0;
-
-	return a;
-}
 
 //-----------------------------------------------------------------------------
 
@@ -75,7 +61,7 @@ void RotateCamera()
 	}
 
 	va.y += flRotationAngle;
-	va.y = NormalizeDeg(va.y);
+	va.y = NormalizeAngle(va.y);
 
 	g_pEngineFuncs->SetViewAngles(va);
 }
