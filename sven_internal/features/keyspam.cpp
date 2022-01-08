@@ -44,6 +44,14 @@ CON_COMMAND_FUNC(sc_spam_snark, ConCommand_SnarkSpam, "sc_spam_snark - Toggle Q 
 	g_Config.cvars.keyspam_q = !g_Config.cvars.keyspam_q;
 }
 
+CON_COMMAND_FUNC(sc_spam_ctrl, ConCommand_CtrlSpam, "sc_spam_ctrl - Toggle CTRL spam")
+{
+	g_pEngineFuncs->pfnClientCmd("-duck");
+
+	g_pEngineFuncs->Con_Printf(g_Config.cvars.keyspam_ctrl ? "CTRL Spam disabled\n" : "CTRL Spam enabled\n");
+	g_Config.cvars.keyspam_ctrl = !g_Config.cvars.keyspam_ctrl;
+}
+
 //-----------------------------------------------------------------------------
 
 void CKeySpam::CreateMove(float frametime, struct usercmd_s *cmd, int active)
@@ -111,6 +119,26 @@ void CKeySpam::KeySpam()
 		else
 		{
 			g_pEngineFuncs->pfnClientCmd("-back");
+			key_down = false;
+		}
+	}
+	
+	if (g_Config.cvars.keyspam_ctrl)
+	{
+		static bool key_down = true;
+
+		if (bSpam || GetAsyncKeyState(VK_LCONTROL)) // CTRL
+		{
+			if (key_down)
+				g_pEngineFuncs->pfnClientCmd("-duck");
+			else
+				g_pEngineFuncs->pfnClientCmd("+duck");
+
+			key_down = !key_down;
+		}
+		else
+		{
+			g_pEngineFuncs->pfnClientCmd("-duck");
 			key_down = false;
 		}
 	}
