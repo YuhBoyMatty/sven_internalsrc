@@ -11,6 +11,7 @@
 #include "../config.h"
 #include "../patterns.h"
 
+#include "../libdasm/libdasm.h"
 #include "../utils/vtable_hook.h"
 #include "../utils/signature_scanner.h"
 #include "../utils/trampoline_hook.h"
@@ -107,7 +108,7 @@ CON_COMMAND_FUNC(sc_save_config, SaveConfig_Cmd, "sc_save_config - Save config t
 	g_Config.Save();
 }
 
-CON_COMMAND(test, "")
+CON_COMMAND(test, "test [entidx]")
 {
 	if (CMD_ARGC() >= 2)
 	{
@@ -117,11 +118,11 @@ CON_COMMAND(test, "")
 
 		if (pEntity)
 		{
-			g_pEngineFuncs->Con_Printf("Entity Pointer: %X\n", pEntity);
+			Msg("Entity Pointer: %X\n", pEntity);
 
 			if (pEntity->player)
 			{
-				g_pEngineFuncs->Con_Printf("Player Info Pointer: %X\n", g_pEngineStudio->PlayerInfo(index - 1));
+				Msg("Player Info Pointer: %X\n", g_pEngineStudio->PlayerInfo(index - 1));
 
 				hud_player_info_t playerInfo;
 				ZeroMemory(&playerInfo, sizeof(hud_player_info_s));
@@ -129,14 +130,14 @@ CON_COMMAND(test, "")
 				g_pEngineFuncs->pfnGetPlayerInfo(index, &playerInfo);
 
 				if (playerInfo.name && playerInfo.model && *playerInfo.model)
-					g_pEngineFuncs->Con_Printf("Model: %s\n", playerInfo.model);
+					Msg("Model: %s\n", playerInfo.model);
 
-				g_pEngineFuncs->Con_Printf("Top Color: %d\n", playerInfo.topcolor);
-				g_pEngineFuncs->Con_Printf("Bottom Color: %d\n", playerInfo.bottomcolor);
+				Msg("Top Color: %d\n", playerInfo.topcolor);
+				Msg("Bottom Color: %d\n", playerInfo.bottomcolor);
 			}
 			else if (pEntity->model && pEntity->model->name)
 			{
-				g_pEngineFuncs->Con_Printf("Model: %s\n", pEntity->model->name);
+				Msg("Model: %s\n", pEntity->model->name);
 			}
 		}
 	}
