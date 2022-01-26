@@ -330,21 +330,21 @@ void InitAutoVote()
 		return;
 	}
 
-	void *pREAD_BYTE = FIND_PATTERN(L"client.dll", Patterns::Client::READ_BYTE);
+	//void *pREAD_BYTE = FIND_PATTERN(L"client.dll", Patterns::Client::READ_BYTE);
 
-	if (!pREAD_BYTE)
-	{
-		ThrowError("READ_BYTE failed initialization\n");
-		return;
-	}
+	//if (!pREAD_BYTE)
+	//{
+	//	ThrowError("READ_BYTE failed initialization\n");
+	//	return;
+	//}
 
-	void *pREAD_STRING = FIND_PATTERN(L"client.dll", Patterns::Client::READ_STRING);
+	//void *pREAD_STRING = FIND_PATTERN(L"client.dll", Patterns::Client::READ_STRING);
 
-	if (!pREAD_STRING)
-	{
-		ThrowError("READ_STRING failed initialization\n");
-		return;
-	}
+	//if (!pREAD_STRING)
+	//{
+	//	ThrowError("READ_STRING failed initialization\n");
+	//	return;
+	//}
 
 	HOOK_FUNCTION(MsgFunc_VoteMenu_Hook, pMsgFunc_VoteMenu, MsgFunc_VoteMenu_Hooked, MsgFunc_VoteMenu_Original, MsgFunc_VoteMenuFn);
 

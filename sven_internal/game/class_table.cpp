@@ -53,7 +53,7 @@ const char *g_szClassName[] =
 	"Robot Grunt"
 };
 
-CHashTable<32, class_info_t> g_classTable;
+CHashTable<31, class_info_t> g_classTable;
 CHashTableString<48, class_info_t, false> g_modelsTable;
 
 constexpr static class_info_t LinkClassInfo(eClassID classID, int flags)

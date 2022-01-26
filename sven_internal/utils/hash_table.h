@@ -39,7 +39,7 @@ public:
 // Hash Table
 //-----------------------------------------------------------------------------
 
-template <uint32_t tableSize = 32, class hashData = uint32_t>
+template <uint32_t tableSize = 31, class hashData = uint32_t>
 class CHashTable64
 {
 public:
@@ -265,7 +265,7 @@ public:
 // Hash Table
 //-----------------------------------------------------------------------------
 
-template <uint32_t tableSize = 32, class hashData = uint32_t>
+template <uint32_t tableSize = 31, class hashData = uint32_t>
 class CHashTable
 {
 public:
@@ -491,7 +491,7 @@ public:
 // CString Hash Table
 //-----------------------------------------------------------------------------
 
-template <uint32_t tableSize = 32, class hashData = uint32_t, bool bAllocateKeys = true>
+template <uint32_t tableSize = 31, class hashData = uint32_t, bool bAllocateKeys = true>
 class CHashTableString
 {
 public:

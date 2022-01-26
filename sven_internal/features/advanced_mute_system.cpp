@@ -32,7 +32,7 @@
 #define AMS_HEADER ( 0x2F77 )
 
 // Hash table size
-#define HASH_TABLE_SIZE ( 256 )
+#define HASH_TABLE_SIZE ( 255 )
 
 // Make sure we're processing valid player
 #define GUARD_VALIDATE_PLAYER_INDEX(idx) \
