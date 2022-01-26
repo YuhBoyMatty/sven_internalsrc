@@ -7,7 +7,10 @@
 
 #include "../utils/signature_scanner.h"
 #include "../utils/patcher.h"
+#include "../game/console.h"
 #include "../patterns.h"
+
+#include <regex>
 
 //-----------------------------------------------------------------------------
 
@@ -45,7 +48,63 @@ static BYTE s_TertiaryAttackPatchedBytes[] =
 
 //-----------------------------------------------------------------------------
 
-void Msg(const char *pszMsg, ...)
+CON_COMMAND(disasm_addr, "disasm_addr [address]")
+{
+	if (CMD_ARGC() >= 2)
+	{
+		std::cmatch match;
+		std::regex regex_address("^([a-zA-Z0-9]+.(dll|exe))(([+-]{1})([0-9abcdefABCDEF]+)){0,1}$");
+
+		const char *pszAddress = CMD_ARGV(1);
+		BYTE *pAddress = NULL;
+
+		if (std::regex_search(pszAddress, match, regex_address))
+		{
+			const wchar_t *pwcModuleName = CStringToWideCString(match[1].str().c_str());
+			pAddress = (BYTE *)GetModuleHandle(pwcModuleName);
+
+			if (match[4].str().c_str() && match[5].str().c_str())
+			{
+				if (*match[4].str().c_str() == '+')
+					pAddress = (BYTE *)((DWORD)pAddress + strtol(match[5].str().c_str(), NULL, 16));
+				else
+					pAddress = (BYTE *)((DWORD)pAddress - strtol(match[5].str().c_str(), NULL, 16));
+			}
+		}
+		else
+		{
+			pAddress = (BYTE *)strtol(pszAddress, NULL, 16);
+		}
+
+		if (IsBadReadPtr(pAddress, 15)) // longest instruction length
+		{
+			Msg("Failed to disassemble address. Memory access violation.\n");
+		}
+		else
+		{
+			INSTRUCTION instruction;
+
+			int length = get_instruction(&instruction, pAddress, MODE_32);
+
+			if (length)
+			{
+				Msg("======= Instruction Info =======\n\n");
+
+				Msg("Address: %X\n\n", pAddress);
+				Msg("Opcode: %X\nOpcode Length: %d\nOpcode Type: %d\n\n", instruction.opcode, length, instruction.type);
+				Msg("Operand #1 Type: %d\nDisplacement Value: %X\nImmediate Value: %X\n\n", instruction.op1.type, instruction.op1.displacement, instruction.op1.immediate);
+				Msg("Operand #2 Type: %d\nDisplacement Value: %X\nImmediate Value: %X\n\n", instruction.op2.type, instruction.op2.displacement, instruction.op2.immediate);
+				Msg("Operand #3 Type: %d\nDisplacement Value: %X\nImmediate Value: %X\n\n", instruction.op3.type, instruction.op3.displacement, instruction.op3.immediate);
+
+				Msg("======= Instruction Info =======\n\n");
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void W_Msg(const char *pszMsg, ...)
 {
 	va_list args;
 
@@ -58,6 +117,18 @@ template<typename... Args>
 void T_Msg(const char *pszMsg, Args... args)
 {
 	g_pEngineFuncs->Con_Printf(pszMsg, args...);
+}
+
+//-----------------------------------------------------------------------------
+
+const wchar_t *CStringToWideCString(const char *pszString)
+{
+	const size_t length = strlen(pszString) + 1;
+	wchar_t *wcString = new wchar_t[length];
+
+	mbstowcs(wcString, pszString, length);
+
+	return wcString;
 }
 
 //-----------------------------------------------------------------------------
@@ -220,7 +291,7 @@ static bool PatchInterp()
 	if (!pPatchInterpString)
 	{
 		//ThrowError("'Patch Interp' failed initialization\n");
-		M_Msg("'Patch Interp' failed initialization\n");
+		Msg("'Patch Interp' failed initialization\n");
 		return false;
 	}
 
@@ -229,7 +300,7 @@ static bool PatchInterp()
 	if (!pPatchInterp)
 	{
 		//ThrowError("'Patch Interp' failed initialization #2\n");
-		M_Msg("'Patch Interp' failed initialization #2\n");
+		Msg("'Patch Interp' failed initialization #2\n");
 		return false;
 	}
 
@@ -239,14 +310,14 @@ static bool PatchInterp()
 	if (*pPatchInterp != 0x68) // check PUSH opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #3\n");
-		M_Msg("'Patch Interp' failed initialization #3\n");
+		Msg("'Patch Interp' failed initialization #3\n");
 		return false;
 	}
 
 	if (*(pPatchInterp - 0x1F) != 0x7A) // JP opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #4\n");
-		M_Msg("'Patch Interp' failed initialization #4\n");
+		Msg("'Patch Interp' failed initialization #4\n");
 		return false;
 	}
 
@@ -262,14 +333,14 @@ static bool PatchInterp()
 	if (*pPatchInterp != 0x68) // check PUSH opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #5\n");
-		M_Msg("'Patch Interp' failed initialization #5\n");
+		Msg("'Patch Interp' failed initialization #5\n");
 		return false;
 	}
 
 	if (*(pPatchInterp - 0x1F) != 0x7A) // JP opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #6\n");
-		M_Msg("'Patch Interp' failed initialization #6\n");
+		Msg("'Patch Interp' failed initialization #6\n");
 		return false;
 	}
 
@@ -284,14 +355,14 @@ static bool PatchInterp()
 	if (*pPatchInterp != 0xB8) // check MOV, EAX ... opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #7\n");
-		M_Msg("'Patch Interp' failed initialization #7\n");
+		Msg("'Patch Interp' failed initialization #7\n");
 		return false;
 	}
 
 	if (*(pPatchInterp - 0x8) != 0x7D) // JNL opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #8\n");
-		M_Msg("'Patch Interp' failed initialization #8\n");
+		Msg("'Patch Interp' failed initialization #8\n");
 		return false;
 	}
 
@@ -303,7 +374,7 @@ static bool PatchInterp()
 	if (*(pPatchInterp + 0xD) != 0x7E) // JLE opcode
 	{
 		//ThrowError("'Patch Interp' failed initialization #9\n");
-		M_Msg("'Patch Interp' failed initialization #9\n");
+		Msg("'Patch Interp' failed initialization #9\n");
 		return false;
 	}
 
@@ -483,7 +554,7 @@ void InitUtils()
 
 	if (!PatchInterp())
 	{
-		M_Msg("PATCH FAILURE\n");
+		Msg("PATCH FAILURE\n");
 		//return;
 	}
 
