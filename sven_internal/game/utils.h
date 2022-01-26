@@ -24,9 +24,9 @@
 #endif
 
 // Console print macro & wrappers
-#define M_Msg(msg, ...) g_pEngineFuncs->Con_Printf(msg, __VA_ARGS__)
+#define Msg(msg, ...) g_pEngineFuncs->Con_Printf(msg, __VA_ARGS__)
 
-void Msg(const char *pszMsg, ...);
+void W_Msg(const char *pszMsg, ...);
 
 template <typename... Args>
 void T_Msg(const char *pszMsg, Args... args);
@@ -38,6 +38,7 @@ void T_Msg(const char *pszMsg, Args... args);
 extern double *dbRealtime;
 extern vgui::ISurface *g_pSurface;
 
+const wchar_t *CStringToWideCString(const char *pszString);
 bool WorldToScreen(float *pflOrigin, float *pflVecScreen);
 void ScreenToWorld(float *pflNDC, float *pflWorldOrigin);
 void SetAnglesSilent(float *angles, struct usercmd_s *cmd);
