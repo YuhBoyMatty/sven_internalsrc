@@ -26,7 +26,7 @@ void ConVar_Unregister()
 
 void PrintConsoleHelp()
 {
-	g_pEngineFuncs->Con_Printf("=================================== Console Help ===================================\n");
+	Msg("=================================== Console Help ===================================\n");
 
 	CConCommandBase *pConCommandBase = CConCommandBase::s_pConCommandBaseList;
 
@@ -35,22 +35,22 @@ void PrintConsoleHelp()
 		switch (pConCommandBase->GetType())
 		{
 		case CONSOLE_VARIABLE:
-			g_pEngineFuncs->Con_Printf("Variable: %s    Description: %s\n", pConCommandBase->GetName(), pConCommandBase->GetHelpText());
+			Msg("Variable: %s    Description: %s\n", pConCommandBase->GetName(), pConCommandBase->GetHelpText());
 			break;
 
 		case CONSOLE_COMMAND:
-			g_pEngineFuncs->Con_Printf("Command: %s    Description: %s\n", pConCommandBase->GetName(), pConCommandBase->GetHelpText());
+			Msg("Command: %s    Description: %s\n", pConCommandBase->GetName(), pConCommandBase->GetHelpText());
 			break;
 
 		case CONSOLE_COMMAND_TOGGLE:
-			g_pEngineFuncs->Con_Printf("Toggle Command: %s    Description: %s\n", pConCommandBase->GetName(), pConCommandBase->GetHelpText());
+			Msg("Toggle Command: %s    Description: %s\n", pConCommandBase->GetName(), pConCommandBase->GetHelpText());
 			break;
 		}
 
 		pConCommandBase = pConCommandBase->GetNext();
 	}
 
-	g_pEngineFuncs->Con_Printf("=================================== Console Help ===================================\n");
+	Msg("=================================== Console Help ===================================\n");
 }
 
 //-----------------------------------------------------------------------------

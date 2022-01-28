@@ -177,6 +177,8 @@ void ShowMainMenu()
 				ImGui::Text("Speed");
 
 				ImGui::Checkbox("Show Speed", &g_Config.cvars.show_speed);
+				ImGui::SliderFloat("Speed Width Fraction", &g_Config.cvars.speed_width_fraction, 0.0f, 1.0f);
+				ImGui::SliderFloat("Speed Height Fraction", &g_Config.cvars.speed_height_fraction, 0.0f, 1.0f);
 				ImGui::ColorEdit4("Speed Color", g_Config.cvars.speed_color);
 				
 				ImGui::Text("");
@@ -191,8 +193,8 @@ void ShowMainMenu()
 				ImGui::Separator();
 				ImGui::Text("Wallhack");
 
-				ImGui::Checkbox("Simple", &g_Config.cvars.wallhack); ImGui::SameLine();
-				ImGui::Checkbox("Lambert", &g_Config.cvars.wallhack_white_walls);
+				ImGui::Checkbox("Simple Wallhack", &g_Config.cvars.wallhack); ImGui::SameLine();
+				ImGui::Checkbox("Lambert Wallhack", &g_Config.cvars.wallhack_white_walls);
 				ImGui::Checkbox("Wireframe World", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
 				ImGui::Checkbox("Wireframe Models", &g_Config.cvars.wallhack_wireframe_models);
 

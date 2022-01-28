@@ -160,7 +160,7 @@ CON_COMMAND_FUNC(sc_reload_autovote_filter, LoadVoteFilter, "sc_reload_autovote_
 			}
 		}
 
-		g_pEngineFuncs->Con_Printf("[AutoVote Filter] Added %d users\n", nAdded);
+		Msg("[AutoVote Filter] Added %d users\n", nAdded);
 		fclose(file);
 	}
 }

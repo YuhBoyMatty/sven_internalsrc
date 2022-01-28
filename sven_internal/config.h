@@ -43,6 +43,8 @@ public:
 		int draw_entities = 0; // enum
 
 		bool show_speed = false;
+		float speed_width_fraction = 0.5f;
+		float speed_height_fraction = 0.88f;
 		float speed_color[4] = { 1.0f, 0.75f, 0.0f, 0.882f };
 
 		bool wallhack = false;

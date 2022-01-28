@@ -74,25 +74,25 @@ pfnUserMsgHook UserMsgHook_ScreenFade_Original = NULL;
 
 CON_COMMAND_FUNC(sc_wallhack, ConCommand_Wallhack, "sc_wallhack - Simple OpenGL wallhack")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.wallhack ? "Wallhack disabled\n" : "Wallhack enabled\n");
+	Msg(g_Config.cvars.wallhack ? "Wallhack disabled\n" : "Wallhack enabled\n");
 	g_Config.cvars.wallhack = !g_Config.cvars.wallhack;
 }
 
 CON_COMMAND_FUNC(sc_wallhack_white_walls, ConCommand_WhiteWalls, "sc_wallhack_white_walls - Lambert wallhack")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.wallhack_white_walls ? "White Walls disabled\n" : "White Walls enabled\n");
+	Msg(g_Config.cvars.wallhack_white_walls ? "White Walls disabled\n" : "White Walls enabled\n");
 	g_Config.cvars.wallhack_white_walls = !g_Config.cvars.wallhack_white_walls;
 }
 
 CON_COMMAND_FUNC(sc_wallhack_wireframe, ConCommand_Wireframe, "sc_wallhack_wireframe - Wireframe view")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.wallhack_wireframe ? "Wireframe disabled\n" : "Wireframe enabled\n");
+	Msg(g_Config.cvars.wallhack_wireframe ? "Wireframe disabled\n" : "Wireframe enabled\n");
 	g_Config.cvars.wallhack_wireframe = !g_Config.cvars.wallhack_wireframe;
 }
 
 CON_COMMAND_FUNC(sc_wallhack_wireframe_models, ConCommand_WireframeModels, "sc_wallhack_wireframe_models - Wireframe view (entity models only)")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.wallhack_wireframe_models ? "Wireframe Models disabled\n" : "Wireframe Models enabled\n");
+	Msg(g_Config.cvars.wallhack_wireframe_models ? "Wireframe Models disabled\n" : "Wireframe Models enabled\n");
 	g_Config.cvars.wallhack_wireframe_models = !g_Config.cvars.wallhack_wireframe_models;
 }
 
@@ -117,19 +117,21 @@ void CVisual::Process()
 
 void CVisual::ShowSpeed()
 {
-	if (!g_Config.cvars.show_speed)
+	if (!g_Config.cvars.show_speed || g_pPlayerMove->iuser1 != 0)
 		return;
 
+	float flSpeed = g_Local.flVelocity;
+
 	g_Drawing.DrawString(g_hESP2,
-						 (m_iScreenWidth / 2),
-						 int(m_iScreenHeight * 0.88),
+						 int(m_iScreenWidth * g_Config.cvars.speed_width_fraction),
+						 int(m_iScreenHeight * g_Config.cvars.speed_height_fraction),
 						 int(255.f * g_Config.cvars.speed_color[0]),
 						 int(255.f * g_Config.cvars.speed_color[1]),
 						 int(255.f * g_Config.cvars.speed_color[2]),
 						 int(255.f * g_Config.cvars.speed_color[3]),
 						 FONT_CENTER,
 						 "%.1f",
-						 g_Local.flVelocity);
+						 flSpeed);
 }
 
 void CVisual::Lightmap()

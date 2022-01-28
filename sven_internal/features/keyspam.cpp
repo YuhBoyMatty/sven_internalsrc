@@ -18,7 +18,7 @@ CON_COMMAND_FUNC(sc_spam_use, ConCommand_UseSpam, "sc_spam_use - Toggle E spam")
 {
 	g_pEngineFuncs->pfnClientCmd("-use");
 
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.keyspam_e ? "Use Spam disabled\n" : "Use Spam enabled\n");
+	Msg(g_Config.cvars.keyspam_e ? "Use Spam disabled\n" : "Use Spam enabled\n");
 	g_Config.cvars.keyspam_e = !g_Config.cvars.keyspam_e;
 }
 
@@ -26,7 +26,7 @@ CON_COMMAND_FUNC(sc_spam_forward, ConCommand_ForwardSpam, "sc_spam_forward - Tog
 {
 	g_pEngineFuncs->pfnClientCmd("-forward");
 
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.keyspam_w ? "Forward Spam disabled\n" : "Forward Spam enabled\n");
+	Msg(g_Config.cvars.keyspam_w ? "Forward Spam disabled\n" : "Forward Spam enabled\n");
 	g_Config.cvars.keyspam_w = !g_Config.cvars.keyspam_w;
 }
 
@@ -34,21 +34,19 @@ CON_COMMAND_FUNC(sc_spam_back, ConCommand_BackSpam, "sc_spam_back - Toggle S spa
 {
 	g_pEngineFuncs->pfnClientCmd("-back");
 
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.keyspam_s ? "Back Spam disabled\n" : "Back Spam enabled\n");
+	Msg(g_Config.cvars.keyspam_s ? "Back Spam disabled\n" : "Back Spam enabled\n");
 	g_Config.cvars.keyspam_s = !g_Config.cvars.keyspam_s;
 }
 
 CON_COMMAND_FUNC(sc_spam_snark, ConCommand_SnarkSpam, "sc_spam_snark - Toggle Q spam")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.keyspam_q ? "Snark Spam disabled\n" : "Snark Spam enabled\n");
+	Msg(g_Config.cvars.keyspam_q ? "Snark Spam disabled\n" : "Snark Spam enabled\n");
 	g_Config.cvars.keyspam_q = !g_Config.cvars.keyspam_q;
 }
 
 CON_COMMAND_FUNC(sc_spam_ctrl, ConCommand_CtrlSpam, "sc_spam_ctrl - Toggle CTRL spam")
 {
-	g_pEngineFuncs->pfnClientCmd("-duck");
-
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.keyspam_ctrl ? "CTRL Spam disabled\n" : "CTRL Spam enabled\n");
+	Msg(g_Config.cvars.keyspam_ctrl ? "CTRL Spam disabled\n" : "CTRL Spam enabled\n");
 	g_Config.cvars.keyspam_ctrl = !g_Config.cvars.keyspam_ctrl;
 }
 

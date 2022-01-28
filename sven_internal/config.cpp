@@ -151,6 +151,8 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Crosshair", cvars.draw_crosshair);
 		INI_IMPORT_VARIABLE("DrawEntities", cvars.draw_entities);
 		INI_IMPORT_VARIABLE("ShowSpeed", cvars.show_speed);
+		INI_IMPORT_VARIABLE("SpeedWidthFraction", cvars.speed_width_fraction);
+		INI_IMPORT_VARIABLE("SpeedHeightFraction", cvars.speed_height_fraction);
 		INI_IMPORT_VARIABLE("Speed_R", cvars.speed_color[0]);
 		INI_IMPORT_VARIABLE("Speed_G", cvars.speed_color[1]);
 		INI_IMPORT_VARIABLE("Speed_B", cvars.speed_color[2]);
@@ -352,6 +354,8 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Crosshair", cvars.draw_crosshair);
 		INI_EXPORT_VARIABLE("DrawEntities", cvars.draw_entities);
 		INI_EXPORT_VARIABLE("ShowSpeed", cvars.show_speed);
+		INI_EXPORT_VARIABLE("SpeedWidthFraction", cvars.speed_width_fraction);
+		INI_EXPORT_VARIABLE("SpeedHeightFraction", cvars.speed_height_fraction);
 		INI_EXPORT_VARIABLE("Speed_R", cvars.speed_color[0]);
 		INI_EXPORT_VARIABLE("Speed_G", cvars.speed_color[1]);
 		INI_EXPORT_VARIABLE("Speed_B", cvars.speed_color[2]);

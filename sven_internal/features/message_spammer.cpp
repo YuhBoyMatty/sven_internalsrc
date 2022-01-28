@@ -44,10 +44,10 @@ CON_COMMAND_FUNC(sc_ms_reload, ConCommand_ReloadSpamTask, "sc_ms_reload [tasknam
 
 CON_COMMAND_FUNC(sc_ms_keywords, ConCommand_PrintSpamKeyWords, "sc_ms_keywords - Prints all keywords")
 {
-	g_pEngineFuncs->Con_Printf("[Message Spammer] Keywords:\n");
-	g_pEngineFuncs->Con_Printf("loop | must be defined at the beginning\n");
-	g_pEngineFuncs->Con_Printf("send [message] | send a given message to the game chat\n");
-	g_pEngineFuncs->Con_Printf("sleep [delay] | pause a running task for a given delay\n");
+	Msg("[Message Spammer] Keywords:\n");
+	Msg("loop | must be defined at the beginning\n");
+	Msg("send [message] | send a given message to the game chat\n");
+	Msg("sleep [delay] | pause a running task for a given delay\n");
 }
 
 CON_COMMAND_FUNC(sc_ms_print, ConCommand_PrintSpamTasks, "sc_ms_print - Print all spam tasks")
@@ -102,13 +102,13 @@ void CMessageSpammer::RunTasks()
 
 void CMessageSpammer::PrintTasks()
 {
-	g_pEngineFuncs->Con_Printf("[Message Spammer] Spam tasks list:\n");
+	Msg("[Message Spammer] Spam tasks list:\n");
 
 	for (size_t i = 0; i < m_tasks.size(); ++i)
 	{
 		CSpamTask *pTask = m_tasks[i];
 
-		g_pEngineFuncs->Con_Printf("%d: %s (loop: %d, waiting: %d)\n", i, pTask->GetName(), pTask->IsLooped(), pTask->IsWaiting());
+		Msg("%d: %s (loop: %d, waiting: %d)\n", i, pTask->GetName(), pTask->IsLooped(), pTask->IsWaiting());
 	}
 }
 
@@ -138,7 +138,7 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 		CSpamTask *pTask = new CSpamTask(pszTaskName);
 
 		if (bDebug)
-			g_pEngineFuncs->Con_Printf("< Parsing task: %s >\n", pszTaskName);
+			Msg("< Parsing task: %s >\n", pszTaskName);
 
 		while (fgets(buffer, sizeof(buffer), file))
 		{
@@ -150,7 +150,7 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 				if (std::regex_search(buffer, match, regex_loop))
 				{
 					if (bDebug)
-						g_pEngineFuncs->Con_Printf("[%d] Found action | loop\n", nLine);
+						Msg("[%d] Found action | loop\n", nLine);
 
 					bLoopVarFound = true;
 					continue;
@@ -160,7 +160,7 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 			if (std::regex_search(buffer, match, regex_send))
 			{
 				if (bDebug)
-					g_pEngineFuncs->Con_Printf("[%d] Found action | send %s\n", nLine, match[1].str().c_str());
+					Msg("[%d] Found action | send %s\n", nLine, match[1].str().c_str());
 
 				CSpamOperatorSend *pOperator = new CSpamOperatorSend();
 
@@ -172,7 +172,7 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 			else if (std::regex_search(buffer, match, regex_sleep))
 			{
 				if (bDebug)
-					g_pEngineFuncs->Con_Printf("[%d] Found action | sleep %s\n", nLine, match[1].str().c_str());
+					Msg("[%d] Found action | sleep %s\n", nLine, match[1].str().c_str());
 
 				CSpamOperatorSleep *pOperator = new CSpamOperatorSleep();
 
@@ -184,19 +184,19 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 		}
 
 		if (bDebug)
-			g_pEngineFuncs->Con_Printf("< Parsing finished >\n");
+			Msg("< Parsing finished >\n");
 
 		pTask->SetLoop(bLoopVarFound);
 		m_tasks.push_back(pTask);
 
-		g_pEngineFuncs->Con_Printf("[Message Spammer] Spam task %s successfully parsed\n", pszTaskName);
+		Msg("[Message Spammer] Spam task %s successfully parsed\n", pszTaskName);
 
 		fclose(file);
 		return true;
 	}
 	else
 	{
-		g_pEngineFuncs->Con_Printf("[Message Spammer] Failed to open file called %s.txt\n", pszTaskName);
+		Msg("[Message Spammer] Failed to open file called %s.txt\n", pszTaskName);
 	}
 
 	return false;
@@ -207,9 +207,9 @@ bool CMessageSpammer::ReloadTask(const char *pszTaskName)
 	bool bReloaded = RemoveTask(pszTaskName) && AddTask(pszTaskName);
 
 	if (bReloaded)
-		g_pEngineFuncs->Con_Printf("[Message Spammer] Spam task %s has been reloaded\n", pszTaskName);
+		Msg("[Message Spammer] Spam task %s has been reloaded\n", pszTaskName);
 	else
-		g_pEngineFuncs->Con_Printf("[Message Spammer] Failed to reload spam task %s\n", pszTaskName);
+		Msg("[Message Spammer] Failed to reload spam task %s\n", pszTaskName);
 
 	return bReloaded;
 }
@@ -226,7 +226,7 @@ bool CMessageSpammer::RemoveTask(const char *pszTaskName)
 			m_tasks.erase(m_tasks.begin() + i);
 			delete pTask;
 
-			g_pEngineFuncs->Con_Printf("[Message Spammer] Spam task %s has been removed\n", pszTaskName);
+			Msg("[Message Spammer] Spam task %s has been removed\n", pszTaskName);
 
 			return true;
 		}

@@ -130,7 +130,7 @@ void LoadMutedPlayers()
 
 		if (buffer != AMS_HEADER)
 		{
-			g_pEngineFuncs->Con_Printf("[AMS] Error: invalid format of file ../sven_internal/muted_players.db\n");
+			Msg("[AMS] Error: invalid format of file ../sven_internal/muted_players.db\n");
 			return;
 		}
 
@@ -139,7 +139,7 @@ void LoadMutedPlayers()
 
 		if (buffer < 1)
 		{
-			g_pEngineFuncs->Con_Printf("[AMS] Error: invalid version\n");
+			Msg("[AMS] Error: invalid version\n");
 			return;
 		}
 
@@ -161,7 +161,7 @@ void LoadMutedPlayers()
 	}
 	else
 	{
-		g_pEngineFuncs->Con_Printf("[AMS] Warning: missing file ../sven_internal/muted_players.db\n");
+		Msg("[AMS] Warning: missing file ../sven_internal/muted_players.db\n");
 	}
 
 	g_pFileDB = NULL;
@@ -199,7 +199,7 @@ void SaveMutedPlayers()
 	}
 	else
 	{
-		g_pEngineFuncs->Con_Printf("[AMS] Error: cannot create file muted_players.db\n");
+		Msg("[AMS] Error: cannot create file muted_players.db\n");
 	}
 
 	g_pFileDB = NULL;
@@ -277,7 +277,7 @@ CON_COMMAND_FUNC(ams_mute_voice, ConCommand_MuteVoice, "ams_mute_voice [player i
 
 	AddMutedPlayer(steamid, MUTE_VOICE);
 
-	g_pEngineFuncs->Con_Printf("[AMS] Player %s muted (voice)\n", g_pLastPlayer->name);
+	Msg("[AMS] Player %s muted (voice)\n", g_pLastPlayer->name);
 }
 
 CON_COMMAND_FUNC(ams_mute_chat, ConCommand_MuteChat, "ams_mute_chat [player index] - Mute a player's chat by index")
@@ -293,7 +293,7 @@ CON_COMMAND_FUNC(ams_mute_chat, ConCommand_MuteChat, "ams_mute_chat [player inde
 
 	AddMutedPlayer(steamid, MUTE_CHAT);
 
-	g_pEngineFuncs->Con_Printf("[AMS] Player %s muted (chat)\n", g_pLastPlayer->name);
+	Msg("[AMS] Player %s muted (chat)\n", g_pLastPlayer->name);
 }
 
 CON_COMMAND_FUNC(ams_mute_all, ConCommand_MuteAll, "ams_mute_all [player index] - Mute all player communications by index")
@@ -309,7 +309,7 @@ CON_COMMAND_FUNC(ams_mute_all, ConCommand_MuteAll, "ams_mute_all [player index] 
 
 	AddMutedPlayer(steamid, MUTE_ALL);
 
-	g_pEngineFuncs->Con_Printf("[AMS] Player %s muted\n", g_pLastPlayer->name);
+	Msg("[AMS] Player %s muted\n", g_pLastPlayer->name);
 }
 
 CON_COMMAND_FUNC(ams_unmute_voice, ConCommand_UnmuteVoice, "ams_unmute_voice [player index] - Mute a player's voice by index")
@@ -325,7 +325,7 @@ CON_COMMAND_FUNC(ams_unmute_voice, ConCommand_UnmuteVoice, "ams_unmute_voice [pl
 
 	RemoveMutedPlayer(steamid, MUTE_VOICE);
 
-	g_pEngineFuncs->Con_Printf("[AMS] Player %s unmuted (voice)\n", g_pLastPlayer->name);
+	Msg("[AMS] Player %s unmuted (voice)\n", g_pLastPlayer->name);
 }
 
 CON_COMMAND_FUNC(ams_unmute_chat, ConCommand_UnmuteChat, "ams_unmute_chat [player index] - Unmute a player's chat by index")
@@ -341,7 +341,7 @@ CON_COMMAND_FUNC(ams_unmute_chat, ConCommand_UnmuteChat, "ams_unmute_chat [playe
 
 	RemoveMutedPlayer(steamid, MUTE_CHAT);
 
-	g_pEngineFuncs->Con_Printf("[AMS] Player %s unmuted (chat)\n", g_pLastPlayer->name);
+	Msg("[AMS] Player %s unmuted (chat)\n", g_pLastPlayer->name);
 }
 
 CON_COMMAND_FUNC(ams_unmute_all, ConCommand_UnmuteAll, "ams_unmute_all [player index] - Unmute all player communications by index")
@@ -357,7 +357,7 @@ CON_COMMAND_FUNC(ams_unmute_all, ConCommand_UnmuteAll, "ams_unmute_all [player i
 
 	RemoveMutedPlayer(steamid, MUTE_ALL);
 
-	g_pEngineFuncs->Con_Printf("[AMS] Player %s unmuted\n", g_pLastPlayer->name);
+	Msg("[AMS] Player %s unmuted\n", g_pLastPlayer->name);
 }
 
 static int s_MutedPlayersCount = 0;
@@ -366,18 +366,18 @@ void ShowMutedPlayers(void *entry)
 {
 	CHashEntry64<uint32_t> *pEntry = reinterpret_cast<CHashEntry64<uint32_t> *>(entry);
 
-	g_pEngineFuncs->Con_Printf("%d >> SteamID: %llu | Voice: %d | Chat: %d\n", ++s_MutedPlayersCount, pEntry->key, (pEntry->value & MUTE_VOICE) != 0, (pEntry->value & MUTE_CHAT) != 0);
+	Msg("%d >> SteamID: %llu | Voice: %d | Chat: %d\n", ++s_MutedPlayersCount, pEntry->key, (pEntry->value & MUTE_VOICE) != 0, (pEntry->value & MUTE_CHAT) != 0);
 }
 
 CON_COMMAND_FUNC(ams_show_muted_players, ConCommand_ShowMutedPlayers, "ams_show_muted_players - Show all muted players in the console")
 {
-	g_pEngineFuncs->Con_Printf("====================== Muted Players ======================\n");
+	Msg("====================== Muted Players ======================\n");
 
 	s_MutedPlayersCount = 0;
 
 	g_MutedPlayers.IterateEntries(ShowMutedPlayers);
 
-	g_pEngineFuncs->Con_Printf("====================== Muted Players ======================\n");
+	Msg("====================== Muted Players ======================\n");
 }
 
 CON_COMMAND_FUNC(ams_show_current_muted_players, ConCommand_ShowCurrentMutedPlayers, "ams_show_current_muted_players - Show current muted players in the console")
@@ -387,7 +387,7 @@ CON_COMMAND_FUNC(ams_show_current_muted_players, ConCommand_ShowCurrentMutedPlay
 	if (!pLocal)
 		return;
 
-	g_pEngineFuncs->Con_Printf("====================== Muted Players ======================\n");
+	Msg("====================== Muted Players ======================\n");
 
 	int nLocalPlayer = pLocal->index;
 
@@ -406,10 +406,10 @@ CON_COMMAND_FUNC(ams_show_current_muted_players, ConCommand_ShowCurrentMutedPlay
 		if (!player)
 			continue;
 
-		g_pEngineFuncs->Con_Printf("#%d >> Player: %s | Voice: %d | Chat: %d\n", i, g_pLastPlayer->name, (player->value & MUTE_VOICE) != 0, (player->value & MUTE_CHAT) != 0);
+		Msg("#%d >> Player: %s | Voice: %d | Chat: %d\n", i, g_pLastPlayer->name, (player->value & MUTE_VOICE) != 0, (player->value & MUTE_CHAT) != 0);
 	}
 
-	g_pEngineFuncs->Con_Printf("====================== Muted Players ======================\n");
+	Msg("====================== Muted Players ======================\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -523,7 +523,7 @@ void __fastcall UpdateServerState_Hooked(void *thisptr, int edx, bool bForce)
 
 	if (*pLevelName == 0 && bClientDebug)
 	{
-		g_pEngineFuncs->Con_Printf("CVoiceStatus::UpdateServerState: pLevelName[0]==0\n");
+		Msg("CVoiceStatus::UpdateServerState: pLevelName[0]==0\n");
 		return;
 	}
 
@@ -545,7 +545,7 @@ void __fastcall UpdateServerState_Hooked(void *thisptr, int edx, bool bForce)
 		g_pEngineFuncs->pfnClientCmd(command_buffer);
 
 		if (bClientDebug)
-			g_pEngineFuncs->Con_Printf("CVoiceStatus::UpdateServerState: Sending '%s'\n", command_buffer);
+			Msg("CVoiceStatus::UpdateServerState: Sending '%s'\n", command_buffer);
 	}
 
 	// build ban mask
@@ -567,14 +567,14 @@ void __fastcall UpdateServerState_Hooked(void *thisptr, int edx, bool bForce)
 		sprintf_s(command_buffer, sizeof(command_buffer), "vban %X", banMask); // vban [ban_mask]
 
 		if (bClientDebug)
-			g_pEngineFuncs->Con_Printf("CVoiceStatus::UpdateServerState: Sending '%s'\n", command_buffer);
+			Msg("CVoiceStatus::UpdateServerState: Sending '%s'\n", command_buffer);
 
 		g_pEngineFuncs->pfnClientCmd(command_buffer);
 		g_BanMask = banMask;
 	}
 	else if (bClientDebug)
 	{
-		g_pEngineFuncs->Con_Printf("CVoiceStatus::UpdateServerState: no change\n");
+		Msg("CVoiceStatus::UpdateServerState: no change\n");
 	}
 
 	*m_LastUpdateServerState = flForceBanMaskTime = g_pEngineFuncs->GetClientTime();

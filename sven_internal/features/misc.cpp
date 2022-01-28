@@ -221,25 +221,25 @@ static void ConCommand_DropEmptyWeapons_Iterator(WEAPON *pWeapon, bool bHasAmmo,
 
 CON_COMMAND_FUNC(sc_autojump, ConCommand_AutoJump, "sc_autojump - Toggle autojump")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.autojump ? "Auto Jump disabled\n" : "Auto Jump enabled\n");
+	Msg(g_Config.cvars.autojump ? "Auto Jump disabled\n" : "Auto Jump enabled\n");
 	g_Config.cvars.autojump = !g_Config.cvars.autojump;
 }
 
 CON_COMMAND_FUNC(sc_doubleduck, ConCommand_DoubleDuck, "sc_doubleduck - Toggle doubleduck")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.doubleduck ? "Double Duck disabled\n" : "Double Duck enabled\n");
+	Msg(g_Config.cvars.doubleduck ? "Double Duck disabled\n" : "Double Duck enabled\n");
 	g_Config.cvars.doubleduck = !g_Config.cvars.doubleduck;
 }
 
 CON_COMMAND_FUNC(sc_jumpbug, ConCommand_JumpBug, "sc_jumpbug - Toggle jumpbug")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.jumpbug ? "Jump Bug disabled\n" : "Jump Bug enabled\n");
+	Msg(g_Config.cvars.jumpbug ? "Jump Bug disabled\n" : "Jump Bug enabled\n");
 	g_Config.cvars.jumpbug = !g_Config.cvars.jumpbug;
 }
 
 CON_COMMAND_FUNC(sc_fakelag, ConCommand_FakeLag, "sc_fakelag - Toggle fake lag")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.fakelag ? "Fake Lag disabled\n" : "Fake Lag enabled\n");
+	Msg(g_Config.cvars.fakelag ? "Fake Lag disabled\n" : "Fake Lag enabled\n");
 	g_Config.cvars.fakelag = !g_Config.cvars.fakelag;
 }
 
@@ -295,7 +295,7 @@ CON_COMMAND_FUNC(drop_empty_weapons, ConCommand_DropEmptyWeapons, "drop_empty_we
 
 CON_COMMAND_FUNC(freeze, ConCommand_Freeze, "freeze - Block connection with a server")
 {
-	g_pEngineFuncs->Con_Printf(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
+	Msg(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
 	s_bFreeze = !s_bFreeze;
 }
 

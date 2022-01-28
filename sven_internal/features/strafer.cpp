@@ -56,7 +56,7 @@ void UpdateStrafeData(float flYaw)
 
 CON_COMMAND_FUNC(sc_strafe, ConCommand_VectorialStrafe, "sc_strafe - Toggle Vectorial Strafing")
 {
-	g_pEngineFuncs->Con_Printf(g_Config.cvars.strafe ? "Vectorial Strafer disabled\n" : "Vectorial Strafer enabled\n");
+	Msg(g_Config.cvars.strafe ? "Vectorial Strafer disabled\n" : "Vectorial Strafer enabled\n");
 	g_Config.cvars.strafe = !g_Config.cvars.strafe;
 }
 

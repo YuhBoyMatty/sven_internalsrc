@@ -68,7 +68,7 @@ CON_COMMAND_FUNC(sc_camhack, ConCommand_CamHack, "sc_camhack - Toggle CamHack")
 	if (g_pPlayerMove->iuser1 > 0)
 		return;
 
-	g_pEngineFuncs->Con_Printf(g_bCamHack ? "CamHack disabled\n" : "CamHack enabled\n");
+	Msg(g_bCamHack ? "CamHack disabled\n" : "CamHack enabled\n");
 	g_bCamHack = !g_bCamHack;
 
 	if (g_bCamHack)
