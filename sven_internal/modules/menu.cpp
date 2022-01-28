@@ -180,7 +180,7 @@ void ShowMainMenu()
 				ImGui::SliderFloat("Speed Width Fraction", &g_Config.cvars.speed_width_fraction, 0.0f, 1.0f);
 				ImGui::SliderFloat("Speed Height Fraction", &g_Config.cvars.speed_height_fraction, 0.0f, 1.0f);
 				ImGui::ColorEdit4("Speed Color", g_Config.cvars.speed_color);
-				
+
 				ImGui::Text("");
 				ImGui::Separator();
 				ImGui::Text("Light Map");

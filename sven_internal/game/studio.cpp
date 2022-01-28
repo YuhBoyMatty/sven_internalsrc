@@ -1,9 +1,9 @@
 // Studio Model Renderer
 
-//#pragma comment(lib, "OpenGL32.lib")
-//
-//#include <Windows.h>
-//#include <gl/GL.h>
+#pragma comment(lib, "OpenGL32.lib")
+
+#include <Windows.h>
+#include <gl/GL.h>
 
 #include "studio.h"
 
@@ -18,13 +18,19 @@
 #include "../features/firstperson_roaming.h"
 
 //-----------------------------------------------------------------------------
-// Typedefs
+// Signatures
 //-----------------------------------------------------------------------------
 
 typedef int (__thiscall *StudioDrawMonsterFn)(CStudioModelRenderer *, int, cl_entity_s *);
 typedef void (__thiscall *StudioSetUpTransformFn)(CStudioModelRenderer *, int trivial_accept);
 typedef void (__thiscall *StudioRenderModelFn)(CStudioModelRenderer *);
 typedef void (__thiscall *StudioRenderFinal_HardwareFn)(CStudioModelRenderer *);
+
+//-----------------------------------------------------------------------------
+// Imports
+//-----------------------------------------------------------------------------
+
+extern cvar_s *r_drawentities;
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -71,7 +77,20 @@ void __fastcall StudioRenderModel_Hooked(CStudioModelRenderer *thisptr)
 	bCallbackFinalRendering = true;
 
 	if (!bRenderHandled)
-		StudioRenderModel_Original(thisptr);
+	{
+		if (g_Config.cvars.wallhack && r_drawentities->value >= 2.0f && r_drawentities->value <= 5.0f)
+		{
+			glDisable(GL_DEPTH_TEST);
+
+			StudioRenderModel_Original(thisptr);
+
+			glEnable(GL_DEPTH_TEST);
+		}
+		else
+		{
+			StudioRenderModel_Original(thisptr);
+		}
+	}
 }
 
 void __fastcall StudioRenderFinal_Hardware_Hooked(CStudioModelRenderer *thisptr)
