@@ -267,7 +267,7 @@ bool RemoveMutedPlayer(uint64_t steamid, uint32_t flags)
 CON_COMMAND_FUNC(ams_mute_voice, ConCommand_MuteVoice, "ams_mute_voice [player index] - Mute a player's voice by index")
 {
 	if (CMD_ARGC() < 2)
-		return;
+		return ams_mute_voice.PrintUsage();
 
 	int nPlayerIndex = atoi(CMD_ARGV(1));
 
@@ -283,7 +283,7 @@ CON_COMMAND_FUNC(ams_mute_voice, ConCommand_MuteVoice, "ams_mute_voice [player i
 CON_COMMAND_FUNC(ams_mute_chat, ConCommand_MuteChat, "ams_mute_chat [player index] - Mute a player's chat by index")
 {
 	if (CMD_ARGC() < 2)
-		return;
+		return ams_mute_chat.PrintUsage();
 
 	int nPlayerIndex = atoi(CMD_ARGV(1));
 
@@ -299,7 +299,7 @@ CON_COMMAND_FUNC(ams_mute_chat, ConCommand_MuteChat, "ams_mute_chat [player inde
 CON_COMMAND_FUNC(ams_mute_all, ConCommand_MuteAll, "ams_mute_all [player index] - Mute all player communications by index")
 {
 	if (CMD_ARGC() < 2)
-		return;
+		return ams_mute_all.PrintUsage();
 
 	int nPlayerIndex = atoi(CMD_ARGV(1));
 
@@ -315,7 +315,7 @@ CON_COMMAND_FUNC(ams_mute_all, ConCommand_MuteAll, "ams_mute_all [player index] 
 CON_COMMAND_FUNC(ams_unmute_voice, ConCommand_UnmuteVoice, "ams_unmute_voice [player index] - Mute a player's voice by index")
 {
 	if (CMD_ARGC() < 2)
-		return;
+		return ams_unmute_voice.PrintUsage();
 
 	int nPlayerIndex = atoi(CMD_ARGV(1));
 
@@ -331,7 +331,7 @@ CON_COMMAND_FUNC(ams_unmute_voice, ConCommand_UnmuteVoice, "ams_unmute_voice [pl
 CON_COMMAND_FUNC(ams_unmute_chat, ConCommand_UnmuteChat, "ams_unmute_chat [player index] - Unmute a player's chat by index")
 {
 	if (CMD_ARGC() < 2)
-		return;
+		return ams_unmute_chat.PrintUsage();
 
 	int nPlayerIndex = atoi(CMD_ARGV(1));
 
@@ -347,7 +347,7 @@ CON_COMMAND_FUNC(ams_unmute_chat, ConCommand_UnmuteChat, "ams_unmute_chat [playe
 CON_COMMAND_FUNC(ams_unmute_all, ConCommand_UnmuteAll, "ams_unmute_all [player index] - Unmute all player communications by index")
 {
 	if (CMD_ARGC() < 2)
-		return;
+		return ams_unmute_all.PrintUsage();
 
 	int nPlayerIndex = atoi(CMD_ARGV(1));
 

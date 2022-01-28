@@ -31,6 +31,10 @@ CON_COMMAND_FUNC(sc_antiafk, ConCommand_AntiAFK, "sc_antiafk [mode] - Set Anti-A
 			g_Config.cvars.antiafk = nMode;
 		}
 	}
+	else
+	{
+		sc_antiafk.PrintUsage();
+	}
 }
 
 void RotateCamera()

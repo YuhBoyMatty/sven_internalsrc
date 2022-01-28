@@ -22,18 +22,24 @@ CON_COMMAND_FUNC(sc_ms_add, ConCommand_AddSpamTask, "sc_ms_add [taskname] - Add 
 {
 	if (CMD_ARGC() >= 2)
 		g_MessageSpammer.AddTask(CMD_ARGV(1));
+	else
+		sc_ms_add.PrintUsage();
 }
 
 CON_COMMAND_FUNC(sc_ms_remove, ConCommand_RemoveSpamTask, "sc_ms_remove [taskname] - Remove spam task by name")
 {
 	if (CMD_ARGC() >= 2)
 		g_MessageSpammer.RemoveTask(CMD_ARGV(1));
+	else
+		sc_ms_remove.PrintUsage();
 }
 
 CON_COMMAND_FUNC(sc_ms_reload, ConCommand_ReloadSpamTask, "sc_ms_reload [taskname] - Reload spam task by name")
 {
 	if (CMD_ARGC() >= 2)
 		g_MessageSpammer.ReloadTask(CMD_ARGV(1));
+	else
+		sc_ms_reload.PrintUsage();
 }
 
 CON_COMMAND_FUNC(sc_ms_keywords, ConCommand_PrintSpamKeyWords, "sc_ms_keywords - Prints all keywords")

@@ -44,12 +44,10 @@ CMisc g_Misc;
 
 QueryPerformanceCounterFn QueryPerformanceCounter_Original = NULL;
 
-int g_iWeaponID = -1;
-int g_iChokeCommands = 0;
-
 cvar_s *ex_interp = NULL;
 
 static int s_nSinkState = 0;
+static int s_iWeaponID = -1;
 static bool s_bFreeze = false;
 
 static float s_flTopColorDelay = 0.0f;
@@ -270,6 +268,10 @@ CON_COMMAND_FUNC(sc_speedhack, ConCommand_SpeedHack, "sc_speedhack [value] - Set
 
 		g_Config.cvars.speedhack = flSpeed;
 	}
+	else
+	{
+		sc_speedhack.PrintUsage();
+	}
 }
 
 CON_COMMAND_FUNC(sc_reset_colors, ConCommand_ResetColors, "sc_reset_colors - Reset colors in Color Pulsator")
@@ -295,6 +297,23 @@ CON_COMMAND_FUNC(freeze, ConCommand_Freeze, "freeze - Block connection with a se
 {
 	g_pEngineFuncs->Con_Printf(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
 	s_bFreeze = !s_bFreeze;
+}
+
+CON_COMMAND(sc_print_server_address, "sc_print_server_address - Prints server address")
+{
+	netadr_t addr;
+	netadr_t *pAddress = g_pEngineClient->GetServerAddress(&addr);
+
+	Msg("IP: %hhu.%hhu.%hhu.%hhu\n", pAddress->ip[0], pAddress->ip[1], pAddress->ip[2], pAddress->ip[3]);
+	Msg("Port: %hu\n", ((pAddress->port & 0xFF) << 8) | (pAddress->port >> 8));
+}
+
+CON_COMMAND(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox name")
+{
+	if (g_pPlayerMove && g_pPlayerMove->movevars)
+	{
+		Msg("Skybox: %s\n", g_pPlayerMove->movevars->skyName);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -805,10 +824,10 @@ void CMisc::QuakeGuns_V_CalcRefdef()
 		if (!pViewModel)
 			return;
 
-		if (g_iWeaponID == -1)
+		if (s_iWeaponID == -1)
 			return;
 
-		float offset = GetWeaponOffset(pViewModel, g_iWeaponID);
+		float offset = GetWeaponOffset(pViewModel, s_iWeaponID);
 
 		Vector va, right;
 
@@ -826,9 +845,11 @@ void CMisc::QuakeGuns_V_CalcRefdef()
 
 void CMisc::QuakeGuns_HUD_PostRunCmd(struct local_state_s *to)
 {
-	g_iWeaponID = to->client.m_iId;
+	s_iWeaponID = to->client.m_iId;
 }
 
+//-----------------------------------------------------------------------------
+// Init
 //-----------------------------------------------------------------------------
 
 void CMisc::Init()
