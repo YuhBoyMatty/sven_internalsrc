@@ -70,6 +70,8 @@ CON_COMMAND(disasm_addr, "disasm_addr [address]")
 				else
 					pAddress = (BYTE *)((DWORD)pAddress - strtol(match[5].str().c_str(), NULL, 16));
 			}
+
+			delete[] pwcModuleName;
 		}
 		else
 		{
@@ -99,6 +101,67 @@ CON_COMMAND(disasm_addr, "disasm_addr [address]")
 				Msg("======= Instruction Info =======\n\n");
 			}
 		}
+	}
+	else
+	{
+		disasm_addr.PrintUsage();
+	}
+}
+
+CON_COMMAND(dump_ifaces, "dump_ifaces [module name] - Dumps all registered interfaces from the specified module")
+{
+	if (CMD_ARGC() > 1)
+	{
+		const wchar_t *pwcModuleName = CStringToWideCString(CMD_ARGV(1));
+		HMODULE hModule = GetModuleHandle(pwcModuleName);
+
+		if (hModule)
+		{
+			CreateInterfaceFn pfnCreateInterface = (CreateInterfaceFn)GetProcAddress(hModule, "CreateInterface");
+
+			if (pfnCreateInterface)
+			{
+				INSTRUCTION instruction;
+				BYTE *pAddress = (BYTE *)pfnCreateInterface;
+
+				int it = 1;
+				int disassembledBytes = 0;
+				
+				while (disassembledBytes < 0x100)
+				{
+					int length = get_instruction(&instruction, pAddress, MODE_32);
+
+					disassembledBytes += length;
+					pAddress += length;
+
+					if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_REGISTER && instruction.op2.type == OPERAND_TYPE_MEMORY)
+					{
+						InterfaceReg *pInterfaceReg = *reinterpret_cast<InterfaceReg **>(instruction.op2.displacement);
+
+						for (; pInterfaceReg != NULL; pInterfaceReg = pInterfaceReg->m_pNext)
+						{
+							Msg("[%d] %s (%X)\n", it++, pInterfaceReg->m_pName, pInterfaceReg->m_CreateFn());
+						}
+
+						break;
+					}
+				}
+			}
+			else
+			{
+				Msg("Function CreateInterface not found\n");
+			}
+		}
+		else
+		{
+			Msg("No such module\n");
+		}
+
+		delete[] pwcModuleName;
+	}
+	else
+	{
+		dump_ifaces.PrintUsage();
 	}
 }
 

@@ -25,6 +25,7 @@
 #include "../features/misc.h"
 #include "../features/firstperson_roaming.h"
 #include "../features/message_spammer.h"
+#include "../features/skybox.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -96,6 +97,10 @@ CON_COMMAND_FUNC(toggle, Toggle_Cmd, "toggle [cvar_name] [value #1] [value #2] -
 			}
 		}
 	}
+	else
+	{
+		toggle.PrintUsage();
+	}
 }
 
 CON_COMMAND_FUNC(sc_load_config, ReloadConfig_Cmd, "sc_load_config - Load config from file sven_internal.ini")
@@ -108,7 +113,7 @@ CON_COMMAND_FUNC(sc_save_config, SaveConfig_Cmd, "sc_save_config - Save config t
 	g_Config.Save();
 }
 
-CON_COMMAND(test, "test [entidx]")
+CON_COMMAND(test, "test [entidx] - Retrieves an entity info")
 {
 	if (CMD_ARGC() >= 2)
 	{
@@ -140,6 +145,10 @@ CON_COMMAND(test, "test [entidx]")
 				Msg("Model: %s\n", pEntity->model->name);
 			}
 		}
+	}
+	else
+	{
+		test.PrintUsage();
 	}
 };
 
@@ -179,6 +188,8 @@ int HUD_Init_Hooked(void)
 
 void CL_CreateMove_Hooked(float frametime, struct usercmd_s *cmd, int active)
 {
+	g_Skybox.Think();
+
 	bSendPacket = true;
 
 	static int s_nWaitFrames = 0;
@@ -269,12 +280,13 @@ void InitClientModule()
 	InitAMS();
 	InitAutoVote();
 
+	g_MessageSpammer.Init();
 	g_AntiAFK.Init();
 	g_Strafer.Init();
 	g_KeySpam.Init();
 	g_CamHack.Init();
 	g_Misc.Init();
-	g_MessageSpammer.Init();
+	g_Skybox.Init();
 
 	//HUD_Init_Original = g_pClientFuncs->HUD_Init;
 	//g_pClientFuncs->HUD_Init = HUD_Init_Hooked;
