@@ -78,6 +78,8 @@ public:
 	virtual const char *GetName() const final;
 	virtual const char *GetHelpText() const final;
 
+	virtual void PrintUsage() const final;
+
 	inline bool IsRegistered() const { return m_bRegistered; }
 
 	inline CConCommandBase *GetNext() const { return m_pNext; }

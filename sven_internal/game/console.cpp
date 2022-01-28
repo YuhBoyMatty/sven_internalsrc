@@ -1,6 +1,7 @@
 // Console Utils
 
 #include "console.h"
+#include "utils.h"
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -107,6 +108,11 @@ const char *CConCommandBase::GetName() const
 const char *CConCommandBase::GetHelpText() const
 {
 	return m_pszHelpText;
+}
+
+void CConCommandBase::PrintUsage() const
+{
+	Msg("Usage: %s\n", m_pszHelpText);
 }
 
 //-----------------------------------------------------------------------------
