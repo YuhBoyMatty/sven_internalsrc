@@ -60,7 +60,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>imgui\;imgui_impl\;hl-sdk\;hl-sdk\engine\;hl-sdk\utils\vgui\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>imgui\;imgui_impl\;hl-sdk\;hl-sdk\engine\;hl-sdk\utils\vgui\include\;utils\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -83,7 +83,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>imgui\;imgui_impl\;hl-sdk\;hl-sdk\engine\;hl-sdk\utils\vgui\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>imgui\;imgui_impl\;hl-sdk\;hl-sdk\engine\;hl-sdk\utils\vgui\include\;utils\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,6 +107,7 @@
     <ClCompile Include="features\keyspam.cpp" />
     <ClCompile Include="features\message_spammer.cpp" />
     <ClCompile Include="features\misc.cpp" />
+    <ClCompile Include="features\skybox.cpp" />
     <ClCompile Include="features\strafer.cpp" />
     <ClCompile Include="features\visual.cpp" />
     <ClCompile Include="game\ammo.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="features\keyspam.h" />
     <ClInclude Include="features\message_spammer.h" />
     <ClInclude Include="features\misc.h" />
+    <ClInclude Include="features\skybox.h" />
     <ClInclude Include="features\strafer.h" />
     <ClInclude Include="features\visual.h" />
     <ClInclude Include="game\ammo.h" />

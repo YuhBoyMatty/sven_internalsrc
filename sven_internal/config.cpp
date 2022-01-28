@@ -3,7 +3,7 @@
 #include "config.h"
 
 #include "../ini-parser/ini_parser.h"
-
+#include "../features/skybox.h"
 #include "../interfaces.h"
 
 #include <stdio.h>
@@ -272,6 +272,10 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Fog_B", cvars.fog_color[2]);
 		INI_IMPORT_VARIABLE("Fog_A", cvars.fog_color[3]);
 	INI_IMPORT_END_SECTION();
+
+	INI_IMPORT_BEGIN_SECTION("SKYBOX");
+		INI_IMPORT_VARIABLE("Type", cvars.skybox);
+	INI_IMPORT_END_SECTION();
 	
 	INI_IMPORT_BEGIN_SECTION("CAMHACK");
 		INI_IMPORT_VARIABLE("SpeedFactor", cvars.camhack_speed_factor);
@@ -295,6 +299,9 @@ bool CConfig::Load()
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_END();
+
+	// Callbacks
+	g_Skybox.OnConfigLoad();
 }
 
 void CConfig::Save()
@@ -465,6 +472,10 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Fog_G", cvars.fog_color[1]);
 		INI_EXPORT_VARIABLE("Fog_B", cvars.fog_color[2]);
 		INI_EXPORT_VARIABLE("Fog_A", cvars.fog_color[3]);
+	INI_EXPORT_END_SECTION();
+
+	INI_EXPORT_BEGIN_SECTION("SKYBOX");
+		INI_EXPORT_VARIABLE("Type", cvars.skybox);
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("CAMHACK");

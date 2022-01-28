@@ -14,8 +14,11 @@ namespace Patterns
 	namespace Hardware
 	{
 		PATTERN(flNextCmdTime, "D9 1D ? ? ? ? 75 0A A1");
+
 		PATTERN(Netchan_CanPacket, "D9 05 ? ? ? ? D9 EE DA E9 DF E0 F6 C4 44 8B 44 24 04");
+
 		PATTERN(V_RenderView, "81 EC ? ? 00 00 A1 ? ? ? ? 33 C4 89 84 24 ? ? 00 00 D9 EE D9 15");
+		PATTERN(R_LoadSkyboxInt, "81 EC ? ? 00 00 A1 ? ? ? ? 33 C4 89 84 24 ? ? 00 00 53 8B 9C 24 ? ? 00 00 55 56 57 89 5C 24 24");
 	}
 
 	namespace Client

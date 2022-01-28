@@ -16,8 +16,11 @@ namespace Patterns
 	namespace Hardware
 	{
 		INIT_PATTERN(flNextCmdTime);
+
 		INIT_PATTERN(Netchan_CanPacket);
+
 		INIT_PATTERN(V_RenderView);
+		INIT_PATTERN(R_LoadSkyboxInt);
 	}
 
 	namespace Client

@@ -191,9 +191,9 @@ void ShowMainMenu()
 				ImGui::Separator();
 				ImGui::Text("Wallhack");
 
-				ImGui::Checkbox("Default", &g_Config.cvars.wallhack); ImGui::SameLine();
-				ImGui::Checkbox("White Walls", &g_Config.cvars.wallhack_white_walls);
-				ImGui::Checkbox("Wireframe", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
+				ImGui::Checkbox("Simple", &g_Config.cvars.wallhack); ImGui::SameLine();
+				ImGui::Checkbox("Lambert", &g_Config.cvars.wallhack_white_walls);
+				ImGui::Checkbox("Wireframe World", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
 				ImGui::Checkbox("Wireframe Models", &g_Config.cvars.wallhack_wireframe_models);
 
 				ImGui::Text("");
@@ -323,7 +323,7 @@ void ShowMainMenu()
 				ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns);
 				ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch);
 				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
-
+				
 				ImGui::Text("");
 				ImGui::Separator();
 				ImGui::Text("Color Pulsator");
@@ -370,6 +370,7 @@ void ShowMainMenu()
 
 				ImGui::Text("");
 				ImGui::Separator();
+				ImGui::Text("Helicopter");
 
 				ImGui::Checkbox("Enable Helicopter", &g_Config.cvars.helicopter);
 				ImGui::SliderFloat("Helicopter Pitch Angle", &g_Config.cvars.helicopter_pitch_angle, -180.0f, 180.0f);
@@ -377,6 +378,7 @@ void ShowMainMenu()
 
 				ImGui::Text("");
 				ImGui::Separator();
+				ImGui::Text("Various Junk");
 
 				static const char *no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
 				ImGui::Combo("No Weapon Animations", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
@@ -450,6 +452,36 @@ void ShowMainMenu()
 				ImGui::SliderFloat("Density", &g_Config.cvars.fog_density, 0.0f, 10.0f);
 
 				ImGui::ColorEdit4("Color", g_Config.cvars.fog_color);
+
+				ImGui::Text("");
+			}
+			
+			// Skybox
+			if (ImGui::CollapsingHeader("Skybox"))
+			{
+				ImGui::Separator();
+
+				extern void ConCommand_ChangeSkybox();
+				extern void ConCommand_ResetSkybox();
+
+				extern const char *g_szSkyboxes[];
+				extern int g_iSkyboxesSize;
+
+				extern bool g_bMenuChangeSkybox;
+
+				ImGui::Combo("Skybox Name", &g_Config.cvars.skybox, g_szSkyboxes, g_iSkyboxesSize);
+
+				if (ImGui::Button("Change Skybox"))
+				{
+					g_bMenuChangeSkybox = true;
+					ConCommand_ChangeSkybox();
+					g_bMenuChangeSkybox = false;
+				}
+
+				if (ImGui::Button("Reset Skybox"))
+				{
+					ConCommand_ResetSkybox();
+				}
 
 				ImGui::Text("");
 			}

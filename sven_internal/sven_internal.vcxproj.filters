@@ -157,6 +157,9 @@
     <ClCompile Include="game\mathlib.cpp">
       <Filter>Sven Internal\Game</Filter>
     </ClCompile>
+    <ClCompile Include="features\skybox.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\patterns_base.h">
@@ -299,6 +302,9 @@
     </ClInclude>
     <ClInclude Include="game\mathlib.h">
       <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\skybox.h">
+      <Filter>Sven Internal\Features</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -143,6 +143,9 @@ public:
 		float fog_density = 0.25f;
 		float fog_color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
+		// Skybox
+		int skybox = 0;
+
 		// Cam Hack		funcs: toggle camhack, reset
 		float camhack_speed_factor = 1.0f;
 
