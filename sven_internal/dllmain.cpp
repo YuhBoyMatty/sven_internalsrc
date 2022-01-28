@@ -32,6 +32,7 @@ cl_clientfunc_t *g_pClientFuncs = NULL;
 engine_studio_api_t *g_pEngineStudio = NULL;
 r_studio_interface_t *g_pStudioAPI = NULL;
 CStudioModelRenderer *g_pStudioRenderer = NULL;
+IEngineClient *g_pEngineClient = NULL;
 
 static char szSoundcacheDirectory[MAX_PATH] = { 0 };
 static void MainThreadRoutine();
@@ -128,6 +129,22 @@ static bool InitInterfaces()
 	else
 	{
 		ThrowError("'CStudioModelRenderer' failed initialization\n");
+		return false;
+	}
+
+	CreateInterfaceFn hardwareFactory = (CreateInterfaceFn)GetProcAddress(GetModuleHandle(L"hw.dll"), "CreateInterface");
+
+	if (!hardwareFactory)
+	{
+		ThrowError("'IEngineClient' failed initialization\n");
+		return false;
+	}
+
+	g_pEngineClient = reinterpret_cast<IEngineClient *>(hardwareFactory(SC_ENGINE_CLIENT_INTERFACE_VERSION, NULL));
+
+	if (!g_pEngineClient)
+	{
+		ThrowError("'IEngineClient' failed initialization #2\n");
 		return false;
 	}
 

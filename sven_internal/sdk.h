@@ -37,6 +37,7 @@
 #include "common/entity_types.h"
 #include "cl_dll/ammo.h"
 #include "cl_dll/StudioModelRenderer.h"
+#include "engine/iengineclient.h"
 
 typedef struct cl_clientfuncs_s
 {
