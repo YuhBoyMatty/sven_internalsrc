@@ -160,6 +160,9 @@
     <ClCompile Include="features\skybox.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
+    <ClCompile Include="modules\SDL2.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\patterns_base.h">
@@ -305,6 +308,9 @@
     </ClInclude>
     <ClInclude Include="features\skybox.h">
       <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\SDL2.h">
+      <Filter>Sven Internal\Modules</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

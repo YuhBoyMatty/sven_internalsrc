@@ -12,6 +12,7 @@
 #include "modules/vgui.h"
 #include "modules/opengl.h"
 #include "modules/menu.h"
+#include "modules/SDL2.h"
 
 #include "game/utils.h"
 #include "game/studio.h"
@@ -176,6 +177,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		InitVGUIModule();
 		InitOpenGLModule();
 		InitMenuModule();
+		InitSDL2Module();
 
 		ConVar_Register();
 

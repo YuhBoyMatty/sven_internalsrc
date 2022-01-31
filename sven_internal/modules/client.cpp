@@ -32,6 +32,18 @@
 #endif
 
 //-----------------------------------------------------------------------------
+// Signatures
+//-----------------------------------------------------------------------------
+
+typedef qboolean (*Netchan_CanPacketFn)(netchan_t *);
+typedef int (*HUD_InitFn)(void);
+typedef void (*CL_CreateMoveFn)(float, struct usercmd_s *, int);
+typedef void (*HUD_PlayerMoveFn)(struct playermove_s *, int);
+typedef void (*V_CalcRefdefFn)(struct ref_params_s *);
+typedef void (*HUD_PostRunCmdFn)(struct local_state_s *, struct local_state_s *, struct usercmd_s *, int, double, unsigned int);
+typedef int (*HUD_Key_EventFn)(int, int, const char *);
+
+//-----------------------------------------------------------------------------
 // Global Vars
 //-----------------------------------------------------------------------------
 
@@ -58,6 +70,7 @@ CL_CreateMoveFn CL_CreateMove_Original = NULL;
 HUD_PlayerMoveFn HUD_PlayerMove_Original = NULL;
 V_CalcRefdefFn V_CalcRefdef_Original = NULL;
 HUD_PostRunCmdFn HUD_PostRunCmd_Original = NULL;
+HUD_Key_EventFn HUD_Key_Event_Original = NULL;
 
 //-----------------------------------------------------------------------------
 // Functions
@@ -73,33 +86,74 @@ void UpdateLocalPlayer()
 	g_Local.flVelocity = g_pPlayerMove->velocity.Length2D();
 }
 
+//-----------------------------------------------------------------------------
+// ConCommands, CVars..
+//-----------------------------------------------------------------------------
+
 CON_COMMAND_FUNC(toggle, Toggle_Cmd, "toggle [cvar_name] [value #1] [value #2] - Toggle between two values")
 {
-	if (CMD_ARGC() >= 4)
+	int i;
+	int argc = CMD_ARGC();
+
+	if (argc > 3)
 	{
 		const char *pszCvar = CMD_ARGV(1);
 		cvar_s *pCvar = g_pEngineFuncs->pfnGetCvarPointer(pszCvar);
 
 		if (pCvar)
 		{
-			const char *pszValue = pCvar->string;
-
-			char *pszValueOne = CMD_ARGV(2);
-			char *pszValueTwo = CMD_ARGV(3);
-
-			if (!strcmp(pszValue, pszValueOne))
+			for (i = 2; i < argc; i++)
 			{
-				g_pEngineFuncs->pfnCvar_Set(pszCvar, pszValueTwo);
+				if ( !strcmp(pCvar->string, CMD_ARGV(i)) )
+					break;
 			}
-			else
+
+			i++;
+
+			if (i >= argc)
 			{
-				g_pEngineFuncs->pfnCvar_Set(pszCvar, pszValueOne);
+				i = 2;
 			}
+
+			g_pEngineFuncs->pfnCvar_Set(pszCvar, CMD_ARGV(i));
 		}
 	}
 	else
 	{
 		toggle.PrintUsage();
+	}
+}
+
+CON_COMMAND(getang, "getang - Get view angles")
+{
+	Vector va;
+
+	g_pEngineFuncs->GetViewAngles(va);
+
+	Msg("View angles: %.3f %.3f %.3f", va.x, va.y, va.z);
+}
+
+CON_COMMAND(setang, "setang [pitch] [optional: yaw] [optional: roll] - Set view angles")
+{
+	if (CMD_ARGC() > 1)
+	{
+		Vector va;
+
+		g_pEngineFuncs->GetViewAngles(va);
+
+		va.x = strtof(CMD_ARGV(1), NULL);
+
+		if (CMD_ARGC() > 2)
+			va.y = strtof(CMD_ARGV(2), NULL);
+		
+		if (CMD_ARGC() > 3)
+			va.z = strtof(CMD_ARGV(3), NULL);
+
+		g_pEngineFuncs->SetViewAngles(va);
+	}
+	else
+	{
+		setang.PrintUsage();
 	}
 }
 
@@ -258,6 +312,14 @@ void HUD_PostRunCmd_Hooked(struct local_state_s *from, struct local_state_s *to,
 	g_Misc.HUD_PostRunCmd(from, to, cmd, runfuncs, time, random_seed);
 }
 
+int HUD_Key_Event_Hooked(int down, int keynum, const char *pszCurrentBinding)
+{
+	if (g_bMenuEnabled)
+		return 0;
+
+	return HUD_Key_Event_Original(down, keynum, pszCurrentBinding);
+}
+
 //-----------------------------------------------------------------------------
 // Init/release client module
 //-----------------------------------------------------------------------------
@@ -302,6 +364,9 @@ void InitClientModule()
 
 	HUD_PlayerMove_Original = g_pClientFuncs->HUD_PlayerMove;
 	g_pClientFuncs->HUD_PlayerMove = HUD_PlayerMove_Hooked;
+	
+	HUD_Key_Event_Original = g_pClientFuncs->HUD_Key_Event;
+	g_pClientFuncs->HUD_Key_Event = HUD_Key_Event_Hooked;
 
 	HOOK_FUNCTION(Netchan_CanPacket_Hook, pNetchan_CanPacket, Netchan_CanPacket_Hooked, Netchan_CanPacket_Original, Netchan_CanPacketFn);
 

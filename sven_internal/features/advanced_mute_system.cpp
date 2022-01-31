@@ -181,7 +181,7 @@ void IterateMutedPlayers(void *entry)
 
 void SaveMutedPlayers()
 {
-	g_pFileDB = fopen("muted_players.db", "wb");
+	g_pFileDB = fopen("sven_internal/muted_players.db", "wb");
 
 	if (g_pFileDB)
 	{

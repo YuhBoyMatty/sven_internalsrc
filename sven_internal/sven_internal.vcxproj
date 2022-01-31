@@ -130,6 +130,7 @@
     <ClCompile Include="modules\client.cpp" />
     <ClCompile Include="modules\menu.cpp" />
     <ClCompile Include="modules\opengl.cpp" />
+    <ClCompile Include="modules\SDL2.cpp" />
     <ClCompile Include="modules\vgui.cpp" />
     <ClCompile Include="patterns.cpp" />
     <ClCompile Include="strafe\strafe.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="modules\client.h" />
     <ClInclude Include="modules\menu.h" />
     <ClInclude Include="modules\opengl.h" />
+    <ClInclude Include="modules\SDL2.h" />
     <ClInclude Include="modules\vgui.h" />
     <ClInclude Include="patterns.h" />
     <ClInclude Include="sdk.h" />
