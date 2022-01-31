@@ -324,6 +324,7 @@ void ShowMainMenu()
 				ImGui::Checkbox("Fastrun", &g_Config.cvars.fastrun);
 				ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns);
 				ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch);
+				ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
 				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
 				
 				ImGui::Text("");

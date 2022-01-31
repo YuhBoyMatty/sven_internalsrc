@@ -118,6 +118,7 @@ public:
 		bool quake_guns = false;
 		bool tertiary_attack_glitch = false;
 		bool save_soundcache = false;
+		bool rotate_dead_body = false;
 		int no_weapon_anim = 0; // enum
 		float speedhack = 1.0f;
 		float ltfxspeed = 0.0f;

@@ -329,6 +329,14 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	ColorPulsator();
 	TertiaryAttackGlitch();
 
+	if (g_Config.cvars.rotate_dead_body && g_pPlayerMove->dead)
+	{
+		Vector va;
+
+		g_pEngineFuncs->GetViewAngles(va);
+		cmd->viewangles = va;
+	}
+
 	if (g_pPlayerMove->iuser1 < 1)
 	{
 		AutoSelfSink();
