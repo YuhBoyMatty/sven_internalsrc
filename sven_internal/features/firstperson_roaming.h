@@ -9,7 +9,8 @@ class CFirstPersonRoaming
 public:
 	CFirstPersonRoaming();
 
-public:
+	bool StudioRenderModel();
+
 	void V_CalcRefdef(struct ref_params_s *pparams);
 	cl_entity_s *GetTargetPlayer();
 

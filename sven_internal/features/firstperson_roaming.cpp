@@ -91,3 +91,11 @@ void CFirstPersonRoaming::GetPlayerViewAngles(Vector &vOutput)
 	// Transform this weird Pitch range [-9.887 ... 9.887] to [-89.0 ... 89.0]
 	vOutput.x *= 10.0f * (89.0f / 98.876953f);
 }
+
+bool CFirstPersonRoaming::StudioRenderModel()
+{
+	if (g_Config.cvars.fp_roaming && g_pStudioRenderer->m_pCurrentEntity == GetTargetPlayer())
+		return true;
+
+	return false;
+}
