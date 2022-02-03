@@ -12,29 +12,48 @@
 #include "../interfaces.h"
 
 //-----------------------------------------------------------------------------
-
-#define swap(a, b) __swap_buffer = a; a = b; b = __swap_buffer
-
+// Macro definitions
 //-----------------------------------------------------------------------------
 
-static int __swap_buffer = 0;
+//#define swap(a, b) s_swap_buffer = a; a = b; b = s_swap_buffer
+
+//-----------------------------------------------------------------------------
+// Imports
+//-----------------------------------------------------------------------------
+
+extern vgui::ISurface *g_pSurface;
+
+//-----------------------------------------------------------------------------
+// Vars
+//-----------------------------------------------------------------------------
 
 CDrawing g_Drawing;
 
 vgui::HFont g_hESP;
 vgui::HFont g_hESP2;
+vgui::HFont g_hFontVotePopup;
 //vgui::HFont MENU;
 
-extern vgui::ISurface *g_pSurface;
+static char s_szBuffer[1024];
+static wchar_t s_wszBuffer[1024];
 
+static int s_swap_buffer = 0;
+
+//-----------------------------------------------------------------------------
+// CDrawing implementations
 //-----------------------------------------------------------------------------
 
 void CDrawing::SetupFonts()
 {
-	g_pSurface->AddGlyphSetToFont(g_hESP = g_pSurface->CreateFont(), "Choktoff", 12, FW_BOLD, NULL, NULL, FONTFLAG_DROPSHADOW, 0, 0);
-	g_pSurface->AddGlyphSetToFont(g_hESP2 = g_pSurface->CreateFont(), "Choktoff", 38, FW_MEDIUM, NULL, NULL, FONTFLAG_DROPSHADOW, 0, 0);
+	g_pSurface->AddGlyphSetToFont(g_hESP = g_pSurface->CreateFont(), "Choktoff", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	g_pSurface->AddGlyphSetToFont(g_hESP2 = g_pSurface->CreateFont(), "Choktoff", 38, FW_MEDIUM, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	g_pSurface->AddGlyphSetToFont(g_hFontVotePopup = g_pSurface->CreateFont(), "Lucida-Console", 20, FW_EXTRABOLD, NULL, NULL, vgui::ISurface::FONTFLAG_NONE, 0, 0);
 	//g_pSurface->AddGlyphSetToFont(MENU = g_pSurface->CreateFont(), "Arial", 14, FW_BOLD, NULL, NULL, FONTFLAG_NONE, 0, 0); //Main font
 }
+
+//-----------------------------------------------------------------------------
+// Figures
+//-----------------------------------------------------------------------------
 
 void CDrawing::DrawCircle3D(Vector &position, float points, float radius, int r, int g, int b, int a)
 {
@@ -76,11 +95,11 @@ void CDrawing::DrawPlayerBox(int x, int y, int w, int h, int r, int g, int b, in
 	int x1 = x + w;
 	int y1 = y + h;
 
-	if (x1 < x0)
-		swap(x1, x0);
+	//if (x1 < x0)
+	//	swap(x1, x0);
 
-	if (y1 < y0)
-		swap(y1, y0);
+	//if (y1 < y0)
+	//	swap(y1, y0);
 
 	g_pSurface->DrawSetColor(r, g, b, a);
 	g_pSurface->DrawOutlinedRect(x0, y0, x1, y1);
@@ -94,13 +113,6 @@ void CDrawing::DrawPlayerBox(int x, int y, int w, int h, int r, int g, int b, in
 	}
 }
 
-void CDrawing::DrawTexture(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a)
-{
-	g_pSurface->DrawSetColor(r, g, b, a);
-	g_pSurface->DrawSetTexture(id);
-	g_pSurface->DrawTexturedRect(x0, y0, x1, y1);
-}
-
 void CDrawing::DrawRect(int x, int y, int w, int h, int r, int g, int b, int a)
 {
 	int x0 = x;
@@ -108,11 +120,11 @@ void CDrawing::DrawRect(int x, int y, int w, int h, int r, int g, int b, int a)
 	int x1 = x + w;
 	int y1 = y + h;
 
-	if (x1 < x0)
-		swap(x1, x0);
+	//if (x1 < x0)
+	//	swap(x1, x0);
 
-	if (y1 < y0)
-		swap(y1, y0);
+	//if (y1 < y0)
+	//	swap(y1, y0);
 
 	g_pSurface->DrawSetColor(r, g, b, a);
 	g_pSurface->DrawFilledRect(x0, y0, x1, y1);
@@ -125,11 +137,11 @@ void CDrawing::DrawOutlinedRect(int x, int y, int w, int h, int r, int g, int b,
 	int x1 = x + w;
 	int y1 = y + h;
 
-	if (x1 < x0)
-		swap(x1, x0);
+	//if (x1 < x0)
+	//	swap(x1, x0);
 
-	if (y1 < y0)
-		swap(y1, y0);
+	//if (y1 < y0)
+	//	swap(y1, y0);
 
 	g_pSurface->DrawSetColor(r, g, b, a);
 	g_pSurface->DrawOutlinedRect(x0, y0, x1, y1);
@@ -170,54 +182,6 @@ void CDrawing::DrawBox(int x, int y, int w, int h, int r, int g, int b, int a)
 {
 	g_pSurface->DrawSetColor(r, g, b, a);
 	g_pSurface->DrawOutlinedRect(x - w, y - h, x + w, y + h);
-}
-
-void CDrawing::DrawString(vgui::HFont font, int x, int y, int r, int g, int b, int a, DWORD alignment, const char* msg, ...)
-{
-	va_list va_alist;
-	char buf[1024];
-	va_start(va_alist, msg);
-	_vsnprintf(buf, sizeof(buf), msg, va_alist);
-	va_end(va_alist);
-	wchar_t wbuf[1024];
-	MultiByteToWideChar(CP_UTF8, 0, buf, 256, wbuf, 256);
-
-	int width, height;
-	g_pSurface->GetTextSize(font, wbuf, width, height);
-
-	if (alignment & FONT_RIGHT)
-		x -= width;
-	if (alignment & FONT_CENTER)
-		x -= width / 2;
-
-	g_pSurface->DrawSetTextFont(font);
-	g_pSurface->DrawSetTextColor(r, g, b, a);
-	g_pSurface->DrawSetTextPos(x, y - height / 2);
-	g_pSurface->DrawPrintText(wbuf, wcslen(wbuf));
-}
-
-void CDrawing::DrawStringACP(vgui::HFont font, int x, int y, int r, int g, int b, int a, DWORD alignment, const char* msg, ...)
-{
-	va_list va_alist;
-	char buf[1024];
-	va_start(va_alist, msg);
-	_vsnprintf(buf, sizeof(buf), msg, va_alist);
-	va_end(va_alist);
-	wchar_t wbuf[1024];
-	MultiByteToWideChar(CP_ACP, 0, buf, 256, wbuf, 256);
-
-	int width, height;
-	g_pSurface->GetTextSize(font, wbuf, width, height);
-
-	if (alignment & FONT_RIGHT)
-		x -= width;
-	if (alignment & FONT_CENTER)
-		x -= width / 2;
-
-	g_pSurface->DrawSetTextFont(font);
-	g_pSurface->DrawSetTextColor(r, g, b, a);
-	g_pSurface->DrawSetTextPos(x, y - height / 2);
-	g_pSurface->DrawPrintText(wbuf, wcslen(wbuf));
 }
 
 void CDrawing::Box(int x, int y, int w, int h, int lw, int r, int g, int b, int a)
@@ -292,6 +256,129 @@ void CDrawing::BoxCornerOutline(int x, int y, int w, int h, int lw, BYTE r, BYTE
 
 	BoxCorner(x, y, w, h, lw, r, g, b, a);
 }
+
+//-----------------------------------------------------------------------------
+// Draw a texture
+//-----------------------------------------------------------------------------
+
+void CDrawing::DrawTexture(int id, int x0, int y0, int x1, int y1, int r, int g, int b, int a)
+{
+	g_pSurface->DrawSetColor(r, g, b, a);
+	g_pSurface->DrawSetTexture(id);
+	g_pSurface->DrawTexturedRect(x0, y0, x1, y1);
+}
+
+//-----------------------------------------------------------------------------
+// Draw a formatted string
+//-----------------------------------------------------------------------------
+
+void CDrawing::DrawStringF(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const char*pszString, ...)
+{
+	va_list va_alist;
+	va_start(va_alist, pszString);
+	_vsnprintf(s_szBuffer, sizeof(s_szBuffer), pszString, va_alist);
+	va_end(va_alist);
+	MultiByteToWideChar(CP_UTF8, 0, s_szBuffer, 256, s_wszBuffer, 256);
+
+	int width, height;
+	g_pSurface->GetTextSize(font, s_wszBuffer, width, height);
+
+	ApplyTextAlignment(alignment, x, y, width, height);
+
+	g_pSurface->DrawSetTextFont(font);
+	g_pSurface->DrawSetTextColor(r, g, b, a);
+	g_pSurface->DrawSetTextPos(x, y - height / 2);
+	g_pSurface->DrawPrintText(s_wszBuffer, wcslen(s_wszBuffer));
+}
+
+void CDrawing::DrawStringACPF(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const char *pszString, ...)
+{
+	va_list va_alist;
+	va_start(va_alist, pszString);
+	_vsnprintf(s_szBuffer, sizeof(s_szBuffer), pszString, va_alist);
+	va_end(va_alist);
+	MultiByteToWideChar(CP_ACP, 0, s_szBuffer, 256, s_wszBuffer, 256);
+
+	int width, height;
+	g_pSurface->GetTextSize(font, s_wszBuffer, width, height);
+
+	ApplyTextAlignment(alignment, x, y, width, height);
+
+	g_pSurface->DrawSetTextFont(font);
+	g_pSurface->DrawSetTextColor(r, g, b, a);
+	g_pSurface->DrawSetTextPos(x, y - height / 2);
+	g_pSurface->DrawPrintText(s_wszBuffer, wcslen(s_wszBuffer));
+}
+
+void CDrawing::DrawWideStringF(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const wchar_t *pwszString, ...)
+{
+	va_list va_alist;
+	va_start(va_alist, pwszString);
+	swprintf(s_wszBuffer, sizeof(s_wszBuffer), pwszString, va_alist);
+	va_end(va_alist);
+
+	int width, height;
+	g_pSurface->GetTextSize(font, s_wszBuffer, width, height);
+
+	ApplyTextAlignment(alignment, x, y, width, height);
+
+	g_pSurface->DrawSetTextFont(font);
+	g_pSurface->DrawSetTextColor(r, g, b, a);
+	g_pSurface->DrawSetTextPos(x, y - height / 2);
+	g_pSurface->DrawPrintText(s_wszBuffer, wcslen(s_wszBuffer));
+}
+
+//-----------------------------------------------------------------------------
+// Draw a string
+//-----------------------------------------------------------------------------
+
+void CDrawing::DrawString(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const char *pszString)
+{
+	MultiByteToWideChar(CP_UTF8, 0, pszString, 256, s_wszBuffer, 256);
+
+	int width, height;
+	g_pSurface->GetTextSize(font, s_wszBuffer, width, height);
+
+	ApplyTextAlignment(alignment, x, y, width, height);
+
+	g_pSurface->DrawSetTextFont(font);
+	g_pSurface->DrawSetTextColor(r, g, b, a);
+	g_pSurface->DrawSetTextPos(x, y - height / 2);
+	g_pSurface->DrawPrintText(s_wszBuffer, wcslen(s_wszBuffer));
+}
+
+void CDrawing::DrawStringACP(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const char *pszString)
+{
+	MultiByteToWideChar(CP_ACP, 0, pszString, 256, s_wszBuffer, 256);
+
+	int width, height;
+	g_pSurface->GetTextSize(font, s_wszBuffer, width, height);
+
+	ApplyTextAlignment(alignment, x, y, width, height);
+
+	g_pSurface->DrawSetTextFont(font);
+	g_pSurface->DrawSetTextColor(r, g, b, a);
+	g_pSurface->DrawSetTextPos(x, y - height / 2);
+	g_pSurface->DrawPrintText(s_wszBuffer, wcslen(s_wszBuffer));
+}
+
+
+void CDrawing::DrawWideString(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const wchar_t *pwszString)
+{
+	int width, height;
+	g_pSurface->GetTextSize(font, pwszString, width, height);
+
+	ApplyTextAlignment(alignment, x, y, width, height);
+
+	g_pSurface->DrawSetTextFont(font);
+	g_pSurface->DrawSetTextColor(r, g, b, a);
+	g_pSurface->DrawSetTextPos(x, y - height / 2);
+	g_pSurface->DrawPrintText(pwszString, wcslen(pwszString));
+}
+
+//-----------------------------------------------------------------------------
+// Misc. draw methods
+//-----------------------------------------------------------------------------
 
 void CDrawing::DrawCrosshair(int x, int y, int r, int g, int b, int a, int Size /* = 10 */, int Gap /* = 4 */, int Thickness /* = 2 */)
 {
