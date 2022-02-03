@@ -1,5 +1,10 @@
 // Visual
 
+#pragma comment(lib, "OpenGL32.lib")
+
+#include <Windows.h>
+#include <gl/GL.h>
+
 #include <algorithm>
 
 #include "visual.h"
@@ -8,6 +13,7 @@
 #include "../interfaces.h"
 
 #include "../modules/client.h"
+#include "../modules/vgui.h"
 
 #include "../game/utils.h"
 #include "../game/drawing.h"
@@ -20,14 +26,11 @@
 
 #include "../utils/vtable_hook.h"
 
-#include "utils/vgui2/IPanel.h"
-#include "utils/vgui2/ISurface.h"
-
 #include "../config.h"
 
 #define MAXENTS 8192
 #define MAXCLIENTS 32
-//#define PROCESS_PLAYER_HITBOXES
+//#define PROCESS_PLAYER_BONES_ONLY
 
 //-----------------------------------------------------------------------------
 // Imports
@@ -50,7 +53,7 @@ struct bone_s
 	int nParent[MAXSTUDIOBONES] = { -1 };
 };
 
-#ifdef PROCESS_PLAYER_HITBOXES
+#ifdef PROCESS_PLAYER_BONES_ONLY
 Hitbox g_Bones[MAXCLIENTS + 1];
 #else
 bone_s g_Bones[MAXENTS + 1];
@@ -102,10 +105,8 @@ CON_COMMAND_FUNC(sc_wallhack_wireframe_models, ConCommand_WireframeModels, "sc_w
 
 void CVisual::Process()
 {
-	SCREEN_STRUCT;
-
-	m_iScreenWidth = SCREEN_WIDTH;
-	m_iScreenHeight = SCREEN_HEIGHT;
+	m_iScreenWidth = g_ScreenInfo.width;
+	m_iScreenHeight = g_ScreenInfo.height;
 
 	Lightmap();
 
@@ -122,14 +123,14 @@ void CVisual::ShowSpeed()
 
 	float flSpeed = g_Local.flVelocity;
 
-	g_Drawing.DrawString(g_hESP2,
+	g_Drawing.DrawStringF(g_hESP2,
 						 int(m_iScreenWidth * g_Config.cvars.speed_width_fraction),
 						 int(m_iScreenHeight * g_Config.cvars.speed_height_fraction),
 						 int(255.f * g_Config.cvars.speed_color[0]),
 						 int(255.f * g_Config.cvars.speed_color[1]),
 						 int(255.f * g_Config.cvars.speed_color[2]),
 						 int(255.f * g_Config.cvars.speed_color[3]),
-						 FONT_CENTER,
+						 FONT_ALIGN_CENTER,
 						 "%.1f",
 						 flSpeed);
 }
@@ -290,13 +291,13 @@ void CVisual::ESP()
 			if (g_Config.cvars.esp_box_index)
 			{
 				int y = int(vecScreenBottom[1] + (8.f + boxHeight));
-				g_Drawing.DrawString(g_hESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_CENTER, "%d", i);
+				g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%d", i);
 			}
 			
 			if (g_Config.cvars.esp_box_distance)
 			{
 				int y = int(vecScreenTop[1] + (-8.f - boxHeight));
-				g_Drawing.DrawString(g_hESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_CENTER, "%.1f", flDistance);
+				g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
 			}
 
 			if (pEntity->player)
@@ -306,7 +307,7 @@ void CVisual::ESP()
 					int y = int(vecScreenTop[1] + (8.f - boxHeight));
 					player_info_s * pPlayer = g_pEngineStudio->PlayerInfo(i - 1);
 
-					g_Drawing.DrawString(g_hESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_CENTER, "%s", pPlayer->name);
+					g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_ALIGN_CENTER, "%s", pPlayer->name);
 				}
 
 				if (g_Config.cvars.esp_skeleton_type == 1)
@@ -317,14 +318,14 @@ void CVisual::ESP()
 				if (g_Config.cvars.esp_box_entity_name)
 				{
 					int y = int(vecScreenTop[1] + (8.f - boxHeight));
-					g_Drawing.DrawString(g_hESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_CENTER, "%s", GetEntityClassname(classInfo));
+					g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_ALIGN_CENTER, "%s", GetEntityClassname(classInfo));
 				}
 
 				if (g_Config.cvars.esp_skeleton_type == 2)
 					continue;
 			}
 
-		#ifdef PROCESS_PLAYER_HITBOXES
+		#ifdef PROCESS_PLAYER_BONES_ONLY
 			if ((g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name) && pEntity->player)
 		#else
 			if (g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name)
@@ -334,14 +335,11 @@ void CVisual::ESP()
 
 				for (int j = 0; j < pStudioHeader->numbones; ++j)
 				{
-				#ifdef PROCESS_PLAYER_HITBOXES
-
-				#endif
 					bool bBonePoint = false;
 					float vBonePoint[2];
 
 					if ((bBonePoint = WorldToScreen(g_Bones[i].vecPoint[j], vBonePoint)) && g_Config.cvars.esp_bones_name)
-						g_Drawing.DrawString(g_hESP, int(vBonePoint[0]), int(vBonePoint[1]), 255, 255, 255, 255, FONT_CENTER, "%s", pBone[j].name);
+						g_Drawing.DrawStringF(g_hESP, int(vBonePoint[0]), int(vBonePoint[1]), 255, 255, 255, 255, FONT_ALIGN_CENTER, "%s", pBone[j].name);
 
 					if (g_Config.cvars.esp_skeleton)
 					{
@@ -372,7 +370,7 @@ void CVisual::ProcessBones()
 	cl_entity_s *pViewModel = g_pEngineFuncs->GetViewModel();
 	cl_entity_s *pLocal = g_pEngineFuncs->GetLocalPlayer();
 
-#ifdef PROCESS_PLAYER_HITBOXES
+#ifdef PROCESS_PLAYER_BONES_ONLY
 	if (!pEntity->player)
 		return;
 #endif
@@ -397,7 +395,7 @@ void CVisual::ProcessBones()
 	Vector vecBottom = pEntity->origin;
 	Vector vecTop = pEntity->origin;
 
-#ifndef PROCESS_PLAYER_HITBOXES
+#ifndef PROCESS_PLAYER_BONES_ONLY
 	if (pEntity->player)
 #endif
 		vecBottom.z -= pEntity->curstate.maxs.z;
@@ -426,7 +424,7 @@ void CVisual::ProcessBones()
 	}
 }
 
-void CVisual::StudioRenderModel()
+bool CVisual::StudioRenderModel()
 {
 	ProcessBones();
 
@@ -436,17 +434,28 @@ void CVisual::StudioRenderModel()
 	{
 		cl_entity_s *pEntity = g_pEngineStudio->GetCurrentEntity();
 
-		if (!pEntity->player)
-		{
+		if ( pEntity->player )
+			r_drawentities->value = 2.0f;
+		else
 			r_drawentities->value = 1.0f;
-			return;
-		}
-
-		r_drawentities->value = 2.0f;
-		return;
+	}
+	else
+	{
+		r_drawentities->value = flDrawEntitiesMode;
 	}
 
-	r_drawentities->value = flDrawEntitiesMode;
+	if (g_Config.cvars.wallhack && r_drawentities->value >= 2.0f && r_drawentities->value <= 5.0f)
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		g_pStudioRenderer->StudioRenderFinal_Hardware();
+
+		glEnable(GL_DEPTH_TEST);
+
+		return true;
+	}
+
+	return false;
 }
 
 //-----------------------------------------------------------------------------

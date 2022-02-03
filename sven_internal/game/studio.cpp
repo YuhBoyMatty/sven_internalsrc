@@ -1,10 +1,5 @@
 // Studio Model Renderer
 
-#pragma comment(lib, "OpenGL32.lib")
-
-#include <Windows.h>
-#include <gl/GL.h>
-
 #include "studio.h"
 
 #include "../interfaces.h"
@@ -15,6 +10,7 @@
 
 #include "../features/chams.h"
 #include "../features/visual.h"
+#include "../features/camhack.h"
 #include "../features/firstperson_roaming.h"
 
 //-----------------------------------------------------------------------------
@@ -31,12 +27,6 @@ typedef void (__thiscall *StudioRenderFinal_HardwareFn)(CStudioModelRenderer *);
 //-----------------------------------------------------------------------------
 
 extern cvar_s *r_drawentities;
-
-//-----------------------------------------------------------------------------
-// Vars
-//-----------------------------------------------------------------------------
-
-bool bCallbackFinalRendering = true;
 
 //-----------------------------------------------------------------------------
 // Original Functions
@@ -63,33 +53,17 @@ void __fastcall StudioSetUpTransform_Hooked(CStudioModelRenderer *thisptr, int e
 
 void __fastcall StudioRenderModel_Hooked(CStudioModelRenderer *thisptr)
 {
-	if (g_Config.cvars.fp_roaming && thisptr->m_pCurrentEntity == g_FirstPersonRoaming.GetTargetPlayer())
-		return;
-
 	bool bRenderHandled = false;
 
-	bCallbackFinalRendering = false;
-
 	// Calling many functions will take down our performance
-	bRenderHandled = g_Chams.StudioRenderModel();
-	g_Visual.StudioRenderModel();
-
-	bCallbackFinalRendering = true;
+	bRenderHandled = g_FirstPersonRoaming.StudioRenderModel();
+	bRenderHandled = g_Chams.StudioRenderModel() || bRenderHandled;
+	bRenderHandled = g_Visual.StudioRenderModel() || bRenderHandled;
+	bRenderHandled = g_CamHack.StudioRenderModel() || bRenderHandled;
 
 	if (!bRenderHandled)
 	{
-		if (g_Config.cvars.wallhack && r_drawentities->value >= 2.0f && r_drawentities->value <= 5.0f)
-		{
-			glDisable(GL_DEPTH_TEST);
-
-			StudioRenderModel_Original(thisptr);
-
-			glEnable(GL_DEPTH_TEST);
-		}
-		else
-		{
-			StudioRenderModel_Original(thisptr);
-		}
+		StudioRenderModel_Original(thisptr);
 	}
 }
 

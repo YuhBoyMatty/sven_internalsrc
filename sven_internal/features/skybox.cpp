@@ -125,6 +125,9 @@ CON_COMMAND_FUNC(sc_change_skybox, ConCommand_ChangeSkybox, "sc_change_skybox [n
 
 CON_COMMAND_FUNC(sc_reset_skybox, ConCommand_ResetSkybox, "sc_reset_skybox - Reset skybox to the default")
 {
+	if (g_Config.cvars.skybox != 0)
+		g_Config.cvars.skybox = 0;
+
 	g_Skybox.Reset();
 }
 
@@ -243,7 +246,7 @@ void CSkybox::Init()
 
 	if (!pR_LoadSkyboxInt)
 	{
-		ThrowError("'R_LoadSkyboxInt' failed initialization");
+		Sys_Error("'R_LoadSkyboxInt' failed initialization");
 		return;
 	}
 

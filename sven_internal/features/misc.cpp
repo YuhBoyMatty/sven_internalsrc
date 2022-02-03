@@ -13,6 +13,8 @@
 #include "../game/utils.h"
 #include "../game/console.h"
 #include "../game/ammo.h"
+#include "../game/mathlib.h"
+
 #include "../config.h"
 
 #include "../utils/trampoline_hook.h"
@@ -112,7 +114,7 @@ BOOL WINAPI QueryPerformanceCounter_Hooked(LARGE_INTEGER *lpPerformanceCount)
 	BOOL result = QueryPerformanceCounter_Original(lpPerformanceCount);
 
 	newvalue = lpPerformanceCount->QuadPart;
-	newvalue = oldfakevalue + (LONGLONG)((newvalue - oldrealvalue) * static_cast<double>(g_Config.cvars.app_speed));
+	newvalue = oldfakevalue + (LONGLONG)((newvalue - oldrealvalue) * static_cast<double>(g_Config.cvars.speedhack_app));
 
 	oldrealvalue = lpPerformanceCount->QuadPart;
 	oldfakevalue = newvalue;
@@ -266,7 +268,7 @@ CON_COMMAND_FUNC(sc_speedhack, ConCommand_SpeedHack, "sc_speedhack [value] - Set
 	{
 		float flSpeed = strtof(CMD_ARGV(1), NULL);
 
-		g_Config.cvars.speedhack = flSpeed;
+		g_Config.cvars.speedhack_default = flSpeed;
 	}
 	else
 	{
@@ -322,8 +324,8 @@ CON_COMMAND(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox 
 
 void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
-	SetGameSpeed(static_cast<double>(g_Config.cvars.speedhack));
-	*dbRealtime += static_cast<double>(g_Config.cvars.ltfxspeed) * frametime;
+	SetGameSpeed(static_cast<double>(g_Config.cvars.speedhack_default));
+	*dbRealtime += static_cast<double>(g_Config.cvars.speedhack_ltfx) * frametime;
 
 	FakeLag(frametime);
 	ColorPulsator();
@@ -427,7 +429,7 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 			break;
 
 		default:
-			if (fabsf(flPlayerHeight - flFrameZDist * 1.5f) <= (20.0f) && flFrameZDist > 0.0f)
+			if (fabsf(flPlayerHeight - flFrameZDist * 1.5f) <= 20.0f && flFrameZDist > 0.0f)
 			{
 				float flNeedSpeed = fabsf(flPlayerHeight - 19.f);
 				float flScale = fabsf(flNeedSpeed / flFrameZDist);
@@ -551,20 +553,25 @@ void CMisc::FastRun(struct usercmd_s *cmd)
 
 void CMisc::Helicopter(struct usercmd_s *cmd)
 {
-	static Vector vHeliAngles(0.f, 0.f, 0.f);
+	static Vector vSpinAngles(0.f, 0.f, 0.f);
 
-	if (g_Config.cvars.helicopter)
+	if (g_Config.cvars.spinner) // not seen for client
 	{
-		vHeliAngles.x = g_Config.cvars.helicopter_pitch_angle; // not seen for client
-		vHeliAngles.y += g_Config.cvars.helicopter_rotation_angle;
+		vSpinAngles.y += g_Config.cvars.spinner_rotation_yaw_angle;
 
-		if (vHeliAngles.y > 180.f)
-			vHeliAngles.y -= 360.f;
-		
-		if (vHeliAngles.y < -180.f)
-			vHeliAngles.y += 360.f;
+		if (g_Config.cvars.spinner_rotate_pitch_angle)
+		{
+			vSpinAngles.x += g_Config.cvars.spinner_rotation_pitch_angle;
+		}
+		else
+		{
+			vSpinAngles.x = g_Config.cvars.spinner_pitch_angle;
+		}
 
-		SetAnglesSilent(vHeliAngles, cmd);
+		vSpinAngles.x = NormalizeAngle(vSpinAngles.x);
+		vSpinAngles.y = NormalizeAngle(vSpinAngles.y);
+
+		SetAnglesSilent(vSpinAngles, cmd);
 	}
 }
 

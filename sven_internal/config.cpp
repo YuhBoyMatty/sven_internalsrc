@@ -250,12 +250,17 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("ColorPulsatorTop", cvars.color_pulsator_top);
 		INI_IMPORT_VARIABLE("ColorPulsatorBottom", cvars.color_pulsator_bottom);
 		INI_IMPORT_VARIABLE("ColorPulsatorDelay", cvars.color_pulsator_delay);
-		INI_IMPORT_VARIABLE("SpeedHack", cvars.speedhack);
-		INI_IMPORT_VARIABLE("LTFXSpeed", cvars.ltfxspeed);
-		INI_IMPORT_VARIABLE("AppSpeed", cvars.app_speed);
-		INI_IMPORT_VARIABLE("Helicopter", cvars.helicopter);
-		INI_IMPORT_VARIABLE("HelicopterPitchAngle", cvars.helicopter_pitch_angle);
-		INI_IMPORT_VARIABLE("HelicopterRotationAngle", cvars.helicopter_rotation_angle);
+		INI_IMPORT_VARIABLE("Spinner", cvars.spinner);
+		INI_IMPORT_VARIABLE("SpinnerRotatePitchAngle", cvars.spinner_rotate_pitch_angle);
+		INI_IMPORT_VARIABLE("SpinnerPitchAngle", cvars.spinner_pitch_angle);
+		INI_IMPORT_VARIABLE("SpinnerRotationPitchAngle", cvars.spinner_rotation_pitch_angle);
+		INI_IMPORT_VARIABLE("SpinnerRotationYawAngle", cvars.spinner_rotation_yaw_angle);
+	INI_IMPORT_END_SECTION();
+
+	INI_IMPORT_BEGIN_SECTION("SPEEDHACK");
+		INI_IMPORT_VARIABLE("Default", cvars.speedhack_default);
+		INI_IMPORT_VARIABLE("LTFX", cvars.speedhack_ltfx);
+		INI_IMPORT_VARIABLE("Application", cvars.speedhack_app);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("KEYSPAM");
@@ -269,6 +274,10 @@ bool CConfig::Load()
 	
 	INI_IMPORT_BEGIN_SECTION("FOG");
 		INI_IMPORT_VARIABLE("Enable", cvars.fog);
+		INI_IMPORT_VARIABLE("FogSkybox", cvars.fog_skybox);
+		INI_IMPORT_VARIABLE("RemoveInWater", cvars.remove_water_fog);
+		INI_IMPORT_VARIABLE("Start", cvars.fog_start);
+		INI_IMPORT_VARIABLE("End", cvars.fog_end);
 		INI_IMPORT_VARIABLE("Density", cvars.fog_density);
 		INI_IMPORT_VARIABLE("Fog_R", cvars.fog_color[0]);
 		INI_IMPORT_VARIABLE("Fog_G", cvars.fog_color[1]);
@@ -282,6 +291,7 @@ bool CConfig::Load()
 	
 	INI_IMPORT_BEGIN_SECTION("CAMHACK");
 		INI_IMPORT_VARIABLE("SpeedFactor", cvars.camhack_speed_factor);
+		INI_IMPORT_VARIABLE("ShowModel", cvars.camhack_show_model);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("FPROAMING");
@@ -291,20 +301,30 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("LerpValue", cvars.fp_roaming_lerp_value);
 	INI_IMPORT_END_SECTION();
 
-	INI_IMPORT_BEGIN_SECTION("AUTOVOTE");
-		INI_IMPORT_VARIABLE("Mode", cvars.autovote_mode);
-		INI_IMPORT_VARIABLE("UseOnCustomVotes", cvars.autovote_custom);
-		INI_IMPORT_VARIABLE("IgnoreVoteFilter", cvars.autovote_ignore_filter);
+	INI_IMPORT_BEGIN_SECTION("VOTEPOPUP");
+		INI_IMPORT_VARIABLE("Enable", cvars.vote_popup);
+		INI_IMPORT_VARIABLE("WidthSize", cvars.vote_popup_width_size);
+		INI_IMPORT_VARIABLE("HeightSize", cvars.vote_popup_height_size);
+		INI_IMPORT_VARIABLE("WidthBorderPixels", cvars.vote_popup_w_border_pix);
+		INI_IMPORT_VARIABLE("HeightBorderPixels", cvars.vote_popup_h_border_pix);
+		INI_IMPORT_VARIABLE("WidthFraction", cvars.vote_popup_width_frac);
+		INI_IMPORT_VARIABLE("HeightFraction", cvars.vote_popup_height_frac);
 	INI_IMPORT_END_SECTION();
+
+	//INI_IMPORT_BEGIN_SECTION("AUTOVOTE");
+	//	INI_IMPORT_VARIABLE("Mode", cvars.autovote_mode);
+	//	INI_IMPORT_VARIABLE("UseOnCustomVotes", cvars.autovote_custom);
+	//	INI_IMPORT_VARIABLE("IgnoreVoteFilter", cvars.autovote_ignore_filter);
+	//INI_IMPORT_END_SECTION();
 	
 	INI_IMPORT_BEGIN_SECTION("AMS");
 		INI_IMPORT_VARIABLE("MuteEverything", cvars.ams_mute_everything);
 	INI_IMPORT_END_SECTION();
 
-	INI_IMPORT_END();
-
 	// Callbacks
 	g_Skybox.OnConfigLoad();
+
+	INI_IMPORT_END();
 }
 
 void CConfig::Save()
@@ -454,12 +474,17 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("ColorPulsatorTop", cvars.color_pulsator_top);
 		INI_EXPORT_VARIABLE("ColorPulsatorBottom", cvars.color_pulsator_bottom);
 		INI_EXPORT_VARIABLE("ColorPulsatorDelay", cvars.color_pulsator_delay);
-		INI_EXPORT_VARIABLE("SpeedHack", cvars.speedhack);
-		INI_EXPORT_VARIABLE("LTFXSpeed", cvars.ltfxspeed);
-		INI_EXPORT_VARIABLE("AppSpeed", cvars.app_speed);
-		INI_EXPORT_VARIABLE("Helicopter", cvars.helicopter);
-		INI_EXPORT_VARIABLE("HelicopterPitchAngle", cvars.helicopter_pitch_angle);
-		INI_EXPORT_VARIABLE("HelicopterRotationAngle", cvars.helicopter_rotation_angle);
+		INI_EXPORT_VARIABLE("Spinner", cvars.spinner);
+		INI_EXPORT_VARIABLE("SpinnerRotatePitchAngle", cvars.spinner_rotate_pitch_angle);
+		INI_EXPORT_VARIABLE("SpinnerPitchAngle", cvars.spinner_pitch_angle);
+		INI_EXPORT_VARIABLE("SpinnerRotationPitchAngle", cvars.spinner_rotation_pitch_angle);
+		INI_EXPORT_VARIABLE("SpinnerRotationYawAngle", cvars.spinner_rotation_yaw_angle);
+	INI_EXPORT_END_SECTION();
+
+	INI_EXPORT_BEGIN_SECTION("SPEEDHACK");
+		INI_EXPORT_VARIABLE("Default", cvars.speedhack_default);
+		INI_EXPORT_VARIABLE("LTFX", cvars.speedhack_ltfx);
+		INI_EXPORT_VARIABLE("Application", cvars.speedhack_app);
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("KEYSPAM");
@@ -473,6 +498,10 @@ void CConfig::Save()
 	
 	INI_EXPORT_BEGIN_SECTION("FOG");
 		INI_EXPORT_VARIABLE("Enable", cvars.fog);
+		INI_EXPORT_VARIABLE("FogSkybox", cvars.fog_skybox);
+		INI_EXPORT_VARIABLE("RemoveInWater", cvars.remove_water_fog);
+		INI_EXPORT_VARIABLE("Start", cvars.fog_start);
+		INI_EXPORT_VARIABLE("End", cvars.fog_end);
 		INI_EXPORT_VARIABLE("Density", cvars.fog_density);
 		INI_EXPORT_VARIABLE("Fog_R", cvars.fog_color[0]);
 		INI_EXPORT_VARIABLE("Fog_G", cvars.fog_color[1]);
@@ -486,6 +515,7 @@ void CConfig::Save()
 	
 	INI_EXPORT_BEGIN_SECTION("CAMHACK");
 		INI_EXPORT_VARIABLE("SpeedFactor", cvars.camhack_speed_factor);
+		INI_EXPORT_VARIABLE("ShowModel", cvars.camhack_show_model);
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("FPROAMING");
@@ -495,11 +525,21 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("LerpValue", cvars.fp_roaming_lerp_value);
 	INI_EXPORT_END_SECTION();
 
-	INI_EXPORT_BEGIN_SECTION("AUTOVOTE");
-		INI_EXPORT_VARIABLE("Mode", cvars.autovote_mode);
-		INI_EXPORT_VARIABLE("UseOnCustomVotes", cvars.autovote_custom);
-		INI_EXPORT_VARIABLE("IgnoreVoteFilter", cvars.autovote_ignore_filter);
+	INI_EXPORT_BEGIN_SECTION("VOTEPOPUP");
+		INI_EXPORT_VARIABLE("Enable", cvars.vote_popup);
+		INI_EXPORT_VARIABLE("WidthSize", cvars.vote_popup_width_size);
+		INI_EXPORT_VARIABLE("HeightSize", cvars.vote_popup_height_size);
+		INI_EXPORT_VARIABLE("WidthBorderPixels", cvars.vote_popup_w_border_pix);
+		INI_EXPORT_VARIABLE("HeightBorderPixels", cvars.vote_popup_h_border_pix);
+		INI_EXPORT_VARIABLE("WidthFraction", cvars.vote_popup_width_frac);
+		INI_EXPORT_VARIABLE("HeightFraction", cvars.vote_popup_height_frac);
 	INI_EXPORT_END_SECTION();
+
+	//INI_EXPORT_BEGIN_SECTION("AUTOVOTE");
+	//	INI_EXPORT_VARIABLE("Mode", cvars.autovote_mode);
+	//	INI_EXPORT_VARIABLE("UseOnCustomVotes", cvars.autovote_custom);
+	//	INI_EXPORT_VARIABLE("IgnoreVoteFilter", cvars.autovote_ignore_filter);
+	//INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("AMS");
 		INI_EXPORT_VARIABLE("MuteEverything", cvars.ams_mute_everything);

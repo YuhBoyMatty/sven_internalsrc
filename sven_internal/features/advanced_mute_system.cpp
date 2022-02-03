@@ -11,7 +11,8 @@
 
 #include "../patterns.h"
 
-#include "../utils/hash_table.h"
+#include "../data_struct/hashtable.h"
+
 #include "../utils/signature_scanner.h"
 #include "../utils/trampoline_hook.h"
 
@@ -31,9 +32,6 @@
 #define AMS_VERSION ( 1 )
 #define AMS_HEADER ( 0x2F77 )
 
-// Hash table size
-#define HASH_TABLE_SIZE ( 255 )
-
 // Make sure we're processing valid player
 #define GUARD_VALIDATE_PLAYER_INDEX(idx) \
 	if ((idx) < 1 || (idx) > 32) return; \
@@ -48,7 +46,7 @@ bool g_bProcessingChat = false;
 int g_nLastIndexedPlayer = -1;
 
 // Init hash table
-CHashTable64<HASH_TABLE_SIZE, uint32_t> g_MutedPlayers;
+CHashTable<uint64_t, uint32_t> g_MutedPlayers(255);
 
 // Database's stream
 FILE *g_pFileDB = NULL;
@@ -145,16 +143,16 @@ void LoadMutedPlayers()
 
 		static struct MutedPlayerEntry
 		{
-			uint32_t steamid_pair1;
-			uint32_t steamid_pair2;
+			uint32_t steamid_high;
+			uint32_t steamid_low;
 			uint32_t flags;
 		} s_MutedPlayerBuffer;
 
 		while (fread(&s_MutedPlayerBuffer, 1, sizeof(MutedPlayerEntry), g_pFileDB) == sizeof(MutedPlayerEntry))
 		{
-			uint64_t steamid = *reinterpret_cast<uint64_t *>(&s_MutedPlayerBuffer.steamid_pair1);
+			uint64_t steamid = *reinterpret_cast<uint64_t *>(&s_MutedPlayerBuffer.steamid_high);
 
-			g_MutedPlayers.AddEntry(steamid, s_MutedPlayerBuffer.flags);
+			g_MutedPlayers.Insert(steamid, s_MutedPlayerBuffer.flags);
 		}
 
 		fclose(g_pFileDB);
@@ -171,12 +169,10 @@ void LoadMutedPlayers()
 // Purpose: save hash table in file muted_players.db
 //-----------------------------------------------------------------------------
 
-void IterateMutedPlayers(void *entry)
+static void IterateMutedPlayers(const uint64_t steamid, uint32_t &mute_flags)
 {
-	CHashEntry64<uint32_t> *pEntry = reinterpret_cast<CHashEntry64<uint32_t> *>(entry);
-
-	fwrite(&pEntry->key, 1, sizeof(uint64_t), g_pFileDB);
-	fwrite(&pEntry->value, 1, sizeof(uint32_t), g_pFileDB);
+	fwrite(&steamid, 1, sizeof(uint64_t), g_pFileDB);
+	fwrite(&mute_flags, 1, sizeof(uint32_t), g_pFileDB);
 }
 
 void SaveMutedPlayers()
@@ -211,53 +207,49 @@ void SaveMutedPlayers()
 
 void RemoveMutedPlayers()
 {
-	g_MutedPlayers.RemoveAll();
+	g_MutedPlayers.Purge();
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: get muted player from hash table
 //-----------------------------------------------------------------------------
 
-CHashEntry64<uint32_t> *__fastcall GetMutedPlayer(uint64_t steamid)
+uint32_t *__fastcall GetMutedPlayer(uint64_t steamid)
 {
-	return g_MutedPlayers.GetEntry(steamid);
+	return g_MutedPlayers.Find(steamid);
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: add player in hash table, or merge flags if player already in table
+// Purpose: add player in hash table or merge flags if player already in table
 //-----------------------------------------------------------------------------
 
-void OnPlayerInTable(void *entry, void *value)
+static void OnPlayerFound(uint32_t *pFoundValue, uint32_t *pInsertValue)
 {
-	CHashEntry64<uint32_t> *pEntry = reinterpret_cast<CHashEntry64<uint32_t> *>(entry);
-
-	pEntry->value |= *reinterpret_cast<uint32_t *>(value);
+	*pFoundValue |= *pInsertValue;
 }
 
 bool AddMutedPlayer(uint64_t steamid, uint32_t flags)
 {
-	return g_MutedPlayers.AddEntry(steamid, flags, OnPlayerInTable);
+	return g_MutedPlayers.Insert(steamid, flags, OnPlayerFound);
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: remove player from hash table if resulting flag is MUTE_NONE
 //-----------------------------------------------------------------------------
 
-bool OnPlayerQueuedToRemove(void *entry, void *value)
+static bool OnPlayerRemove(uint32_t *pRemoveValue, uint32_t *pUserValue)
 {
-	CHashEntry64<uint32_t> *pEntry = reinterpret_cast<CHashEntry64<uint32_t> *>(entry);
+	*pRemoveValue &= ~(*pUserValue);
 
-	pEntry->value &= ~(*reinterpret_cast<uint32_t *>(value));
+	if (*pRemoveValue != MUTE_NONE)
+		return false;
 
-	if (pEntry->value == MUTE_NONE)
-		return true;
-
-	return false;
+	return true;
 }
 
 bool RemoveMutedPlayer(uint64_t steamid, uint32_t flags)
 {
-	return g_MutedPlayers.RemoveEntry(steamid, flags, OnPlayerQueuedToRemove);
+	return g_MutedPlayers.Remove(steamid, OnPlayerRemove, &flags);
 }
 
 //-----------------------------------------------------------------------------
@@ -362,11 +354,9 @@ CON_COMMAND_FUNC(ams_unmute_all, ConCommand_UnmuteAll, "ams_unmute_all [player i
 
 static int s_MutedPlayersCount = 0;
 
-void ShowMutedPlayers(void *entry)
+static void ShowMutedPlayers(const uint64_t steamid, uint32_t &mute_flags)
 {
-	CHashEntry64<uint32_t> *pEntry = reinterpret_cast<CHashEntry64<uint32_t> *>(entry);
-
-	Msg("%d >> SteamID: %llu | Voice: %d | Chat: %d\n", ++s_MutedPlayersCount, pEntry->key, (pEntry->value & MUTE_VOICE) != 0, (pEntry->value & MUTE_CHAT) != 0);
+	Msg("%d >> SteamID: %llu | Voice: %d | Chat: %d\n", ++s_MutedPlayersCount, steamid, (mute_flags & MUTE_VOICE) != 0, (mute_flags & MUTE_CHAT) != 0);
 }
 
 CON_COMMAND_FUNC(ams_show_muted_players, ConCommand_ShowMutedPlayers, "ams_show_muted_players - Show all muted players in the console")
@@ -401,12 +391,12 @@ CON_COMMAND_FUNC(ams_show_current_muted_players, ConCommand_ShowCurrentMutedPlay
 		if (!steamid)
 			continue;
 
-		auto player = GetMutedPlayer(steamid);
+		uint32_t *mute_flags = GetMutedPlayer(steamid);
 
-		if (!player)
+		if (!mute_flags)
 			continue;
 
-		Msg("#%d >> Player: %s | Voice: %d | Chat: %d\n", i, g_pLastPlayer->name, (player->value & MUTE_VOICE) != 0, (player->value & MUTE_CHAT) != 0);
+		Msg("#%d >> Player: %s | Voice: %d | Chat: %d\n", i, g_pLastPlayer->name, (*mute_flags & MUTE_VOICE) != 0, (*mute_flags & MUTE_CHAT) != 0);
 	}
 
 	Msg("====================== Muted Players ======================\n");
@@ -443,10 +433,10 @@ void *__fastcall InternalFindPlayerSquelch_Hooked(void *thisptr, int edx, char *
 	if (!steamid)
 		return NULL;
 
-	auto player = GetMutedPlayer(steamid);
+	uint32_t *mute_flags = GetMutedPlayer(steamid);
 
-	if (player && (player->value & MUTE_VOICE || g_Config.cvars.ams_mute_everything))
-		return player;
+	if (mute_flags && (*mute_flags & MUTE_VOICE || g_Config.cvars.ams_mute_everything))
+		return mute_flags;
 
 	return NULL;
 }
@@ -471,19 +461,19 @@ bool __fastcall IsPlayerBlocked_Hooked(void *thisptr, int edx, int nPlayerIndex)
 	if (!steamid)
 		return false;
 
-	auto player = GetMutedPlayer(steamid);
+	uint32_t *mute_flags = GetMutedPlayer(steamid);
 
-	if (player)
+	if (mute_flags)
 	{
 		if (g_Config.cvars.ams_mute_everything)
 			return true;
 
 		if (g_bProcessingChat)
 		{
-			if (player->value & MUTE_CHAT)
+			if (*mute_flags & MUTE_CHAT)
 				return true;
 		}
-		else if (player->value & MUTE_VOICE)
+		else if (*mute_flags & MUTE_VOICE)
 		{
 			return true;
 		}
@@ -556,9 +546,9 @@ void __fastcall UpdateServerState_Hooked(void *thisptr, int edx, bool bForce)
 		if (!steamid)
 			continue;
 
-		auto player = GetMutedPlayer(steamid);
+		uint32_t *mute_flags = GetMutedPlayer(steamid);
 
-		if (player && (player->value & MUTE_VOICE || bMuteEverything))
+		if (mute_flags && (*mute_flags & MUTE_VOICE || bMuteEverything))
 			banMask |= 1 << i; // one bit, one client
 	}
 
@@ -598,7 +588,7 @@ void InitAMS()
 
 	if (!pPrint)
 	{
-		ThrowError("CHudBaseTextBlock::Print failed initialization\n");
+		Sys_Error("CHudBaseTextBlock::Print failed initialization\n");
 		return;
 	}
 	
@@ -606,7 +596,7 @@ void InitAMS()
 
 	if (!pSaveState)
 	{
-		ThrowError("CVoiceBanMgr::SaveState failed initialization\n");
+		Sys_Error("CVoiceBanMgr::SaveState failed initialization\n");
 		return;
 	}
 	
@@ -614,7 +604,7 @@ void InitAMS()
 
 	if (!pSetPlayerBan)
 	{
-		ThrowError("CVoiceBanMgr::SetPlayerBan failed initialization\n");
+		Sys_Error("CVoiceBanMgr::SetPlayerBan failed initialization\n");
 		return;
 	}
 	
@@ -622,7 +612,7 @@ void InitAMS()
 
 	if (!pInternalFindPlayerSquelch)
 	{
-		ThrowError("CVoiceBanMgr::InternalFindPlayerSquelch failed initialization\n");
+		Sys_Error("CVoiceBanMgr::InternalFindPlayerSquelch failed initialization\n");
 		return;
 	}
 	
@@ -630,7 +620,7 @@ void InitAMS()
 
 	if (!pIsPlayerBlocked)
 	{
-		ThrowError("CVoiceStatus::IsPlayerBlocked failed initialization\n");
+		Sys_Error("CVoiceStatus::IsPlayerBlocked failed initialization\n");
 		return;
 	}
 	
@@ -638,7 +628,7 @@ void InitAMS()
 
 	if (!pSetPlayerBlockedState)
 	{
-		ThrowError("CVoiceStatus::SetPlayerBlockedState failed initialization\n");
+		Sys_Error("CVoiceStatus::SetPlayerBlockedState failed initialization\n");
 		return;
 	}
 
@@ -646,7 +636,7 @@ void InitAMS()
 
 	if (!pUpdateServerState)
 	{
-		ThrowError("CVoiceStatus::UpdateServerState failed initialization\n");
+		Sys_Error("CVoiceStatus::UpdateServerState failed initialization\n");
 		return;
 	}
 	
@@ -654,7 +644,7 @@ void InitAMS()
 
 	if (!pHACK_GetPlayerUniqueID)
 	{
-		ThrowError("HACK_GetPlayerUniqueID failed initialization\n");
+		Sys_Error("HACK_GetPlayerUniqueID failed initialization\n");
 		return;
 	}
 	
@@ -676,6 +666,5 @@ void InitAMS()
 	HOOK_FUNCTION(UpdateServerState_Hook, pUpdateServerState, UpdateServerState_Hooked, UpdateServerState_Original, UpdateServerStateFn);
 	HOOK_FUNCTION(HACK_GetPlayerUniqueID_Hook, pHACK_GetPlayerUniqueID, HACK_GetPlayerUniqueID_Hooked, HACK_GetPlayerUniqueID_Original, HACK_GetPlayerUniqueIDFn);
 
-	RemoveMutedPlayers();
 	LoadMutedPlayers();
 }

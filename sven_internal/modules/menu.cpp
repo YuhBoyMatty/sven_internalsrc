@@ -21,6 +21,8 @@
 #include "imgui_impl_opengl2.h"
 
 //-----------------------------------------------------------------------------
+// Signatures
+//-----------------------------------------------------------------------------
 
 typedef BOOL (APIENTRY *wglSwapBuffersFn)(HDC);
 typedef BOOL (WINAPI *SetCursorPosFn)(int, int);
@@ -28,8 +30,8 @@ typedef BOOL (WINAPI *SetCursorPosFn)(int, int);
 LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //-----------------------------------------------------------------------------
-
-static bool __INITIALIZED__ = false;
+// Vars
+//-----------------------------------------------------------------------------
 
 static HWND hGameWnd;
 static WNDPROC hGameWndProc;
@@ -37,6 +39,8 @@ static WNDPROC hGameWndProc;
 bool g_bMenuEnabled = false;
 bool g_bMenuClosed = false;
 
+//-----------------------------------------------------------------------------
+// Declare hooks
 //-----------------------------------------------------------------------------
 
 TRAMPOLINE_HOOK(wglSwapBuffers_Hook);
@@ -350,34 +354,14 @@ void ShowMainMenu()
 
 				ImGui::Text("");
 				ImGui::Separator();
-				ImGui::Text("Speedhack Methods");
+				ImGui::Text("Spinner");
 
-				if (ImGui::Button("Reset Speedhack"))
-					g_Config.cvars.speedhack = 1.0f;
-
-				ImGui::SliderFloat("Speedhack", &g_Config.cvars.speedhack, 0.0f, 30.0f);
-				
+				ImGui::Checkbox("Enable Spinner", &g_Config.cvars.spinner);
+				ImGui::SliderFloat("Set Pitch Angle", &g_Config.cvars.spinner_pitch_angle, -180.0f, 180.0f);
+				ImGui::SliderFloat("Yaw Angle Rotation", &g_Config.cvars.spinner_rotation_yaw_angle, -10.0f, 10.0f);
 				ImGui::Text("");
-
-				if (ImGui::Button("Reset LTFX Speed"))
-					g_Config.cvars.ltfxspeed = 0.0f;
-
-				ImGui::SliderFloat("LTFX Speed", &g_Config.cvars.ltfxspeed, -5.0f, 5.0f);
-				
-				ImGui::Text("");
-
-				if (ImGui::Button("Reset Application Speed"))
-					g_Config.cvars.app_speed = 1.0f;
-
-				ImGui::SliderFloat("Application Speed", &g_Config.cvars.app_speed, 0.1f, 30.0f);
-
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Helicopter");
-
-				ImGui::Checkbox("Enable Helicopter", &g_Config.cvars.helicopter);
-				ImGui::SliderFloat("Helicopter Pitch Angle", &g_Config.cvars.helicopter_pitch_angle, -180.0f, 180.0f);
-				ImGui::SliderFloat("Helicopter Rotation Angle", &g_Config.cvars.helicopter_rotation_angle, -10.0f, 10.0f);
+				ImGui::Checkbox("Rotate Pitch Angle", &g_Config.cvars.spinner_rotate_pitch_angle);
+				ImGui::SliderFloat("Pitch Angle Rotation", &g_Config.cvars.spinner_rotation_pitch_angle, -10.0f, 10.0f);
 
 				ImGui::Text("");
 				ImGui::Separator();
@@ -388,7 +372,34 @@ void ShowMainMenu()
 
 				ImGui::Text("");
 			}
-			
+
+			// Speedhack
+			if (ImGui::CollapsingHeader("Speedhack"))
+			{
+				ImGui::Separator();
+
+				if (ImGui::Button("Reset Default Speedhack"))
+					g_Config.cvars.speedhack_default = 1.0f;
+
+				ImGui::SliderFloat("Default Speedhack", &g_Config.cvars.speedhack_default, 0.0f, 30.0f);
+				
+				ImGui::Text("");
+
+				if (ImGui::Button("Reset LTFX Speedhack"))
+					g_Config.cvars.speedhack_ltfx = 0.0f;
+
+				ImGui::SliderFloat("LTFX Speedhack", &g_Config.cvars.speedhack_ltfx, -10.0f, 10.0f);
+				
+				ImGui::Text("");
+
+				if (ImGui::Button("Reset Application Speed"))
+					g_Config.cvars.speedhack_app = 1.0f;
+
+				ImGui::SliderFloat("Application Speed", &g_Config.cvars.speedhack_app, 0.1f, 30.0f);
+
+				ImGui::Text("");
+			}
+
 			// Fake Lag
 			if (ImGui::CollapsingHeader("Fake Lag"))
 			{
@@ -449,6 +460,13 @@ void ShowMainMenu()
 				ImGui::Separator();
 
 				ImGui::Checkbox("Enable Fog", &g_Config.cvars.fog);
+				ImGui::Checkbox("Fog Skybox", &g_Config.cvars.fog_skybox);
+				ImGui::Checkbox("Disable Water Fog", &g_Config.cvars.remove_water_fog);
+
+				ImGui::Text("");
+
+				ImGui::SliderFloat("Fog Start", &g_Config.cvars.fog_start, 0.0f, 10000.0f);
+				ImGui::SliderFloat("Fog End", &g_Config.cvars.fog_end, 0.0f, 10000.0f);
 
 				ImGui::Text("");
 
@@ -508,6 +526,7 @@ void ShowMainMenu()
 					ConCommand_CamHackReset();
 
 				ImGui::SliderFloat("Speed Factor", &g_Config.cvars.camhack_speed_factor, 0.0f, 15.0f);
+				ImGui::Checkbox("Show Model", &g_Config.cvars.camhack_show_model);
 				
 				ImGui::Text("");
 			}
@@ -526,7 +545,34 @@ void ShowMainMenu()
 				ImGui::Text("");
 			}
 			
+			// Custom Vote Popup
+			if (ImGui::CollapsingHeader("Vote Popup"))
+			{
+				extern void LoadVoteFilter();
+
+				ImGui::Separator();
+
+				ImGui::Checkbox("Custom Vote Popup", &g_Config.cvars.vote_popup);
+
+				ImGui::Text("");
+
+				ImGui::SliderInt("VP: Width Size", &g_Config.cvars.vote_popup_width_size, 0, 1000);
+				ImGui::SliderInt("VP: Height Size", &g_Config.cvars.vote_popup_height_size, 0, 1000);
+				
+				ImGui::Text("");
+
+				ImGui::SliderInt("VP: Width Border Pixels", &g_Config.cvars.vote_popup_w_border_pix, 0, 100);
+				ImGui::SliderInt("VP: Height Border Pixels", &g_Config.cvars.vote_popup_h_border_pix, 0, 100);
+
+				ImGui::Text("");
+
+				ImGui::SliderFloat("VP: Width Fraction", &g_Config.cvars.vote_popup_width_frac, 0.0f, 1.0f);
+				ImGui::SliderFloat("VP: Height Fraction", &g_Config.cvars.vote_popup_height_frac, 0.0f, 1.0f);
+				ImGui::Text("");
+			}
+			
 			// Auto Vote
+			/*
 			if (ImGui::CollapsingHeader("Auto Vote"))
 			{
 				extern void LoadVoteFilter();
@@ -544,6 +590,7 @@ void ShowMainMenu()
 				
 				ImGui::Text("");
 			}
+			*/
 
 			// Message Spammer
 			if (ImGui::CollapsingHeader("Message Spammer"))
@@ -693,13 +740,13 @@ void InitMenuModule()
 		ValveUnhookFunc = (ValveUnhookFuncFn)FIND_PATTERN(L"gameoverlayrenderer.dll", Patterns::GameOverlay::ValveUnhookFunc);
 
 		if (!ValveUnhookFunc)
-			ThrowError("'ValveUnhookFunc' failed initialization\n");
+			Sys_Error("'ValveUnhookFunc' failed initialization\n");
 	}
 
 	SetCursorPos_GameOverlay = (SetCursorPosFn)FIND_PATTERN(L"gameoverlayrenderer.dll", Patterns::GameOverlay::SetCursorPos_Hook);
 
 	if (!SetCursorPos_GameOverlay)
-		ThrowError("'SetCursorPos_GameOverlay' failed initialization\n");
+		Sys_Error("'SetCursorPos_GameOverlay' failed initialization\n");
 
 	void *pwglSwapBuffers = GetProcAddress(GetModuleHandle(L"opengl32.dll"), "wglSwapBuffers");
 	void *pSetCursorPos = GetProcAddress(GetModuleHandle(L"user32.dll"), "SetCursorPos");
@@ -715,13 +762,8 @@ void InitMenuModule()
 	HOOK_FUNCTION(wglSwapBuffers_Hook, pwglSwapBuffers, wglSwapBuffers_Hooked, wglSwapBuffers_Original, wglSwapBuffersFn);
 
 #pragma warning(pop)
-
-	__INITIALIZED__ = true;
 }
 
-void ReleaseMenuModule()
+void ShutdownMenuModule()
 {
-	if (!__INITIALIZED__)
-		return;
-	
 }

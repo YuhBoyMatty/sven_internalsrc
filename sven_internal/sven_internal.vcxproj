@@ -101,8 +101,8 @@
     <ClCompile Include="features\advanced_mute_system.cpp" />
     <ClCompile Include="features\antiafk.cpp" />
     <ClCompile Include="features\camhack.cpp" />
-    <ClCompile Include="features\autovote.cpp" />
     <ClCompile Include="features\chams.cpp" />
+    <ClCompile Include="features\custom_vote_popup.cpp" />
     <ClCompile Include="features\firstperson_roaming.cpp" />
     <ClCompile Include="features\keyspam.cpp" />
     <ClCompile Include="features\message_spammer.cpp" />
@@ -128,6 +128,7 @@
     <ClCompile Include="ini-parser\ini_parser.c" />
     <ClCompile Include="libdasm\libdasm.c" />
     <ClCompile Include="modules\client.cpp" />
+    <ClCompile Include="modules\engine.cpp" />
     <ClCompile Include="modules\menu.cpp" />
     <ClCompile Include="modules\opengl.cpp" />
     <ClCompile Include="modules\SDL2.cpp" />
@@ -141,11 +142,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="data_struct\hash.h" />
+    <ClInclude Include="data_struct\hashdict.h" />
+    <ClInclude Include="data_struct\hashtable.h" />
     <ClInclude Include="features\advanced_mute_system.h" />
     <ClInclude Include="features\antiafk.h" />
     <ClInclude Include="features\camhack.h" />
-    <ClInclude Include="features\autovote.h" />
     <ClInclude Include="features\chams.h" />
+    <ClInclude Include="features\custom_vote_popup.h" />
     <ClInclude Include="features\firstperson_roaming.h" />
     <ClInclude Include="features\keyspam.h" />
     <ClInclude Include="features\message_spammer.h" />
@@ -175,6 +179,7 @@
     <ClInclude Include="libdasm\libdasm.h" />
     <ClInclude Include="libdasm\opcode_tables.h" />
     <ClInclude Include="modules\client.h" />
+    <ClInclude Include="modules\engine.h" />
     <ClInclude Include="modules\menu.h" />
     <ClInclude Include="modules\opengl.h" />
     <ClInclude Include="modules\SDL2.h" />
@@ -183,7 +188,6 @@
     <ClInclude Include="sdk.h" />
     <ClInclude Include="strafe\strafe.h" />
     <ClInclude Include="strafe\strafe_utils.h" />
-    <ClInclude Include="utils\hash_table.h" />
     <ClInclude Include="utils\patcher.h" />
     <ClInclude Include="utils\patterns_base.h" />
     <ClInclude Include="utils\signature_scanner.h" />

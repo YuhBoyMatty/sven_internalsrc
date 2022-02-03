@@ -1,5 +1,7 @@
 // Game Utils
 
+#include <regex>
+
 #include "utils.h"
 #include "mathlib.h"
 
@@ -7,10 +9,11 @@
 
 #include "../utils/signature_scanner.h"
 #include "../utils/patcher.h"
+
 #include "../game/console.h"
 #include "../patterns.h"
 
-#include <regex>
+#include "../modules/vgui.h"
 
 //-----------------------------------------------------------------------------
 
@@ -60,8 +63,8 @@ CON_COMMAND(disasm_addr, "disasm_addr [address]")
 
 		if (std::regex_search(pszAddress, match, regex_address))
 		{
-			const wchar_t *pwcModuleName = CStringToWideCString(match[1].str().c_str());
-			pAddress = (BYTE *)GetModuleHandle(pwcModuleName);
+			//const wchar_t *pwcModuleName = CStringToWideCString(match[1].str().c_str());
+			pAddress = (BYTE *)GetModuleHandleA(match[1].str().c_str());
 
 			if (match[4].str().c_str() && match[5].str().c_str())
 			{
@@ -71,7 +74,7 @@ CON_COMMAND(disasm_addr, "disasm_addr [address]")
 					pAddress = (BYTE *)((DWORD)pAddress - strtol(match[5].str().c_str(), NULL, 16));
 			}
 
-			delete[] pwcModuleName;
+			//delete[] pwcModuleName;
 		}
 		else
 		{
@@ -112,8 +115,8 @@ CON_COMMAND(dump_ifaces, "dump_ifaces [module name] - Dumps all registered inter
 {
 	if (CMD_ARGC() > 1)
 	{
-		const wchar_t *pwcModuleName = CStringToWideCString(CMD_ARGV(1));
-		HMODULE hModule = GetModuleHandle(pwcModuleName);
+		//const wchar_t *pwcModuleName = CStringToWideCString(CMD_ARGV(1));
+		HMODULE hModule = GetModuleHandleA(CMD_ARGV(1));
 
 		if (hModule)
 		{
@@ -157,7 +160,7 @@ CON_COMMAND(dump_ifaces, "dump_ifaces [module name] - Dumps all registered inter
 			Msg("No such module\n");
 		}
 
-		delete[] pwcModuleName;
+		//delete[] pwcModuleName;
 	}
 	else
 	{
@@ -202,10 +205,8 @@ bool WorldToScreen(float *pflOrigin, float *pflVecScreen)
 
 	if (pflVecScreen[0] <= 1 && pflVecScreen[1] <= 1 && pflVecScreen[0] >= -1 && pflVecScreen[1] >= -1 && !iResult)
 	{
-		SCREEN_STRUCT;
-
-		pflVecScreen[0] = (SCREEN_WIDTH / 2 * pflVecScreen[0]) + (pflVecScreen[0] + SCREEN_WIDTH / 2);
-		pflVecScreen[1] = -(SCREEN_HEIGHT / 2 * pflVecScreen[1]) + (pflVecScreen[1] + SCREEN_HEIGHT / 2);
+		pflVecScreen[0] = (g_ScreenInfo.width / 2 * pflVecScreen[0]) + (pflVecScreen[0] + g_ScreenInfo.width / 2);
+		pflVecScreen[1] = -(g_ScreenInfo.height / 2 * pflVecScreen[1]) + (pflVecScreen[1] + g_ScreenInfo.height / 2);
 
 		return true;
 	}
@@ -353,7 +354,7 @@ static bool PatchInterp()
 
 	if (!pPatchInterpString)
 	{
-		//ThrowError("'Patch Interp' failed initialization\n");
+		//Sys_Error("'Patch Interp' failed initialization\n");
 		Msg("'Patch Interp' failed initialization\n");
 		return false;
 	}
@@ -362,7 +363,7 @@ static bool PatchInterp()
 
 	if (!pPatchInterp)
 	{
-		//ThrowError("'Patch Interp' failed initialization #2\n");
+		//Sys_Error("'Patch Interp' failed initialization #2\n");
 		Msg("'Patch Interp' failed initialization #2\n");
 		return false;
 	}
@@ -372,14 +373,14 @@ static bool PatchInterp()
 
 	if (*pPatchInterp != 0x68) // check PUSH opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #3\n");
+		//Sys_Error("'Patch Interp' failed initialization #3\n");
 		Msg("'Patch Interp' failed initialization #3\n");
 		return false;
 	}
 
 	if (*(pPatchInterp - 0x1F) != 0x7A) // JP opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #4\n");
+		//Sys_Error("'Patch Interp' failed initialization #4\n");
 		Msg("'Patch Interp' failed initialization #4\n");
 		return false;
 	}
@@ -395,14 +396,14 @@ static bool PatchInterp()
 
 	if (*pPatchInterp != 0x68) // check PUSH opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #5\n");
+		//Sys_Error("'Patch Interp' failed initialization #5\n");
 		Msg("'Patch Interp' failed initialization #5\n");
 		return false;
 	}
 
 	if (*(pPatchInterp - 0x1F) != 0x7A) // JP opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #6\n");
+		//Sys_Error("'Patch Interp' failed initialization #6\n");
 		Msg("'Patch Interp' failed initialization #6\n");
 		return false;
 	}
@@ -417,14 +418,14 @@ static bool PatchInterp()
 
 	if (*pPatchInterp != 0xB8) // check MOV, EAX ... opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #7\n");
+		//Sys_Error("'Patch Interp' failed initialization #7\n");
 		Msg("'Patch Interp' failed initialization #7\n");
 		return false;
 	}
 
 	if (*(pPatchInterp - 0x8) != 0x7D) // JNL opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #8\n");
+		//Sys_Error("'Patch Interp' failed initialization #8\n");
 		Msg("'Patch Interp' failed initialization #8\n");
 		return false;
 	}
@@ -436,7 +437,7 @@ static bool PatchInterp()
 
 	if (*(pPatchInterp + 0xD) != 0x7E) // JLE opcode
 	{
-		//ThrowError("'Patch Interp' failed initialization #9\n");
+		//Sys_Error("'Patch Interp' failed initialization #9\n");
 		Msg("'Patch Interp' failed initialization #9\n");
 		return false;
 	}
@@ -465,12 +466,12 @@ static void InitTertiaryAttackPatch(CPatcher &patcher, void *pfnTertiaryAttack)
 		}
 		else
 		{
-			ThrowError("'InitTertiaryAttackPatch' failed initialization #2\n");
+			Sys_Error("'InitTertiaryAttackPatch' failed initialization #2\n");
 		}
 	}
 	else
 	{
-		ThrowError("'InitTertiaryAttackPatch' failed initialization #1\n");
+		Sys_Error("'InitTertiaryAttackPatch' failed initialization #1\n");
 	}
 }
 
@@ -489,7 +490,7 @@ static void InitTertiaryAttackGlitch()
 		void *weapon_shockrifle = GetProcAddress(clientDLL, "weapon_shockrifle"); // vtable <- (byte *)weapon_shockrifle + 0x67
 
 		if (!weapon_gauss || !weapon_minigun || !weapon_handgrenade || !weapon_shockrifle)
-			ThrowError("InitTertiaryAttackGlitch: GetProcAddress failed\n");
+			Sys_Error("InitTertiaryAttackGlitch: GetProcAddress failed\n");
 
 		// weapon_gauss
 		get_instruction(&instruction, (BYTE *)weapon_gauss + 0x63, MODE_32);
@@ -497,7 +498,7 @@ static void InitTertiaryAttackGlitch()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[0] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch' failed initialization #1\n");
+			Sys_Error("'InitTertiaryAttackGlitch' failed initialization #1\n");
 		
 		// weapon_minigun
 		get_instruction(&instruction, (BYTE *)weapon_minigun + 0x63, MODE_32);
@@ -505,7 +506,7 @@ static void InitTertiaryAttackGlitch()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[1] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch' failed initialization #2\n");
+			Sys_Error("'InitTertiaryAttackGlitch' failed initialization #2\n");
 		
 		// weapon_handgrenade
 		get_instruction(&instruction, (BYTE *)weapon_handgrenade + 0x63, MODE_32);
@@ -513,7 +514,7 @@ static void InitTertiaryAttackGlitch()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[2] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch' failed initialization #3\n");
+			Sys_Error("'InitTertiaryAttackGlitch' failed initialization #3\n");
 		
 		// weapon_shockrifle
 		get_instruction(&instruction, (BYTE *)weapon_shockrifle + 0x67, MODE_32);
@@ -521,7 +522,7 @@ static void InitTertiaryAttackGlitch()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[3] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch' failed initialization #4\n");
+			Sys_Error("'InitTertiaryAttackGlitch' failed initialization #4\n");
 
 		InitTertiaryAttackPatch(GaussTertiaryAttack, (void *)dwVTable[0][150]); // CBasePlayerWeapon::TertiaryAttack
 		InitTertiaryAttackPatch(MinigunTertiaryAttack, (void *)dwVTable[1][150]);
@@ -532,7 +533,7 @@ static void InitTertiaryAttackGlitch()
 	}
 	else
 	{
-		ThrowError("InitTertiaryAttackGlitch: client module??\n");
+		Sys_Error("InitTertiaryAttackGlitch: client module??\n");
 	}
 }
 
@@ -552,7 +553,7 @@ void InitTertiaryAttackGlitch_Server()
 		void *weapon_egon = GetProcAddress(serverDLL, "weapon_egon"); // vtable <- (byte *)weapon_egon + 0x83
 
 		if (!weapon_gauss || !weapon_minigun || !weapon_handgrenade || !weapon_shockrifle || !weapon_egon)
-			ThrowError("InitTertiaryAttackGlitch_Server: GetProcAddress failed\n");
+			Sys_Error("InitTertiaryAttackGlitch_Server: GetProcAddress failed\n");
 
 		// weapon_gauss
 		get_instruction(&instruction, (BYTE *)weapon_gauss + 0x7B, MODE_32);
@@ -560,7 +561,7 @@ void InitTertiaryAttackGlitch_Server()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[0] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch_Server' failed initialization #1\n");
+			Sys_Error("'InitTertiaryAttackGlitch_Server' failed initialization #1\n");
 
 		// weapon_minigun
 		get_instruction(&instruction, (BYTE *)weapon_minigun + 0x7B, MODE_32);
@@ -568,7 +569,7 @@ void InitTertiaryAttackGlitch_Server()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[1] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch_Server' failed initialization #2\n");
+			Sys_Error("'InitTertiaryAttackGlitch_Server' failed initialization #2\n");
 
 		// weapon_handgrenade
 		get_instruction(&instruction, (BYTE *)weapon_handgrenade + 0x7B, MODE_32);
@@ -576,7 +577,7 @@ void InitTertiaryAttackGlitch_Server()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[2] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch_Server' failed initialization #3\n");
+			Sys_Error("'InitTertiaryAttackGlitch_Server' failed initialization #3\n");
 
 		// weapon_shockrifle
 		get_instruction(&instruction, (BYTE *)weapon_shockrifle + 0x83, MODE_32);
@@ -584,7 +585,7 @@ void InitTertiaryAttackGlitch_Server()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[3] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch_Server' failed initialization #4\n");
+			Sys_Error("'InitTertiaryAttackGlitch_Server' failed initialization #4\n");
 		
 		// weapon_egon
 		get_instruction(&instruction, (BYTE *)weapon_egon + 0x83, MODE_32);
@@ -592,7 +593,7 @@ void InitTertiaryAttackGlitch_Server()
 		if (instruction.type == INSTRUCTION_TYPE_MOV && instruction.op1.type == OPERAND_TYPE_MEMORY && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 			dwVTable[4] = reinterpret_cast<DWORD *>(instruction.op2.immediate);
 		else
-			ThrowError("'InitTertiaryAttackGlitch_Server' failed initialization #5\n");
+			Sys_Error("'InitTertiaryAttackGlitch_Server' failed initialization #5\n");
 
 		InitTertiaryAttackPatch(GaussTertiaryAttack_Server, (void *)dwVTable[0][151]);
 		InitTertiaryAttackPatch(MinigunTertiaryAttack_Server, (void *)dwVTable[1][151]);
@@ -604,7 +605,7 @@ void InitTertiaryAttackGlitch_Server()
 	}
 	else
 	{
-		ThrowError("InitTertiaryAttackGlitch: server module??\n");
+		Sys_Error("InitTertiaryAttackGlitch: server module??\n");
 	}
 }
 
@@ -627,7 +628,7 @@ void InitUtils()
 
 	if (!pNextCmdTime)
 	{
-		ThrowError("'flNextCmdTime' failed initialization\n");
+		Sys_Error("'flNextCmdTime' failed initialization\n");
 		return;
 	}
 
@@ -635,7 +636,7 @@ void InitUtils()
 
 	if (!pTextureLoadAddress)
 	{
-		ThrowError("'Game speed up' failed initialization\n");
+		Sys_Error("'Game speed up' failed initialization\n");
 		return;
 	}
 
@@ -643,7 +644,7 @@ void InitUtils()
 
 	if (!pTextureLoad)
 	{
-		ThrowError("'Game speed up' failed initialization #2\n");
+		Sys_Error("'Game speed up' failed initialization #2\n");
 		return;
 	}
 
@@ -656,7 +657,7 @@ void InitUtils()
 	}
 	else
 	{
-		ThrowError("'Game speed up' failed initialization #3\n");
+		Sys_Error("'Game speed up' failed initialization #3\n");
 		return;
 	}
 
@@ -669,7 +670,7 @@ void InitUtils()
 	}
 	else
 	{
-		ThrowError("'flNextCmdTime' failed initialization #2\n");
+		Sys_Error("'flNextCmdTime' failed initialization #2\n");
 		return;
 	}
 	
@@ -682,7 +683,7 @@ void InitUtils()
 	}
 	else
 	{
-		ThrowError("'dbRealtime' failed initialization\n");
+		Sys_Error("'dbRealtime' failed initialization\n");
 		return;
 	}
 

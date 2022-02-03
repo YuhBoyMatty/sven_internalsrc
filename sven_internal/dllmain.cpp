@@ -8,6 +8,7 @@
 #include "patterns.h"
 #include "config.h"
 
+#include "modules/engine.h"
 #include "modules/client.h"
 #include "modules/vgui.h"
 #include "modules/opengl.h"
@@ -46,7 +47,7 @@ static bool InitInterfaces()
 
 	if (!pEngineFuncs)
 	{
-		ThrowError("'cl_enginefunc_t' failed initialization\n");
+		Sys_Error("'cl_enginefunc_t' failed initialization\n");
 		return false;
 	}
 
@@ -54,7 +55,7 @@ static bool InitInterfaces()
 
 	if (!pClientFuncs)
 	{
-		ThrowError("'cl_clientfunc_t' failed initialization\n");
+		Sys_Error("'cl_clientfunc_t' failed initialization\n");
 		return false;
 	}
 
@@ -62,7 +63,7 @@ static bool InitInterfaces()
 
 	if (!pEngineStudio)
 	{
-		ThrowError("'engine_studio_api_t' failed initialization\n");
+		Sys_Error("'engine_studio_api_t' failed initialization\n");
 		return false;
 	}
 
@@ -77,7 +78,7 @@ static bool InitInterfaces()
 	}
 	else
 	{
-		ThrowError("'cl_enginefunc_t' failed initialization #2\n");
+		Sys_Error("'cl_enginefunc_t' failed initialization #2\n");
 		return false;
 	}
 
@@ -90,7 +91,7 @@ static bool InitInterfaces()
 	}
 	else
 	{
-		ThrowError("'cl_clientfunc_t' failed initialization #2\n");
+		Sys_Error("'cl_clientfunc_t' failed initialization #2\n");
 		return false;
 	}
 
@@ -103,7 +104,7 @@ static bool InitInterfaces()
 	}
 	else
 	{
-		ThrowError("'engine_studio_api_t' failed initialization #2\n");
+		Sys_Error("'engine_studio_api_t' failed initialization #2\n");
 		return false;
 	}
 
@@ -116,7 +117,7 @@ static bool InitInterfaces()
 	}
 	else
 	{
-		ThrowError("'r_studio_interface_t' failed initialization\n");
+		Sys_Error("'r_studio_interface_t' failed initialization\n");
 		return false;
 	}
 	
@@ -129,7 +130,7 @@ static bool InitInterfaces()
 	}
 	else
 	{
-		ThrowError("'CStudioModelRenderer' failed initialization\n");
+		Sys_Error("'CStudioModelRenderer' failed initialization\n");
 		return false;
 	}
 
@@ -137,7 +138,7 @@ static bool InitInterfaces()
 
 	if (!hardwareFactory)
 	{
-		ThrowError("'IEngineClient' failed initialization\n");
+		Sys_Error("'IEngineClient' failed initialization\n");
 		return false;
 	}
 
@@ -145,7 +146,7 @@ static bool InitInterfaces()
 
 	if (!g_pEngineClient)
 	{
-		ThrowError("'IEngineClient' failed initialization #2\n");
+		Sys_Error("'IEngineClient' failed initialization #2\n");
 		return false;
 	}
 
@@ -171,19 +172,19 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		InitUserMsg();
 		InitStudioDetours();
 		InitWeaponsResource();
-		InitClassTable();
 
-		InitClientModule();
-		InitVGUIModule();
-		InitOpenGLModule();
-		InitMenuModule();
 		InitSDL2Module();
+		InitOpenGLModule();
+		InitVGUIModule();
+		InitEngineModule();
+		InitClientModule();
+		InitMenuModule();
 
 		ConVar_Register();
 
 		printf("Successfully loaded\n");
 
-		Msg("Internal Module Loaded\n");
+		Msg("Sven Internal Loaded\n");
 
 		//g_pEngineFuncs->pfnClientCmd("cl_timeout 999999;rate 999999;cl_updaterate 1000;cl_cmdrate 1000;ex_interp 0.1"); // rate 50000; cl_updaterate 80; cl_cmdrate 205
 		g_pEngineFuncs->pfnClientCmd("exec sven_internal.cfg");

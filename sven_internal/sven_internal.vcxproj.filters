@@ -35,6 +35,9 @@
     <Filter Include="Sven Internal\ImGui Implementations">
       <UniqueIdentifier>{903b05c5-aca7-48f4-9aa9-6cde168f8b3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sven Internal\Data Structures">
+      <UniqueIdentifier>{2081de0d-7527-4f6c-850a-ee5ca2aab80d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -65,9 +68,6 @@
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
     <ClCompile Include="features\strafer.cpp">
-      <Filter>Sven Internal\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="features\autovote.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
     <ClCompile Include="features\keyspam.cpp">
@@ -163,6 +163,12 @@
     <ClCompile Include="modules\SDL2.cpp">
       <Filter>Sven Internal\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="modules\engine.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="features\custom_vote_popup.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\patterns_base.h">
@@ -212,12 +218,6 @@
     </ClInclude>
     <ClInclude Include="game\utils.h">
       <Filter>Sven Internal\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="features\autovote.h">
-      <Filter>Sven Internal\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\hash_table.h">
-      <Filter>Sven Internal\Utils</Filter>
     </ClInclude>
     <ClInclude Include="features\keyspam.h">
       <Filter>Sven Internal\Features</Filter>
@@ -311,6 +311,21 @@
     </ClInclude>
     <ClInclude Include="modules\SDL2.h">
       <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\engine.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct\hash.h">
+      <Filter>Sven Internal\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct\hashdict.h">
+      <Filter>Sven Internal\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct\hashtable.h">
+      <Filter>Sven Internal\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="features\custom_vote_popup.h">
+      <Filter>Sven Internal\Features</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -120,18 +120,22 @@ public:
 		bool save_soundcache = false;
 		bool rotate_dead_body = false;
 		int no_weapon_anim = 0; // enum
-		float speedhack = 1.0f;
-		float ltfxspeed = 0.0f;
-		float app_speed = 1.0f;
 
 		bool color_pulsator = false;
 		bool color_pulsator_top = true;
 		bool color_pulsator_bottom = true;
 		float color_pulsator_delay = 0.5f;
 		
-		bool helicopter = false;
-		float helicopter_pitch_angle = 0.0f;
-		float helicopter_rotation_angle = 0.5f;
+		bool spinner = false;
+		bool spinner_rotate_pitch_angle = false;
+		float spinner_pitch_angle = 0.0f;
+		float spinner_rotation_pitch_angle = 0.0f;
+		float spinner_rotation_yaw_angle = 0.5f;
+
+		// Speedhack
+		float speedhack_default = 1.0f;
+		float speedhack_ltfx = 0.0f;
+		float speedhack_app = 1.0f;
 
 		// Key Spam
 		bool keyspam_hold_mode = true;
@@ -143,6 +147,10 @@ public:
 
 		// Fog
 		bool fog = false;
+		bool remove_water_fog = false;
+		bool fog_skybox = true;
+		float fog_start = 0.0f;
+		float fog_end = 1000.0f;
 		float fog_density = 0.25f;
 		float fog_color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -150,6 +158,7 @@ public:
 		int skybox = 0;
 
 		// Cam Hack		funcs: toggle camhack, reset
+		bool camhack_show_model = true;
 		float camhack_speed_factor = 1.0f;
 
 		// First-Person Observer
@@ -159,9 +168,18 @@ public:
 		float fp_roaming_lerp_value = 0.15f;
 
 		// Auto Vote	funcs: reload filter
-		int autovote_mode = 0; // enum
-		bool autovote_custom = true;
-		bool autovote_ignore_filter = false;
+		//int autovote_mode = 0; // enum
+		//bool autovote_custom = true;
+		//bool autovote_ignore_filter = false;
+
+		// Custom Vote Popup
+		bool vote_popup = true;
+		int vote_popup_width_size = 250;
+		int vote_popup_height_size = 125;
+		int vote_popup_w_border_pix = 12;
+		int vote_popup_h_border_pix = 7;
+		float vote_popup_width_frac = 0.015f;
+		float vote_popup_height_frac = 0.37f;
 
 		// AMS			funcs: show (current) muted playerds
 		bool ams_mute_everything = false;

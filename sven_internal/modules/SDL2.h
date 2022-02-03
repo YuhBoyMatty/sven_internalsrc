@@ -4,4 +4,4 @@
 
 void InitSDL2Module();
 
-void ReleaseSDL2Module();
+void ShutdownSDL2Module();

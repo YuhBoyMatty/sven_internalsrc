@@ -19,13 +19,13 @@
 #include "../features/advanced_mute_system.h"
 #include "../features/strafer.h"
 #include "../features/antiafk.h"
-#include "../features/autovote.h"
 #include "../features/keyspam.h"
 #include "../features/camhack.h"
 #include "../features/misc.h"
 #include "../features/firstperson_roaming.h"
 #include "../features/message_spammer.h"
 #include "../features/skybox.h"
+#include "../features/custom_vote_popup.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -35,8 +35,8 @@
 // Signatures
 //-----------------------------------------------------------------------------
 
-typedef qboolean (*Netchan_CanPacketFn)(netchan_t *);
 typedef int (*HUD_InitFn)(void);
+typedef int (*HUD_VidInitFn)(void);
 typedef void (*CL_CreateMoveFn)(float, struct usercmd_s *, int);
 typedef void (*HUD_PlayerMoveFn)(struct playermove_s *, int);
 typedef void (*V_CalcRefdefFn)(struct ref_params_s *);
@@ -44,27 +44,23 @@ typedef void (*HUD_PostRunCmdFn)(struct local_state_s *, struct local_state_s *,
 typedef int (*HUD_Key_EventFn)(int, int, const char *);
 
 //-----------------------------------------------------------------------------
-// Global Vars
+// Imports
+//-----------------------------------------------------------------------------
+
+extern bool bSendPacket;
+
+//-----------------------------------------------------------------------------
+// Vars
 //-----------------------------------------------------------------------------
 
 local_player_s g_Local;
-
 playermove_s *g_pPlayerMove = NULL;
-netchan_t *g_pNetchan = NULL;
-
-bool bSendPacket = true;
-
-//-----------------------------------------------------------------------------
-// Init hooks
-//-----------------------------------------------------------------------------
-
-TRAMPOLINE_HOOK(Netchan_CanPacket_Hook);
 
 //-----------------------------------------------------------------------------
 // Original functions
 //-----------------------------------------------------------------------------
 
-Netchan_CanPacketFn Netchan_CanPacket_Original = NULL;
+HUD_VidInitFn HUD_VidInit_Original = NULL;
 HUD_InitFn HUD_Init_Original = NULL;
 CL_CreateMoveFn CL_CreateMove_Original = NULL;
 HUD_PlayerMoveFn HUD_PlayerMove_Original = NULL;
@@ -76,7 +72,7 @@ HUD_Key_EventFn HUD_Key_Event_Original = NULL;
 // Functions
 //-----------------------------------------------------------------------------
 
-void UpdateLocalPlayer()
+static void UpdateLocalPlayer()
 {
 	Vector vBottomOrigin = g_pPlayerMove->origin; vBottomOrigin.z -= 8192.0f;
 	pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, /* g_pPlayerMove->usehull */ (g_pPlayerMove->flags & FL_DUCKING) ? 1 : 0, -1);
@@ -85,126 +81,6 @@ void UpdateLocalPlayer()
 	g_Local.flGroundNormalAngle = static_cast<float>(acos(pTrace->plane.normal[2]) * 180.0 / M_PI);
 	g_Local.flVelocity = g_pPlayerMove->velocity.Length2D();
 }
-
-//-----------------------------------------------------------------------------
-// ConCommands, CVars..
-//-----------------------------------------------------------------------------
-
-CON_COMMAND_FUNC(toggle, Toggle_Cmd, "toggle [cvar_name] [value #1] [value #2] - Toggle between two values")
-{
-	int i;
-	int argc = CMD_ARGC();
-
-	if (argc > 3)
-	{
-		const char *pszCvar = CMD_ARGV(1);
-		cvar_s *pCvar = g_pEngineFuncs->pfnGetCvarPointer(pszCvar);
-
-		if (pCvar)
-		{
-			for (i = 2; i < argc; i++)
-			{
-				if ( !strcmp(pCvar->string, CMD_ARGV(i)) )
-					break;
-			}
-
-			i++;
-
-			if (i >= argc)
-			{
-				i = 2;
-			}
-
-			g_pEngineFuncs->pfnCvar_Set(pszCvar, CMD_ARGV(i));
-		}
-	}
-	else
-	{
-		toggle.PrintUsage();
-	}
-}
-
-CON_COMMAND(getang, "getang - Get view angles")
-{
-	Vector va;
-
-	g_pEngineFuncs->GetViewAngles(va);
-
-	Msg("View angles: %.3f %.3f %.3f", va.x, va.y, va.z);
-}
-
-CON_COMMAND(setang, "setang [pitch] [optional: yaw] [optional: roll] - Set view angles")
-{
-	if (CMD_ARGC() > 1)
-	{
-		Vector va;
-
-		g_pEngineFuncs->GetViewAngles(va);
-
-		va.x = strtof(CMD_ARGV(1), NULL);
-
-		if (CMD_ARGC() > 2)
-			va.y = strtof(CMD_ARGV(2), NULL);
-		
-		if (CMD_ARGC() > 3)
-			va.z = strtof(CMD_ARGV(3), NULL);
-
-		g_pEngineFuncs->SetViewAngles(va);
-	}
-	else
-	{
-		setang.PrintUsage();
-	}
-}
-
-CON_COMMAND_FUNC(sc_load_config, ReloadConfig_Cmd, "sc_load_config - Load config from file sven_internal.ini")
-{
-	g_Config.Load();
-}
-
-CON_COMMAND_FUNC(sc_save_config, SaveConfig_Cmd, "sc_save_config - Save config to file sven_internal.ini")
-{
-	g_Config.Save();
-}
-
-CON_COMMAND(test, "test [entidx] - Retrieves an entity info")
-{
-	if (CMD_ARGC() >= 2)
-	{
-		int index = atoi(CMD_ARGV(1));
-
-		cl_entity_s *pEntity = g_pEngineFuncs->GetEntityByIndex(index);
-
-		if (pEntity)
-		{
-			Msg("Entity Pointer: %X\n", pEntity);
-
-			if (pEntity->player)
-			{
-				Msg("Player Info Pointer: %X\n", g_pEngineStudio->PlayerInfo(index - 1));
-
-				hud_player_info_t playerInfo;
-				ZeroMemory(&playerInfo, sizeof(hud_player_info_s));
-
-				g_pEngineFuncs->pfnGetPlayerInfo(index, &playerInfo);
-
-				if (playerInfo.name && playerInfo.model && *playerInfo.model)
-					Msg("Model: %s\n", playerInfo.model);
-
-				Msg("Top Color: %d\n", playerInfo.topcolor);
-				Msg("Bottom Color: %d\n", playerInfo.bottomcolor);
-			}
-			else if (pEntity->model && pEntity->model->name)
-			{
-				Msg("Model: %s\n", pEntity->model->name);
-			}
-		}
-	}
-	else
-	{
-		test.PrintUsage();
-	}
-};
 
 //-----------------------------------------------------------------------------
 // Callbacks
@@ -225,19 +101,18 @@ void OnMenuClose()
 // Hooks
 //-----------------------------------------------------------------------------
 
-qboolean Netchan_CanPacket_Hooked(netchan_t *chan)
-{
-	if (!bSendPacket)
-		return 0;
-
-	return Netchan_CanPacket_Original(chan);
-}
-
 int HUD_Init_Hooked(void)
 {
-	int result = HUD_Init_Original();
+	g_VotePopup.OnHUDInit();
 
-	return result;
+	return HUD_Init_Original();
+}
+
+int HUD_VidInit_Hooked(void)
+{
+	g_VotePopup.OnVideoInit();
+
+	return HUD_VidInit_Original();
 }
 
 void CL_CreateMove_Hooked(float frametime, struct usercmd_s *cmd, int active)
@@ -317,6 +192,8 @@ int HUD_Key_Event_Hooked(int down, int keynum, const char *pszCurrentBinding)
 	if (g_bMenuEnabled)
 		return 0;
 
+	g_VotePopup.OnKeyPress(down, keynum);
+
 	return HUD_Key_Event_Original(down, keynum, pszCurrentBinding);
 }
 
@@ -326,21 +203,7 @@ int HUD_Key_Event_Hooked(int down, int keynum, const char *pszCurrentBinding)
 
 void InitClientModule()
 {
-	//void *pNetchan_TransmitString = LookupForString(L"hw.dll", "%s:Outgoing");
-	//void *pNetchan_Transmit = FindAddress(L"hw.dll", pNetchan_TransmitString);
-
-	//pNetchan_Transmit = (void *)((BYTE *)pNetchan_Transmit - 0x75);
-
-	void *pNetchan_CanPacket = FIND_PATTERN(L"hw.dll", Patterns::Hardware::Netchan_CanPacket);
-
-	if (!pNetchan_CanPacket)
-	{
-		ThrowError("'Netchan_CanPacket' failed initialization\n");
-		return;
-	}
-
 	InitAMS();
-	InitAutoVote();
 
 	g_MessageSpammer.Init();
 	g_AntiAFK.Init();
@@ -349,9 +212,13 @@ void InitClientModule()
 	g_CamHack.Init();
 	g_Misc.Init();
 	g_Skybox.Init();
+	g_VotePopup.Init();
 
-	//HUD_Init_Original = g_pClientFuncs->HUD_Init;
-	//g_pClientFuncs->HUD_Init = HUD_Init_Hooked;
+	HUD_Init_Original = g_pClientFuncs->HUD_Init;
+	g_pClientFuncs->HUD_Init = HUD_Init_Hooked;
+	
+	HUD_VidInit_Original = g_pClientFuncs->HUD_VidInit;
+	g_pClientFuncs->HUD_VidInit = HUD_VidInit_Hooked;
 	
 	HUD_PostRunCmd_Original = g_pClientFuncs->HUD_PostRunCmd;
 	g_pClientFuncs->HUD_PostRunCmd = HUD_PostRunCmd_Hooked;
@@ -367,18 +234,10 @@ void InitClientModule()
 	
 	HUD_Key_Event_Original = g_pClientFuncs->HUD_Key_Event;
 	g_pClientFuncs->HUD_Key_Event = HUD_Key_Event_Hooked;
-
-	HOOK_FUNCTION(Netchan_CanPacket_Hook, pNetchan_CanPacket, Netchan_CanPacket_Hooked, Netchan_CanPacket_Original, Netchan_CanPacketFn);
-
-	REGISTER_COMMAND("sc_help", PrintConsoleHelp);
-
-	//REGISTER_COMMAND("toggle", Toggle_Cmd);
-	//REGISTER_COMMAND("sc_load_config", ReloadConfig_Cmd);
-	//REGISTER_COMMAND("sc_save_config", SaveConfig_Cmd);
 }
 
-void ReleaseClientModule()
+void ShutdownClientModule()
 {
-	g_pClientFuncs->CL_CreateMove = CL_CreateMove_Original;
-	g_pClientFuncs->HUD_PlayerMove = HUD_PlayerMove_Original;
+	//g_pClientFuncs->CL_CreateMove = CL_CreateMove_Original;
+	//g_pClientFuncs->HUD_PlayerMove = HUD_PlayerMove_Original;
 }

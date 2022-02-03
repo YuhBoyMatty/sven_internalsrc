@@ -9,7 +9,8 @@
 #include "../game/usermsg.h"
 #include "../game/console.h"
 
-#include "../utils/hash_table.h"
+#include "../data_struct/hash.h"
+
 #include "../utils/vtable_hook.h"
 #include "../utils/trampoline_hook.h"
 #include "../utils/signature_scanner.h"
@@ -19,7 +20,12 @@
 
 //-----------------------------------------------------------------------------
 
-CHashTable64<> voteFilter;
+static bool HashTable_CompareFunc(const uint64_t &a, const uint64_t &b);
+static unsigned int HashTable_HashFunc(const uint64_t &key);
+
+//-----------------------------------------------------------------------------
+
+CHash<uint64_t> g_HashSteamID(32, HashTable_CompareFunc, HashTable_HashFunc);
 
 CVotePopup *g_pVotePopup = NULL;
 CVoteInfo g_VoteInfo;
@@ -47,6 +53,34 @@ CVotePopup__OpenFn CVotePopup__Open_Original = NULL;
 CVotePopup__CloseFn CVotePopup__Close_Original = NULL;
 
 pfnUserMsgHook UserMsgHook_VoteMenu_Original = NULL;
+
+//-----------------------------------------------------------------------------
+
+static bool HashTable_CompareFunc(const uint64_t &a, const uint64_t &b)
+{
+	return a == b;
+}
+
+static unsigned int HashTable_HashFunc(const uint64_t &key)
+{
+	// Jenkins hash function
+	size_t i = 0;
+	uint32_t hash = 0;
+	uint8_t *pKey = (uint8_t *)&key;
+
+	while (i != sizeof(uint64_t))
+	{
+		hash += pKey[i++];
+		hash += hash << 10;
+		hash ^= hash >> 6;
+	}
+
+	hash += hash << 3;
+	hash ^= hash >> 11;
+	hash += hash << 15;
+
+	return hash;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -105,7 +139,7 @@ CON_COMMAND_FUNC(sc_reload_autovote_filter, LoadVoteFilter, "sc_reload_autovote_
 {
 	FILE *file = fopen("sven_internal/autovote_filter.txt", "r");
 
-	voteFilter.RemoveAll();
+	g_HashSteamID.Clear();
 
 	if (file)
 	{
@@ -155,7 +189,7 @@ CON_COMMAND_FUNC(sc_reload_autovote_filter, LoadVoteFilter, "sc_reload_autovote_
 
 			if (steamID & (((uint64_t)1 << 56) | ((uint64_t)1 << 52) | ((uint64_t)1 << 32)))
 			{
-				voteFilter.AddEntry(steamID, 0);
+				g_HashSteamID.Insert(steamID);
 				++nAdded;
 			}
 		}
@@ -218,7 +252,7 @@ void __fastcall CVotePopup__Open_Hooked(void *thisptr, int edx)
 					if (pPlayerInfo && !strcmp(pszName, pPlayerInfo->name))
 					{
 						uint64_t steamID = *(uint64_t *)((PBYTE)pPlayerInfo + 0x248);
-						auto filteredSteamID = voteFilter.GetEntry(steamID);
+						uint64_t *filteredSteamID = g_HashSteamID.Find(steamID);
 
 						if (filteredSteamID)
 							bOppositeVote = true;
@@ -326,7 +360,7 @@ void InitAutoVote()
 
 	if (!pMsgFunc_VoteMenu)
 	{
-		ThrowError("CVotePopup::MsgFunc_VoteMenu failed initialization\n");
+		Sys_Error("CVotePopup::MsgFunc_VoteMenu failed initialization\n");
 		return;
 	}
 
@@ -334,7 +368,7 @@ void InitAutoVote()
 
 	//if (!pREAD_BYTE)
 	//{
-	//	ThrowError("READ_BYTE failed initialization\n");
+	//	Sys_Error("READ_BYTE failed initialization\n");
 	//	return;
 	//}
 
@@ -342,7 +376,7 @@ void InitAutoVote()
 
 	//if (!pREAD_STRING)
 	//{
-	//	ThrowError("READ_STRING failed initialization\n");
+	//	Sys_Error("READ_STRING failed initialization\n");
 	//	return;
 	//}
 

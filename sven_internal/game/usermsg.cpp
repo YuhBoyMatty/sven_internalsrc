@@ -73,7 +73,7 @@ void InitUserMsg()
 	}
 	else
 	{
-		ThrowError("'g_pClientUserMsgs' failed initialization\n");
+		Sys_Error("'g_pClientUserMsgs' failed initialization\n");
 		return;
 	}
 
@@ -87,7 +87,7 @@ void InitUserMsg()
 	}
 	else
 	{
-		ThrowError("'g_pClientUserMsgs' failed initialization #2\n");
+		Sys_Error("'g_pClientUserMsgs' failed initialization #2\n");
 		return;
 	}
 }
@@ -323,6 +323,11 @@ void BufferWriter::WriteString( const char *str )
 }
 
 //--------------------------------------------------------------------------------------------------------------
+
+bool BufferWriter::HasOverflowed()
+{
+	return m_overflow || !m_buffer || !m_remaining;
+}
 
 int BufferWriter::GetSpaceUsed()
 {

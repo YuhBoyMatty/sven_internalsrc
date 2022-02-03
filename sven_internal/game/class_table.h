@@ -2,6 +2,12 @@
 
 #pragma once
 
+#include "../sdk.h"
+
+//-----------------------------------------------------------------------------
+// Class flags
+//-----------------------------------------------------------------------------
+
 // 16 flags only
 #define FL_CLASS_FRIEND (1 << 0)
 #define FL_CLASS_ENEMY (1 << 1)
@@ -19,6 +25,10 @@
 #define FL_CLASS_UNDEFINED_14 (1 << 13)
 #define FL_CLASS_UNDEFINED_15 (1 << 14)
 #define FL_CLASS_UNDEFINED_16 (1 << 15)
+
+//-----------------------------------------------------------------------------
+// Class ID
+//-----------------------------------------------------------------------------
 
 enum eClassID
 {
@@ -68,11 +78,24 @@ enum eClassID
 	CLASS_ROBOT_GRUNT
 };
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 typedef struct class_info_s
 {
 	unsigned short flags;
 	unsigned short id;
 } class_info_t;
+
+class CClassTable
+{
+public:
+	CClassTable();
+};
+
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
 
 inline const char *GetEntityClassname(class_info_t &classInfo)
 {
@@ -97,7 +120,7 @@ inline bool IsEntityClassNeutral(class_info_t &classInfo)
 
 inline bool IsEntityClassDeadbody(class_info_t &classInfo, int iSolid)
 {
-	return iSolid == 2 && classInfo.flags & FL_CLASS_DEAD_BODY;
+	return iSolid == SOLID_BBOX && classInfo.flags & FL_CLASS_DEAD_BODY;
 }
 
 inline bool IsEntityClassTrash(class_info_t &classInfo)
@@ -105,6 +128,12 @@ inline bool IsEntityClassTrash(class_info_t &classInfo)
 	return classInfo.flags & FL_CLASS_WORLD_ENTITY;
 }
 
+//-----------------------------------------------------------------------------
+// Gets entity info from a model
+//-----------------------------------------------------------------------------
+
 class_info_t GetEntityClassInfo(const char *pszModelName);
 
-void InitClassTable();
+//-----------------------------------------------------------------------------
+
+extern CClassTable g_ClassTable;

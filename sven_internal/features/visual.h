@@ -8,7 +8,7 @@ public:
 	void Init();
 	void Process();
 	
-	void StudioRenderModel();
+	bool StudioRenderModel();
 
 private:
 	void ESP();

@@ -3,8 +3,6 @@
 #include "../sdk.h"
 #include "../interfaces.h"
 
-#include "utils/vgui2/ISurface.h"
-
 // Register console stuff
 #define REGISTER_COMMAND(command, func) g_pEngineFuncs->pfnAddCommand(command, func)
 #define REGISTER_TOGGLE_COMMAND(command, key_down_func, key_up_func) g_pEngineFuncs->pfnAddCommand("+" command, key_down_func); g_pEngineFuncs->pfnAddCommand("-" command, key_up_func)
@@ -13,11 +11,6 @@
 // Command arguments when use a console command
 #define CMD_ARGC() g_pEngineFuncs->Cmd_Argc()
 #define CMD_ARGV(arg) g_pEngineFuncs->Cmd_Argv(arg)
-
-// Screen size
-#define SCREEN_STRUCT int __width, __height; g_pSurface->GetScreenSize(__width, __height)
-#define SCREEN_WIDTH __width
-#define SCREEN_HEIGHT __height
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -36,7 +29,6 @@ void T_Msg(const char *pszMsg, Args... args);
 //-----------------------------------------------------------------------------
 
 extern double *dbRealtime;
-extern vgui::ISurface *g_pSurface;
 
 const wchar_t *CStringToWideCString(const char *pszString);
 bool WorldToScreen(float *pflOrigin, float *pflVecScreen);
@@ -58,7 +50,7 @@ bool IsTertiaryAttackGlitchInit_Server();
 
 void InitUtils();
 
-inline void ThrowError(const char *msg)
+inline void Sys_Error(const char *msg)
 {
 	MessageBoxA(NULL, msg, "FATAL ERROR", MB_OK | MB_ICONERROR);
 	TerminateProcess(GetCurrentProcess(), 0);

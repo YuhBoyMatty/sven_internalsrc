@@ -64,12 +64,12 @@ void InitWeaponsResource()
 	void *pWeaponsResource__GetFirstPos = FIND_PATTERN(L"client.dll", Patterns::Client::WeaponsResource__GetFirstPos);
 
 	if (!pWeaponsResource__GetFirstPos)
-		ThrowError("'WeaponsResource' failed initialization #1\n");
+		Sys_Error("'WeaponsResource' failed initialization #1\n");
 	
 	get_instruction(&instruction, (BYTE *)pWeaponsResource__GetFirstPos + 0xB, MODE_32);
 
 	if (instruction.type == INSTRUCTION_TYPE_ADD && instruction.op1.type == OPERAND_TYPE_REGISTER && instruction.op2.type == OPERAND_TYPE_IMMEDIATE)
 		g_pWR = reinterpret_cast<WeaponsResource *>(instruction.op2.immediate);
 	else
-		ThrowError("'WeaponsResource' failed initialization #2\n");
+		Sys_Error("'WeaponsResource' failed initialization #2\n");
 }
