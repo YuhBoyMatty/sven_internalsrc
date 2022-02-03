@@ -4,6 +4,7 @@
 
 #include "../sdk.h"
 #include "../interfaces.h"
+
 #include "../game/utils.h"
 #include "../game/console.h"
 #include "../game/mathlib.h"
@@ -11,24 +12,16 @@
 #include "../config.h"
 
 //-----------------------------------------------------------------------------
+// Imports
+//-----------------------------------------------------------------------------
 
 extern playermove_s *g_pPlayerMove;
 
 //-----------------------------------------------------------------------------
+// Vars
+//-----------------------------------------------------------------------------
 
 CCamHack g_CamHack;
-
-bool g_bCamHack = false;
-
-Vector g_vecCameraOrigin;
-Vector g_vecCameraAngles;
-
-Vector g_vecViewAngles;
-Vector g_vecVirtualVA;
-
-//cvar_s *camhack_speed_factor = NULL;
-
-GetViewInfoFn GetViewInfo_Original = NULL;
 
 //-----------------------------------------------------------------------------
 // Utils
@@ -65,47 +58,52 @@ static inline void PM_NoClip(Vector &origin, Vector &va, float frametime, struct
 
 CON_COMMAND_FUNC(sc_camhack, ConCommand_CamHack, "sc_camhack - Toggle CamHack")
 {
-	if (g_pPlayerMove->iuser1 > 0)
+	if (g_pPlayerMove->iuser1 != 0 || !g_pEngineFuncs->GetLocalPlayer())
 		return;
 
-	Msg(g_bCamHack ? "CamHack disabled\n" : "CamHack enabled\n");
-	g_bCamHack = !g_bCamHack;
-
-	if (g_bCamHack)
+	if (g_CamHack.IsEnabled())
 	{
-		g_pEngineFuncs->GetViewAngles(g_vecViewAngles);
-
-		g_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-		g_vecCameraAngles = g_vecVirtualVA = g_vecViewAngles;
+		Msg("CamHack disabled\n");
+		g_CamHack.Disable();
+	}
+	else
+	{
+		Msg("CamHack enabled\n");
+		g_CamHack.Enable();
 	}
 }
 
 CON_COMMAND_FUNC(sc_camhack_reset_roll, ConCommand_CamHackResetRoll, "sc_camhack_reset_roll - Reset camera's roll axis to zero")
 {
-	if (g_bCamHack)
+	if (g_CamHack.IsEnabled())
 	{
-		g_vecCameraAngles.z = 0.0f;
+		g_CamHack.ResetRollAxis();
 	}
 }
 
-CON_COMMAND_FUNC(sc_camhack_reset, ConCommand_CamHackReset, "sc_camhack_reset - Teleport to your model's position")
+CON_COMMAND_FUNC(sc_camhack_reset, ConCommand_CamHackReset, "sc_camhack_reset - Teleport to your original position")
 {
-	if (g_bCamHack)
+	if (g_CamHack.IsEnabled())
 	{
-		g_pEngineFuncs->GetViewAngles(g_vecViewAngles);
-
-		g_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-		g_vecCameraAngles = g_vecViewAngles;
+		g_CamHack.ResetOrientation();
 	}
 }
 
 //-----------------------------------------------------------------------------
-// Callbacks
+// Cam Hack Callbacks
 //-----------------------------------------------------------------------------
+
+bool CCamHack::StudioRenderModel()
+{
+	if (m_bEnabled && !g_pClientFuncs->CL_IsThirdPerson() && g_pStudioRenderer->m_pCurrentEntity == g_pEngineFuncs->GetViewModel())
+		return true;
+
+	return false;
+}
 
 void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
-	if (g_bCamHack)
+	if (g_CamHack.IsEnabled())
 	{
 		if (cmd->buttons & IN_JUMP)
 			cmd->upmove += g_pPlayerMove->clientmaxspeed;
@@ -115,22 +113,22 @@ void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 
 		cmd->upmove *= 0.75f;
 
-		g_vecCameraAngles = g_vecCameraAngles + (cmd->viewangles - g_vecVirtualVA);
-		g_vecVirtualVA = cmd->viewangles;
+		g_CamHack.m_vecCameraAngles = g_CamHack.m_vecCameraAngles + (cmd->viewangles - g_CamHack.m_vecVirtualVA);
+		g_CamHack.m_vecVirtualVA = cmd->viewangles;
 
 		if (cmd->buttons & IN_ATTACK)
-			g_vecCameraAngles.z -= 0.3f;
+			g_CamHack.m_vecCameraAngles.z -= 0.3f;
 
 		if (cmd->buttons & IN_ATTACK2)
-			g_vecCameraAngles.z += 0.3f;
+			g_CamHack.m_vecCameraAngles.z += 0.3f;
 
-		NormalizeAngles(g_vecCameraAngles);
+		NormalizeAngles(g_CamHack.m_vecCameraAngles);
 
-		ClampViewAngles(g_vecCameraAngles);
+		ClampViewAngles(g_CamHack.m_vecCameraAngles);
 
-		PM_NoClip(g_vecCameraOrigin, g_vecCameraAngles, g_pPlayerMove->frametime, cmd);
+		PM_NoClip(g_CamHack.m_vecCameraOrigin, g_CamHack.m_vecCameraAngles, g_pPlayerMove->frametime, cmd);
 
-		cmd->viewangles = g_vecViewAngles;
+		cmd->viewangles = g_CamHack.m_vecViewAngles;
 
 		cmd->forwardmove = 0.0f;
 		cmd->sidemove = 0.0f;
@@ -143,52 +141,109 @@ void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 
 void CCamHack::V_CalcRefdef(struct ref_params_s *pparams)
 {
-	if (g_bCamHack)
+	if (g_CamHack.IsEnabled())
 	{
 		if (g_pPlayerMove->iuser1 == 0)
 		{
-			*reinterpret_cast<Vector *>(pparams->vieworg) = g_vecCameraOrigin;
-			*reinterpret_cast<Vector *>(pparams->viewangles) = g_vecCameraAngles;
+			cl_entity_t *pLocal = g_pEngineFuncs->GetLocalPlayer();
+
+			*reinterpret_cast<Vector *>(pparams->vieworg) = g_CamHack.m_vecCameraOrigin;
+			*reinterpret_cast<Vector *>(pparams->viewangles) = g_CamHack.m_vecCameraAngles;
+
+			pLocal->angles.x = g_CamHack.m_flSavedPitchAngle;
+			pLocal->curstate.angles.x = g_CamHack.m_flSavedPitchAngle;
+			pLocal->prevstate.angles.x = g_CamHack.m_flSavedPitchAngle;
+			pLocal->latched.prevangles.x = g_CamHack.m_flSavedPitchAngle;
 		}
 		else
 		{
-			g_bCamHack = false;
+			g_CamHack.Disable();
 		}
 	}
 }
 
 //-----------------------------------------------------------------------------
+// Cam Hack implementations
+//-----------------------------------------------------------------------------
 
-void GetViewInfo_Hooked(float *origin, float *upv, float *rightv, float *vpnv)
+CCamHack::CCamHack()
 {
-	GetViewInfo_Original(origin, upv, rightv, vpnv);
+	m_bEnabled = false;
 
-	if (g_bCamHack)
+	m_bEnableFirstPerson = false;
+	m_bEnableThirdPerson = false;
+
+	m_flSavedPitchAngle = 0.0f;
+
+	m_vecCameraOrigin = { 0.0f, 0.0f, 0.0f };
+	m_vecCameraAngles = { 0.0f, 0.0f, 0.0f };
+
+	m_vecViewAngles = { 0.0f, 0.0f, 0.0f };
+	m_vecVirtualVA = { 0.0f, 0.0f, 0.0f };
+}
+
+void CCamHack::Enable()
+{
+	m_bEnabled = true;
+
+	g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
+
+	m_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+	m_vecCameraAngles = m_vecVirtualVA = m_vecViewAngles;
+	m_flSavedPitchAngle = NormalizeAngle(m_vecViewAngles.x) / -3.0f;
+
+	if (g_Config.cvars.camhack_show_model)
 	{
-		if (origin)
-			*reinterpret_cast<Vector *>(origin) = g_vecCameraOrigin;
+		if (!g_pClientFuncs->CL_IsThirdPerson())
+		{
+			g_pEngineFuncs->pfnClientCmd("sc_chasecam\n");
 
-		Vector forward, right, up;
+			m_bEnableFirstPerson = true;
+			m_bEnableThirdPerson = false;
+		}
+		else
+		{
+			m_bEnableFirstPerson = false;
+			m_bEnableThirdPerson = true;
+		}
+	}
+	else
+	{
+		if (g_pClientFuncs->CL_IsThirdPerson())
+			g_pEngineFuncs->pfnClientCmd("sc_chasecam\n");
 
-		g_pEngineFuncs->pfnAngleVectors(g_vecCameraAngles, forward, right, up);
-
-		if (upv)
-			*reinterpret_cast<Vector *>(upv) = up;
-
-		if (rightv)
-			*reinterpret_cast<Vector *>(rightv) = right;
-
-		if (vpnv)
-			*reinterpret_cast<Vector *>(vpnv) = forward;
+		m_bEnableFirstPerson = m_bEnableThirdPerson = false;
 	}
 }
 
-//-----------------------------------------------------------------------------
+void CCamHack::Disable()
+{
+	m_bEnabled = false;
+
+	if (m_bEnableFirstPerson && g_pClientFuncs->CL_IsThirdPerson())
+		g_pEngineFuncs->pfnClientCmd("firstperson\n");
+
+	if (m_bEnableThirdPerson && !g_pClientFuncs->CL_IsThirdPerson())
+		g_pEngineFuncs->pfnClientCmd("thirdperson\n");
+}
+
+void CCamHack::ResetRollAxis()
+{
+	m_vecCameraAngles.z = 0.0f;
+}
+
+void CCamHack::ResetOrientation()
+{
+	g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
+
+	m_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+	m_vecCameraAngles = m_vecViewAngles;
+}
 
 void CCamHack::Init()
 {
-	GetViewInfo_Original = g_pEngineStudio->GetViewInfo;
-	g_pEngineStudio->GetViewInfo = GetViewInfo_Hooked;
+	//GetViewInfo_Original = g_pEngineStudio->GetViewInfo;
+	//g_pEngineStudio->GetViewInfo = GetViewInfo_Hooked;
 	
 	//camhack_speed_factor = REGISTER_CVAR("camhack_speed_factor", "1.0", 0);
 }
