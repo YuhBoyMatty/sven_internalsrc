@@ -24,6 +24,7 @@ Don't forget to get more hax at kekma !!
 - Various Visual Hacks (Velometer, Crosshair, etc.)
 - Message Spammer
 - Skybox Replacement
+- Custom Vote Popup
 
 # Autoload config
 Create file `sven_internal.cfg` in the following directory: `../Sven Co-op/svencoop/`.
