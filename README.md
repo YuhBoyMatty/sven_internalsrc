@@ -3,6 +3,8 @@ Imagine cheat in a co-op game =)
 
 Don't forget to get more hax at kekma !!
 
+The code is a bit mess, basically didn't plan to publish it.
+
 # Features
 - Menu (key **INSERT** as default)
 - ESP
@@ -18,7 +20,6 @@ Don't forget to get more hax at kekma !!
 - Anti-AFK
 - Cam Hack
 - Key Spammer
-- Auto Vote
 - First-Person Roaming
 - [Advanced Mute System](https://github.com/sw1ft747/AdvancedMuteSystem "Advanced Mute System")
 - Various Visual Hacks (Velometer, Crosshair, etc.)
@@ -46,8 +47,6 @@ File `sven_internal.ini` is the config file (you can save it via menu or console
 
 File `muted_players.db` automatically saved by the cheat when you exit from the game.
 
-File `autovote_filter.txt` is used by **Auto Vote** to filter specified SteamID's (64 bit format).
-
 Folder `message_spammer` is used by **Message Spammer** to load spam tasks.
 
 Also, when cheat injected it will execute `sven_internal.cfg` file from folder `../Sven Co-op/svencoop/`.
@@ -56,19 +55,6 @@ Also, when cheat injected it will execute `sven_internal.cfg` file from folder `
 Type in the console the following command: `sc_help`.
 
 The command above will print information about each CVar/ConCommand that belongs to the cheat.
-
-# Auto Vote
-Automatically vote (with choosen mode: 'Yes' or 'No') when the vote window appear.
-
-File `autovote_filter.txt` is used when started vote to kill a player to perform opposite vote (not that you've choosed via menu). For example, if you choosed vote mode 'Yes' but someone is voting against a person you know then you're allowed to add that person in filter in the file `autovote_filter.txt`, thus the vote will be opposite ('No')
-
-File format for each line: Steam64 ID
-
-Example:
-```
-76561198819023292 ; you can add a comment after that symbol -> ;
-76561198819023293
-```
 
 # Message Spammer
 Roughly, it's some kind of AHK.
@@ -124,4 +110,4 @@ send thief
 sleep 125.0
 ```
 
-Also, you have a file called `test.txt`, then in the console you enter the following command: `sc_ms_add test`, file extension isn't allowed.
+Also, if you have a file called `test.txt`, then in the console you enter the following command: `sc_ms_add test`, file extension isn't allowed.
