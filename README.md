@@ -26,6 +26,7 @@ The code is a bit mess, basically didn't plan to publish it.
 - Message Spammer
 - Skybox Replacement
 - Custom Vote Popup
+- Chat Colors
 
 # Autoload config
 Create file `sven_internal.cfg` in the following directory: `../Sven Co-op/svencoop/`.
@@ -41,11 +42,13 @@ How it looks: `../Sven Co-op/sven_internal/`.
 
 Note: some files/folders may not appear, you need to create them.
 
-This folder is used to save the config, muted players, load filter for **Auto Vote** and load spam tasks for **Message Spammer**.
+This folder is used to save the config, muted players, load players (their Steam ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
 File `sven_internal.ini` is the config file (you can save it via menu or console command `sc_save_config`).
 
 File `muted_players.db` automatically saved by the cheat when you exit from the game.
+
+File `chat_colors_players.txt` allows to change chat color for a specific player.
 
 Folder `message_spammer` is used by **Message Spammer** to load spam tasks.
 
@@ -56,6 +59,20 @@ Type in the console the following command: `sc_help`.
 
 The command above will print information about each CVar/ConCommand that belongs to the cheat.
 
+# Chat Colors
+Lets you change the color of players when they write something in chat.
+
+File `chat_colors_players.txt` used for adding the players in such format: `STEAMID : COLOR_NUMBER`.
+
+There're currently 5 color numbers (slots) that let you use 5 unique and customizable colors (can be change in Menu).
+
+Example for the file:
+```
+76561198819023292 : 1 ; it's a comment.. (76561198819023292 : 1) <<< (STEAMID : COLOR_NUMBER)
+```
+
+The file automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the players list.
+
 # Message Spammer
 Roughly, it's some kind of AHK.
 
@@ -63,7 +80,7 @@ Uses `*.txt` files from folder `message_spammer` to run spam tasks.
 
 It supports 3 keywords: `loop`, `send` and `sleep`.
 
-Important: Message Spammer reads the `*.txt` files sequentially.
+Important: Message Spammer reads the `*.txt` files sequentially. Also, use the following console command to run a spam task: `sc_ms_add [FILENAME]`.
 
 For example:
 ```
@@ -109,5 +126,3 @@ sleep 0.35
 send thief
 sleep 125.0
 ```
-
-Also, if you have a file called `test.txt`, then in the console you enter the following command: `sc_ms_add test`, file extension isn't allowed.
