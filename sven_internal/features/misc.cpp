@@ -95,36 +95,6 @@ static float s_flWeaponOffset[32] =
 };
 
 //-----------------------------------------------------------------------------
-// Hooks
-//-----------------------------------------------------------------------------
-
-BOOL WINAPI QueryPerformanceCounter_Hooked(LARGE_INTEGER *lpPerformanceCount)
-{
-	static LONGLONG oldfakevalue = 0;
-	static LONGLONG oldrealvalue = 0;
-
-	LONGLONG newvalue;
-
-	if (oldfakevalue == 0 || oldrealvalue == 0)
-	{
-		oldfakevalue = lpPerformanceCount->QuadPart;
-		oldrealvalue = lpPerformanceCount->QuadPart;
-	}
-
-	BOOL result = QueryPerformanceCounter_Original(lpPerformanceCount);
-
-	newvalue = lpPerformanceCount->QuadPart;
-	newvalue = oldfakevalue + (LONGLONG)((newvalue - oldrealvalue) * static_cast<double>(g_Config.cvars.speedhack_app));
-
-	oldrealvalue = lpPerformanceCount->QuadPart;
-	oldfakevalue = newvalue;
-
-	lpPerformanceCount->QuadPart = newvalue;
-
-	return result;
-}
-
-//-----------------------------------------------------------------------------
 // Common Functions
 //-----------------------------------------------------------------------------
 
@@ -245,8 +215,17 @@ CON_COMMAND_FUNC(sc_fakelag, ConCommand_FakeLag, "sc_fakelag - Toggle fake lag")
 	g_Config.cvars.fakelag = !g_Config.cvars.fakelag;
 }
 
+CON_COMMAND_FUNC(sc_fastrun, ConCommand_FastRun, "sc_fakelag - Toggle fast run")
+{
+	Msg(g_Config.cvars.fastrun ? "Fast Run disabled\n" : "Fast Run enabled\n");
+	g_Config.cvars.fastrun = !g_Config.cvars.fastrun;
+}
+
 CON_COMMAND_FUNC(sc_selfsink, ConCommand_AutoSelfSink, "sc_selfsink - Perform self sink")
 {
+	if (g_pPlayerMove->iuser1 != 0)
+		return;
+
 	if (g_pPlayerMove->view_ofs.z == 12.0f)
 	{
 		g_pEngineFuncs->SetViewAngles(Vector(-0.1f, -90.0f, 0.0f));
@@ -259,20 +238,6 @@ CON_COMMAND_FUNC(sc_selfsink, ConCommand_AutoSelfSink, "sc_selfsink - Perform se
 		g_pEngineFuncs->pfnClientCmd("+duck");
 
 		s_nSinkState = 2;
-	}
-}
-
-CON_COMMAND_FUNC(sc_speedhack, ConCommand_SpeedHack, "sc_speedhack [value] - Set speedhack value")
-{
-	if (CMD_ARGC() >= 2)
-	{
-		float flSpeed = strtof(CMD_ARGV(1), NULL);
-
-		g_Config.cvars.speedhack_default = flSpeed;
-	}
-	else
-	{
-		sc_speedhack.PrintUsage();
 	}
 }
 
@@ -318,14 +283,55 @@ CON_COMMAND(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox 
 	}
 }
 
+CConVar sc_speedhack("sc_speedhack", "1", "sc_speedhack [value] - Set speedhack value");
+CConVar sc_speedhack_ltfx("sc_speedhack_ltfx", "0", "sc_speedhack_ltfx [value] - Set LTFX speedhack value; 0 - disable, value < 0 - slower, value > 0 - faster");
+
+//-----------------------------------------------------------------------------
+// Hooks
+//-----------------------------------------------------------------------------
+
+BOOL WINAPI QueryPerformanceCounter_Hooked(LARGE_INTEGER *lpPerformanceCount)
+{
+	static LONGLONG oldfakevalue = 0;
+	static LONGLONG oldrealvalue = 0;
+
+	LONGLONG newvalue;
+
+	if (oldfakevalue == 0 || oldrealvalue == 0)
+	{
+		oldfakevalue = lpPerformanceCount->QuadPart;
+		oldrealvalue = lpPerformanceCount->QuadPart;
+	}
+
+	BOOL result = QueryPerformanceCounter_Original(lpPerformanceCount);
+
+	newvalue = lpPerformanceCount->QuadPart;
+	newvalue = oldfakevalue + (LONGLONG)((newvalue - oldrealvalue) * static_cast<double>(g_Config.cvars.application_speed));
+
+	oldrealvalue = lpPerformanceCount->QuadPart;
+	oldfakevalue = newvalue;
+
+	lpPerformanceCount->QuadPart = newvalue;
+
+	return result;
+}
+
 //-----------------------------------------------------------------------------
 // Callbacks
 //-----------------------------------------------------------------------------
 
 void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
-	SetGameSpeed(static_cast<double>(g_Config.cvars.speedhack_default));
-	*dbRealtime += static_cast<double>(g_Config.cvars.speedhack_ltfx) * frametime;
+	// Clamp speedhack values
+	if (sc_speedhack.GetCVar()->value < 0.0f)
+		g_pEngineFuncs->pfnCvar_Set(sc_speedhack.GetName(), "0");
+	
+	if (sc_speedhack_ltfx.GetCVar()->value < -100.0f)
+		g_pEngineFuncs->pfnCvar_Set(sc_speedhack_ltfx.GetName(), "-100");
+
+	// Set speedhack
+	SetGameSpeed(static_cast<double>(sc_speedhack.GetCVar()->value));
+	*dbRealtime += static_cast<double>(sc_speedhack_ltfx.GetCVar()->value) * frametime;
 
 	FakeLag(frametime);
 	ColorPulsator();
@@ -394,7 +400,10 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 {
 	static int nJumpBugState = 0;
 
-	if (g_Config.cvars.jumpbug && g_Local.flGroundNormalAngle <= acosf(0.7f) * 180.0f / static_cast<float>(M_PI) && g_pPlayerMove->flFallVelocity >= 500.0f)
+	if (g_Config.cvars.jumpbug &&
+		g_Config.cvars.jumpbug_min_height >= g_Local.flHeight &&
+		g_Local.flGroundNormalAngle <= acosf(0.7f) * 180.0f / static_cast<float>(M_PI) &&
+		g_pPlayerMove->flFallVelocity >= 500.0f)
 	{
 		float flPlayerHeight = g_Local.flHeight; // = 0.0f
 		float flFrameZDist = fabsf((g_pPlayerMove->flFallVelocity + (800.0f * frametime)) * frametime);
