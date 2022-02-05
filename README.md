@@ -42,7 +42,7 @@ How it looks: `../Sven Co-op/sven_internal/`.
 
 Note: some files/folders may not appear, you need to create them.
 
-This folder is used to save the config, muted players, load players (their Steam ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
+This folder is used to save the config, muted players, load players (their SteamID 64) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
 File `sven_internal.ini` is the config file (you can save it via menu or console command `sc_save_config`).
 
@@ -62,13 +62,13 @@ The command above will print information about each CVar/ConCommand that belongs
 # Chat Colors
 Lets you change the color of players when they write something in chat.
 
-File `chat_colors_players.txt` used for adding the players in such format: `STEAMID : COLOR_NUMBER`.
+File `chat_colors_players.txt` used for adding the players in such format: `STEAMID64 : COLOR_NUMBER`.
 
 There're currently 5 color numbers (slots) that let you use 5 unique and customizable colors (can be change in Menu).
 
 Example for the file:
 ```
-76561198819023292 : 1 ; it's a comment.. (76561198819023292 : 1) <<< (STEAMID : COLOR_NUMBER)
+76561198819023292 : 1 ; it's a comment.. (76561198819023292 : 1) <<< (STEAMID64 : COLOR_NUMBER)
 ```
 
 The file automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the players list.
