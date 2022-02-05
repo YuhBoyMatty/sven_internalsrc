@@ -169,6 +169,12 @@
     <ClCompile Include="features\custom_vote_popup.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
+    <ClCompile Include="features\chat_colors.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="game\player_utils.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\patterns_base.h">
@@ -326,6 +332,12 @@
     </ClInclude>
     <ClInclude Include="features\custom_vote_popup.h">
       <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\chat_colors.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\player_utils.h">
+      <Filter>Sven Internal\Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

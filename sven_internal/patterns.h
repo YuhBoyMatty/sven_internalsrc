@@ -42,6 +42,8 @@ namespace Patterns
 
 		INIT_PATTERN(HACK_GetPlayerUniqueID);
 
+		INIT_PATTERN(GetClientColor);
+
 		INIT_PATTERN(WeaponsResource__GetFirstPos);
 	}
 

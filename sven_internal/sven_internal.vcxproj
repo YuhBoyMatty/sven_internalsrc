@@ -102,6 +102,7 @@
     <ClCompile Include="features\antiafk.cpp" />
     <ClCompile Include="features\camhack.cpp" />
     <ClCompile Include="features\chams.cpp" />
+    <ClCompile Include="features\chat_colors.cpp" />
     <ClCompile Include="features\custom_vote_popup.cpp" />
     <ClCompile Include="features\firstperson_roaming.cpp" />
     <ClCompile Include="features\keyspam.cpp" />
@@ -115,6 +116,7 @@
     <ClCompile Include="game\drawing.cpp" />
     <ClCompile Include="game\class_table.cpp" />
     <ClCompile Include="game\mathlib.cpp" />
+    <ClCompile Include="game\player_utils.cpp" />
     <ClCompile Include="game\usermsg.cpp" />
     <ClCompile Include="game\studio.cpp" />
     <ClCompile Include="game\utils.cpp" />
@@ -149,6 +151,7 @@
     <ClInclude Include="features\antiafk.h" />
     <ClInclude Include="features\camhack.h" />
     <ClInclude Include="features\chams.h" />
+    <ClInclude Include="features\chat_colors.h" />
     <ClInclude Include="features\custom_vote_popup.h" />
     <ClInclude Include="features\firstperson_roaming.h" />
     <ClInclude Include="features\keyspam.h" />
@@ -162,6 +165,7 @@
     <ClInclude Include="game\drawing.h" />
     <ClInclude Include="game\class_table.h" />
     <ClInclude Include="game\mathlib.h" />
+    <ClInclude Include="game\player_utils.h" />
     <ClInclude Include="game\usermsg.h" />
     <ClInclude Include="game\studio.h" />
     <ClInclude Include="game\utils.h" />
