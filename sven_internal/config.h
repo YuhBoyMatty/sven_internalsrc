@@ -20,11 +20,14 @@ public:
 		bool esp_box_outline = true;
 		int esp_box_fill = 0;
 		bool esp_box_index = false;
+		bool esp_box_player_health = true;
+		bool esp_box_player_armor = true;
 		bool esp_box_distance = true;
 		bool esp_box_entity_name = true;
 		bool esp_box_player_name = true;
 		bool esp_skeleton = false;
 		bool esp_bones_name = false;
+		int esp_targets = 0;
 		int esp_skeleton_type = 1;
 
 		float esp_friend_color[3] = { 0.0f, 1.0f, 0.0f };
@@ -112,7 +115,6 @@ public:
 
 		// Misc		funcs: autoselfsink
 		bool autojump = true;
-		bool jumpbug = false;
 		bool doubleduck = false;
 		bool fastrun = false;
 		bool quake_guns = false;
@@ -120,6 +122,9 @@ public:
 		bool save_soundcache = false;
 		bool rotate_dead_body = false;
 		int no_weapon_anim = 0; // enum
+
+		bool jumpbug = false;
+		float jumpbug_min_height = 250.0f;
 
 		bool color_pulsator = false;
 		bool color_pulsator_top = true;
@@ -132,10 +137,7 @@ public:
 		float spinner_rotation_pitch_angle = 0.0f;
 		float spinner_rotation_yaw_angle = 0.5f;
 
-		// Speedhack
-		float speedhack_default = 1.0f;
-		float speedhack_ltfx = 0.0f;
-		float speedhack_app = 1.0f;
+		float application_speed = 1.0f;
 
 		// Key Spam
 		bool keyspam_hold_mode = true;
@@ -152,10 +154,18 @@ public:
 		float fog_start = 0.0f;
 		float fog_end = 1000.0f;
 		float fog_density = 0.25f;
-		float fog_color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float fog_color[3] = { 1.0f, 1.0f, 1.0f };
 
 		// Skybox
 		int skybox = 0;
+
+		// Chat Colors
+		float player_name_color[3] = { 0.6f, 0.75f, 1.0f };
+		float chat_color_one[3] = { 0.25f, 0.25f, 1.0f };
+		float chat_color_two[3] = { 1.0f, 0.25f, 0.25f };
+		float chat_color_three[3] = { 1.0f, 1.0f, 0.25f };
+		float chat_color_four[3] = { 0.25f, 1.0f, 0.25f };
+		float chat_color_five[3] = { 1.0f, 0.57f, 0.0f };
 
 		// Cam Hack		funcs: toggle camhack, reset
 		bool camhack_show_model = true;

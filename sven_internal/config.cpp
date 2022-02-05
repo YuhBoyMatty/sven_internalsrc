@@ -118,8 +118,11 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Fill", cvars.esp_box_fill);
 		INI_IMPORT_VARIABLE("ShowIndex", cvars.esp_box_index);
 		INI_IMPORT_VARIABLE("ShowDistance", cvars.esp_box_distance);
+		INI_IMPORT_VARIABLE("ShowPlayerHealth", cvars.esp_box_player_health);
+		INI_IMPORT_VARIABLE("ShowPlayerArmor", cvars.esp_box_player_armor);
 		INI_IMPORT_VARIABLE("ShowEntityName", cvars.esp_box_entity_name);
 		INI_IMPORT_VARIABLE("ShowPlayerName", cvars.esp_box_player_name);
+		INI_IMPORT_VARIABLE("Targets", cvars.esp_targets);
 		INI_IMPORT_VARIABLE("ShowSkeleton", cvars.esp_skeleton);
 		INI_IMPORT_VARIABLE("ShowBonesName", cvars.esp_bones_name);
 		INI_IMPORT_VARIABLE("ShowSkeletonType", cvars.esp_skeleton_type);
@@ -239,6 +242,7 @@ bool CConfig::Load()
 	INI_IMPORT_BEGIN_SECTION("MISC");
 		INI_IMPORT_VARIABLE("AutoJump", cvars.autojump);
 		INI_IMPORT_VARIABLE("JumpBug", cvars.jumpbug);
+		INI_IMPORT_VARIABLE("JumpBugMinHeight", cvars.jumpbug_min_height);
 		INI_IMPORT_VARIABLE("DoubleDuck", cvars.doubleduck);
 		INI_IMPORT_VARIABLE("FastRun", cvars.fastrun);
 		INI_IMPORT_VARIABLE("QuakeGuns", cvars.quake_guns);
@@ -255,12 +259,7 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("SpinnerPitchAngle", cvars.spinner_pitch_angle);
 		INI_IMPORT_VARIABLE("SpinnerRotationPitchAngle", cvars.spinner_rotation_pitch_angle);
 		INI_IMPORT_VARIABLE("SpinnerRotationYawAngle", cvars.spinner_rotation_yaw_angle);
-	INI_IMPORT_END_SECTION();
-
-	INI_IMPORT_BEGIN_SECTION("SPEEDHACK");
-		INI_IMPORT_VARIABLE("Default", cvars.speedhack_default);
-		INI_IMPORT_VARIABLE("LTFX", cvars.speedhack_ltfx);
-		INI_IMPORT_VARIABLE("Application", cvars.speedhack_app);
+		INI_IMPORT_VARIABLE("ApplicationSpeed", cvars.application_speed);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("KEYSPAM");
@@ -282,13 +281,33 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Fog_R", cvars.fog_color[0]);
 		INI_IMPORT_VARIABLE("Fog_G", cvars.fog_color[1]);
 		INI_IMPORT_VARIABLE("Fog_B", cvars.fog_color[2]);
-		INI_IMPORT_VARIABLE("Fog_A", cvars.fog_color[3]);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("SKYBOX");
 		INI_IMPORT_VARIABLE("Type", cvars.skybox);
 	INI_IMPORT_END_SECTION();
 	
+	INI_IMPORT_BEGIN_SECTION("CHATCOLORS");
+		INI_IMPORT_VARIABLE("PlayerName_R", cvars.player_name_color[0]);
+		INI_IMPORT_VARIABLE("PlayerName_G", cvars.player_name_color[1]);
+		INI_IMPORT_VARIABLE("PlayerName_B", cvars.player_name_color[2]);
+		INI_IMPORT_VARIABLE("ColorOne_R", cvars.chat_color_one[0]);
+		INI_IMPORT_VARIABLE("ColorOne_G", cvars.chat_color_one[1]);
+		INI_IMPORT_VARIABLE("ColorOne_B", cvars.chat_color_one[2]);
+		INI_IMPORT_VARIABLE("ColorTwo_R", cvars.chat_color_two[0]);
+		INI_IMPORT_VARIABLE("ColorTwo_G", cvars.chat_color_two[1]);
+		INI_IMPORT_VARIABLE("ColorTwo_B", cvars.chat_color_two[2]);
+		INI_IMPORT_VARIABLE("ColorThree_R", cvars.chat_color_three[0]);
+		INI_IMPORT_VARIABLE("ColorThree_G", cvars.chat_color_three[1]);
+		INI_IMPORT_VARIABLE("ColorThree_B", cvars.chat_color_three[2]);
+		INI_IMPORT_VARIABLE("ColorFour_R", cvars.chat_color_four[0]);
+		INI_IMPORT_VARIABLE("ColorFour_G", cvars.chat_color_four[1]);
+		INI_IMPORT_VARIABLE("ColorFour_B", cvars.chat_color_four[2]);
+		INI_IMPORT_VARIABLE("ColorFive_R", cvars.chat_color_five[0]);
+		INI_IMPORT_VARIABLE("ColorFive_G", cvars.chat_color_five[1]);
+		INI_IMPORT_VARIABLE("ColorFive_B", cvars.chat_color_five[2]);
+	INI_IMPORT_END_SECTION();
+
 	INI_IMPORT_BEGIN_SECTION("CAMHACK");
 		INI_IMPORT_VARIABLE("SpeedFactor", cvars.camhack_speed_factor);
 		INI_IMPORT_VARIABLE("ShowModel", cvars.camhack_show_model);
@@ -342,8 +361,11 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Fill", cvars.esp_box_fill);
 		INI_EXPORT_VARIABLE("ShowIndex", cvars.esp_box_index);
 		INI_EXPORT_VARIABLE("ShowDistance", cvars.esp_box_distance);
+		INI_EXPORT_VARIABLE("ShowPlayerHealth", cvars.esp_box_player_health);
+		INI_EXPORT_VARIABLE("ShowPlayerArmor", cvars.esp_box_player_armor);
 		INI_EXPORT_VARIABLE("ShowEntityName", cvars.esp_box_entity_name);
 		INI_EXPORT_VARIABLE("ShowPlayerName", cvars.esp_box_player_name);
+		INI_EXPORT_VARIABLE("Targets", cvars.esp_targets);
 		INI_EXPORT_VARIABLE("ShowSkeleton", cvars.esp_skeleton);
 		INI_EXPORT_VARIABLE("ShowBonesName", cvars.esp_bones_name);
 		INI_EXPORT_VARIABLE("ShowSkeletonType", cvars.esp_skeleton_type);
@@ -463,6 +485,7 @@ void CConfig::Save()
 	INI_EXPORT_BEGIN_SECTION("MISC");
 		INI_EXPORT_VARIABLE("AutoJump", cvars.autojump);
 		INI_EXPORT_VARIABLE("JumpBug", cvars.jumpbug);
+		INI_EXPORT_VARIABLE("JumpBugMinHeight", cvars.jumpbug_min_height);
 		INI_EXPORT_VARIABLE("DoubleDuck", cvars.doubleduck);
 		INI_EXPORT_VARIABLE("FastRun", cvars.fastrun);
 		INI_EXPORT_VARIABLE("QuakeGuns", cvars.quake_guns);
@@ -479,14 +502,9 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("SpinnerPitchAngle", cvars.spinner_pitch_angle);
 		INI_EXPORT_VARIABLE("SpinnerRotationPitchAngle", cvars.spinner_rotation_pitch_angle);
 		INI_EXPORT_VARIABLE("SpinnerRotationYawAngle", cvars.spinner_rotation_yaw_angle);
+		INI_EXPORT_VARIABLE("ApplicationSpeed", cvars.application_speed);
 	INI_EXPORT_END_SECTION();
 
-	INI_EXPORT_BEGIN_SECTION("SPEEDHACK");
-		INI_EXPORT_VARIABLE("Default", cvars.speedhack_default);
-		INI_EXPORT_VARIABLE("LTFX", cvars.speedhack_ltfx);
-		INI_EXPORT_VARIABLE("Application", cvars.speedhack_app);
-	INI_EXPORT_END_SECTION();
-	
 	INI_EXPORT_BEGIN_SECTION("KEYSPAM");
 		INI_EXPORT_VARIABLE("HoldMode", cvars.keyspam_hold_mode);
 		INI_EXPORT_VARIABLE("Spam_E", cvars.keyspam_e);
@@ -506,13 +524,33 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Fog_R", cvars.fog_color[0]);
 		INI_EXPORT_VARIABLE("Fog_G", cvars.fog_color[1]);
 		INI_EXPORT_VARIABLE("Fog_B", cvars.fog_color[2]);
-		INI_EXPORT_VARIABLE("Fog_A", cvars.fog_color[3]);
 	INI_EXPORT_END_SECTION();
 
 	INI_EXPORT_BEGIN_SECTION("SKYBOX");
 		INI_EXPORT_VARIABLE("Type", cvars.skybox);
 	INI_EXPORT_END_SECTION();
 	
+	INI_EXPORT_BEGIN_SECTION("CHATCOLORS");
+		INI_EXPORT_VARIABLE("PlayerName_R", cvars.player_name_color[0]);
+		INI_EXPORT_VARIABLE("PlayerName_G", cvars.player_name_color[1]);
+		INI_EXPORT_VARIABLE("PlayerName_B", cvars.player_name_color[2]);
+		INI_EXPORT_VARIABLE("ColorOne_R", cvars.chat_color_one[0]);
+		INI_EXPORT_VARIABLE("ColorOne_G", cvars.chat_color_one[1]);
+		INI_EXPORT_VARIABLE("ColorOne_B", cvars.chat_color_one[2]);
+		INI_EXPORT_VARIABLE("ColorTwo_R", cvars.chat_color_two[0]);
+		INI_EXPORT_VARIABLE("ColorTwo_G", cvars.chat_color_two[1]);
+		INI_EXPORT_VARIABLE("ColorTwo_B", cvars.chat_color_two[2]);
+		INI_EXPORT_VARIABLE("ColorThree_R", cvars.chat_color_three[0]);
+		INI_EXPORT_VARIABLE("ColorThree_G", cvars.chat_color_three[1]);
+		INI_EXPORT_VARIABLE("ColorThree_B", cvars.chat_color_three[2]);
+		INI_EXPORT_VARIABLE("ColorFour_R", cvars.chat_color_four[0]);
+		INI_EXPORT_VARIABLE("ColorFour_G", cvars.chat_color_four[1]);
+		INI_EXPORT_VARIABLE("ColorFour_B", cvars.chat_color_four[2]);
+		INI_EXPORT_VARIABLE("ColorFive_R", cvars.chat_color_five[0]);
+		INI_EXPORT_VARIABLE("ColorFive_G", cvars.chat_color_five[1]);
+		INI_EXPORT_VARIABLE("ColorFive_B", cvars.chat_color_five[2]);
+	INI_EXPORT_END_SECTION();
+
 	INI_EXPORT_BEGIN_SECTION("CAMHACK");
 		INI_EXPORT_VARIABLE("SpeedFactor", cvars.camhack_speed_factor);
 		INI_EXPORT_VARIABLE("ShowModel", cvars.camhack_show_model);

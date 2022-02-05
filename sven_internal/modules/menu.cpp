@@ -122,10 +122,16 @@ void ShowMainMenu()
 
 				ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
 				ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline);
+
 				ImGui::Checkbox("Draw Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
 				ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
+
+				ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health); ImGui::SameLine();
+				ImGui::Checkbox("Draw Player Armor", &g_Config.cvars.esp_box_player_armor);
+
 				ImGui::Checkbox("Draw Entity Name", &g_Config.cvars.esp_box_entity_name); ImGui::SameLine();
 				ImGui::Checkbox("Draw Nicknames", &g_Config.cvars.esp_box_player_name);
+
 				ImGui::Checkbox("Draw Skeleton", &g_Config.cvars.esp_skeleton); ImGui::SameLine();
 				ImGui::Checkbox("Draw Bones Name", &g_Config.cvars.esp_bones_name);
 
@@ -135,16 +141,15 @@ void ShowMainMenu()
 				ImGui::ColorEdit3("Friend Color", g_Config.cvars.esp_friend_color);
 				ImGui::ColorEdit3("Enemy Color", g_Config.cvars.esp_enemy_color);
 				ImGui::ColorEdit3("Neutral Color", g_Config.cvars.esp_neutral_color);
-				
+
 				ImGui::Text("");
+
+				static const char *esp_process_items[] = { "0 - Everyone", "1 - Entities", "2 - Players" };
+				ImGui::Combo("ESP Targets", &g_Config.cvars.esp_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+				ImGui::Combo("Draw Skeleton Type", &g_Config.cvars.esp_skeleton_type, esp_process_items, IM_ARRAYSIZE(esp_process_items));
 
 				static const char *esp_box_items[] = { "0 - Off", "1 - Default", "2 - Coal", "3 - Corner" };
 				ImGui::Combo("Box Type", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
-
-				ImGui::Text("");
-				
-				static const char *esp_skeleton_items[] = { "0 - Everyone", "1 - Entities", "2 - Players" };
-				ImGui::Combo("Draw Skeleton Type", &g_Config.cvars.esp_skeleton_type, esp_skeleton_items, IM_ARRAYSIZE(esp_skeleton_items));
 
 				ImGui::Text("");
 
@@ -323,7 +328,6 @@ void ShowMainMenu()
 					ConCommand_DropEmptyWeapons();
 
 				ImGui::Checkbox("Autojump", &g_Config.cvars.autojump); ImGui::SameLine();
-				ImGui::Checkbox("Jumpbug", &g_Config.cvars.jumpbug); ImGui::SameLine();
 				ImGui::Checkbox("Doubleduck", &g_Config.cvars.doubleduck); ImGui::SameLine();
 				ImGui::Checkbox("Fastrun", &g_Config.cvars.fastrun);
 				ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns);
@@ -331,6 +335,13 @@ void ShowMainMenu()
 				ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
 				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
 				
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Jumpbug");
+				
+				ImGui::Checkbox("Enable Jumpbug", &g_Config.cvars.jumpbug);
+				ImGui::SliderFloat("Jumpbug Min. Height", &g_Config.cvars.jumpbug_min_height, 5.0f, 2000.0f);
+
 				ImGui::Text("");
 				ImGui::Separator();
 				ImGui::Text("Color Pulsator");
@@ -370,32 +381,7 @@ void ShowMainMenu()
 				static const char *no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
 				ImGui::Combo("No Weapon Animations", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
 
-				ImGui::Text("");
-			}
-
-			// Speedhack
-			if (ImGui::CollapsingHeader("Speedhack"))
-			{
-				ImGui::Separator();
-
-				if (ImGui::Button("Reset Default Speedhack"))
-					g_Config.cvars.speedhack_default = 1.0f;
-
-				ImGui::SliderFloat("Default Speedhack", &g_Config.cvars.speedhack_default, 0.0f, 30.0f);
-				
-				ImGui::Text("");
-
-				if (ImGui::Button("Reset LTFX Speedhack"))
-					g_Config.cvars.speedhack_ltfx = 0.0f;
-
-				ImGui::SliderFloat("LTFX Speedhack", &g_Config.cvars.speedhack_ltfx, -10.0f, 10.0f);
-				
-				ImGui::Text("");
-
-				if (ImGui::Button("Reset Application Speed"))
-					g_Config.cvars.speedhack_app = 1.0f;
-
-				ImGui::SliderFloat("Application Speed", &g_Config.cvars.speedhack_app, 0.1f, 30.0f);
+				ImGui::SliderFloat("Application Speed", &g_Config.cvars.application_speed, 0.1f, 50.0f);
 
 				ImGui::Text("");
 			}
@@ -472,7 +458,7 @@ void ShowMainMenu()
 
 				ImGui::SliderFloat("Density", &g_Config.cvars.fog_density, 0.0f, 10.0f);
 
-				ImGui::ColorEdit4("Color", g_Config.cvars.fog_color);
+				ImGui::ColorEdit3("Color", g_Config.cvars.fog_color);
 
 				ImGui::Text("");
 			}
@@ -503,6 +489,28 @@ void ShowMainMenu()
 				{
 					ConCommand_ResetSkybox();
 				}
+
+				ImGui::Text("");
+			}
+
+			// Chat Colors
+			if (ImGui::CollapsingHeader("Chat Colors"))
+			{
+				extern void ConCommand_ChatColorsLoadPlayers();
+
+				ImGui::Separator();
+
+				if (ImGui::Button("Load Players List"))
+				{
+					ConCommand_ChatColorsLoadPlayers();
+				}
+
+				ImGui::ColorEdit3("Default Player Color", g_Config.cvars.player_name_color);
+				ImGui::ColorEdit3("Custom Color One", g_Config.cvars.chat_color_one);
+				ImGui::ColorEdit3("Custom Color Two", g_Config.cvars.chat_color_two);
+				ImGui::ColorEdit3("Custom Color Three", g_Config.cvars.chat_color_three);
+				ImGui::ColorEdit3("Custom Color Four", g_Config.cvars.chat_color_four);
+				ImGui::ColorEdit3("Custom Color Five", g_Config.cvars.chat_color_five);
 
 				ImGui::Text("");
 			}

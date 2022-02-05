@@ -168,6 +168,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		if (!InitInterfaces())
 			goto FAILURE_EXIT;
 
+		ConVar_Register();
+
 		InitUtils();
 		InitUserMsg();
 		InitStudioDetours();
@@ -179,8 +181,6 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		InitEngineModule();
 		InitClientModule();
 		InitMenuModule();
-
-		ConVar_Register();
 
 		printf("Successfully loaded\n");
 

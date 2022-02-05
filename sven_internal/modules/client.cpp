@@ -7,6 +7,7 @@
 #include "../interfaces.h"
 #include "../game/utils.h"
 #include "../game/console.h"
+#include "../game/player_utils.h"
 
 #include "../config.h"
 #include "../patterns.h"
@@ -26,6 +27,7 @@
 #include "../features/message_spammer.h"
 #include "../features/skybox.h"
 #include "../features/custom_vote_popup.h"
+#include "../features/chat_colors.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -55,6 +57,7 @@ extern bool bSendPacket;
 
 local_player_s g_Local;
 playermove_s *g_pPlayerMove = NULL;
+extra_player_info_t *g_pPlayerExtraInfo = NULL;
 
 //-----------------------------------------------------------------------------
 // Original functions
@@ -203,6 +206,36 @@ int HUD_Key_Event_Hooked(int down, int keynum, const char *pszCurrentBinding)
 
 void InitClientModule()
 {
+	extern void *pGetClientColor; // Chat Colors
+
+	INSTRUCTION instruction;
+	int disassembledBytes = 0;
+
+	pGetClientColor = FIND_PATTERN(L"client.dll", Patterns::Client::GetClientColor);
+
+	if (!pGetClientColor)
+	{
+		Sys_Error("'GetClientColor' failed initialization\n");
+		return;
+	}
+
+	BYTE *pdisGetClientColor = (BYTE *)pGetClientColor;
+
+	do
+	{
+		int length = get_instruction(&instruction, pdisGetClientColor, MODE_32);
+
+		disassembledBytes += length;
+		pdisGetClientColor += length;
+
+		if (instruction.type == INSTRUCTION_TYPE_MOVSX && instruction.op1.type == OPERAND_TYPE_REGISTER && instruction.op2.type == OPERAND_TYPE_MEMORY)
+		{
+			g_pPlayerExtraInfo = reinterpret_cast<extra_player_info_t *>(instruction.op2.displacement);
+			break;
+		}
+	} while (disassembledBytes < 0x80);
+
+	// Init features
 	InitAMS();
 
 	g_MessageSpammer.Init();
@@ -213,7 +246,9 @@ void InitClientModule()
 	g_Misc.Init();
 	g_Skybox.Init();
 	g_VotePopup.Init();
+	g_ChatColors.Init();
 
+	// Hook client functions
 	HUD_Init_Original = g_pClientFuncs->HUD_Init;
 	g_pClientFuncs->HUD_Init = HUD_Init_Hooked;
 	

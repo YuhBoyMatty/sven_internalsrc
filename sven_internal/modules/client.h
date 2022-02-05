@@ -3,6 +3,11 @@
 #pragma once
 
 #include "../sdk.h"
+#include "../game/player_utils.h"
+
+//-----------------------------------------------------------------------------
+// Struct declarations
+//-----------------------------------------------------------------------------
 
 struct local_player_s
 {
@@ -13,8 +18,17 @@ struct local_player_s
 	Vector vecNoRecoil = { 0.f, 0.f, 0.f };
 };
 
-void InitClientModule();
-
-void ReleaseClientModule();
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
 
 extern local_player_s g_Local;
+extern extra_player_info_t *g_pPlayerExtraInfo;
+
+//-----------------------------------------------------------------------------
+// Init/release client module
+//-----------------------------------------------------------------------------
+
+void InitClientModule();
+
+void ShutdownClientModule();

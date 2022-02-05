@@ -62,7 +62,7 @@ cvar_s *voice_modenable = NULL;
 player_info_s *g_pLastPlayer = NULL;
 
 //-----------------------------------------------------------------------------
-// Init hooks
+// Declare hooks
 //-----------------------------------------------------------------------------
 
 TRAMPOLINE_HOOK(Print_Hook);

@@ -16,9 +16,13 @@
 #include "../modules/vgui.h"
 
 //-----------------------------------------------------------------------------
+// Imports
+//-----------------------------------------------------------------------------
 
 extern playermove_s *g_pPlayerMove;
 
+//-----------------------------------------------------------------------------
+// Vars
 //-----------------------------------------------------------------------------
 
 static float forwardmove, sidemove, upmove; //backup for fixmove
@@ -49,6 +53,8 @@ static BYTE s_TertiaryAttackPatchedBytes[] =
 	0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 // NOP
 };
 
+//-----------------------------------------------------------------------------
+// ConCommands, CVars..
 //-----------------------------------------------------------------------------
 
 CON_COMMAND(disasm_addr, "disasm_addr [address]")
@@ -130,7 +136,7 @@ CON_COMMAND(dump_ifaces, "dump_ifaces [module name] - Dumps all registered inter
 				int it = 1;
 				int disassembledBytes = 0;
 				
-				while (disassembledBytes < 0x100)
+				while (disassembledBytes < 0x80)
 				{
 					int length = get_instruction(&instruction, pAddress, MODE_32);
 
@@ -169,6 +175,8 @@ CON_COMMAND(dump_ifaces, "dump_ifaces [module name] - Dumps all registered inter
 }
 
 //-----------------------------------------------------------------------------
+// Prints wrappers
+//-----------------------------------------------------------------------------
 
 void W_Msg(const char *pszMsg, ...)
 {
@@ -186,6 +194,8 @@ void T_Msg(const char *pszMsg, Args... args)
 }
 
 //-----------------------------------------------------------------------------
+// char * to wchar_t *
+//-----------------------------------------------------------------------------
 
 const wchar_t *CStringToWideCString(const char *pszString)
 {
@@ -197,6 +207,8 @@ const wchar_t *CStringToWideCString(const char *pszString)
 	return wcString;
 }
 
+//-----------------------------------------------------------------------------
+// Viewport transformations
 //-----------------------------------------------------------------------------
 
 bool WorldToScreen(float *pflOrigin, float *pflVecScreen)
@@ -219,6 +231,7 @@ void ScreenToWorld(float *pflNDC, float *pflWorldOrigin)
 	g_pEngineFuncs->pTriAPI->ScreenToWorld(pflNDC, pflWorldOrigin);
 }
 
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
 static void FixMoveStart(struct usercmd_s *cmd)
@@ -266,6 +279,14 @@ static void FixMoveEnd(struct usercmd_s *cmd)
 
 void SetAnglesSilent(float *angles, struct usercmd_s *cmd)
 {
+	//FixMoveStart(cmd);
+
+	//cmd->viewangles[0] = angles[0];
+	//cmd->viewangles[1] = angles[1];
+	//cmd->viewangles[2] = angles[2];
+
+	//FixMoveEnd(cmd);
+
 	FixMoveStart(cmd);
 
 	cmd->viewangles[0] = angles[0];
