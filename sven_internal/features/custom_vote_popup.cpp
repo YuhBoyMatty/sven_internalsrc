@@ -35,6 +35,7 @@ CUserVotePopup g_VotePopup;
 pfnUserMsgHook UserMsgHook_VoteMenu_Original = NULL;
 pfnUserMsgHook UserMsgHook_EndVote_Original = NULL;
 
+static const wchar_t *s_wszDefaultVoteMessage = L"Unknown vote";
 static const wchar_t *s_wszDefaultVoteYes = L"F1: Vote Yes";
 static const wchar_t *s_wszDefaultVoteNo = L"F2: Vote No";
 
@@ -70,7 +71,7 @@ int UserMsgHook_EndVote(const char *pszUserMsg, int iSize, void *pBuffer)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-CUserVotePopup::CUserVotePopup() : m_wszVoteTarget(), m_wszVoteMessage(), m_wszVoteYes(), m_wszVoteNo()
+CUserVotePopup::CUserVotePopup() : m_szVoteTarget(), m_wszVoteTarget(), m_wszVoteMessage(), m_wszVoteYes(), m_wszVoteNo()
 {
 	m_voteType = votetype_t(-1);
 
@@ -89,28 +90,22 @@ void CUserVotePopup::Draw()
 
 	if (m_bShowPopup)
 	{
-		if (!rgVoteMessages[0].wszMsg)
-		{
+		// Init output text
+		if (*m_wszVoteMessage)
 			rgVoteMessages[0].wszMsg = m_wszVoteMessage;
-		}
+		else
+			rgVoteMessages[0].wszMsg = (wchar_t *)s_wszDefaultVoteMessage;
 
 		if (*m_wszVoteYes)
-		{
 			rgVoteMessages[1].wszMsg = m_wszVoteYes;
-		}
 		else
-		{
 			rgVoteMessages[1].wszMsg = (wchar_t *)s_wszDefaultVoteYes;
-		}
 
 		if (*m_wszVoteNo)
-		{
 			rgVoteMessages[2].wszMsg = m_wszVoteNo;
-		}
 		else
-		{
 			rgVoteMessages[2].wszMsg = (wchar_t *)s_wszDefaultVoteNo;
-		}
+
 
 		int nWidestText = 0, nTextTall = 0;
 
@@ -120,27 +115,27 @@ void CUserVotePopup::Draw()
 		int nPopupWidth = g_Config.cvars.vote_popup_width_size;
 		int nPopupHeight = g_Config.cvars.vote_popup_height_size;
 
-		// get text size
+		// Get text size
 		for (int i = 0; i < 3; i++)
 		{
 			g_pSurface->GetTextSize(g_hFontVotePopup, rgVoteMessages[i].wszMsg, rgVoteMessages[i].wide, rgVoteMessages[i].tall);
 
-			// find widest text
+			// Find widest text
 			if (nWidestText < rgVoteMessages[i].wide)
 				nWidestText = rgVoteMessages[i].wide;
 		}
 
-		// distance from border of popup to text
+		// Distance from border of popup to text
 		int nBorderWidthPixels = g_Config.cvars.vote_popup_w_border_pix;
 		int nWidthShiftPixels = nBorderWidthPixels;
 
-		// auto size popup's width
+		// Auto size popup's width
 		if (nPopupWidth - (nWidthShiftPixels + nWidestText) <= nWidthShiftPixels)
 		{
 			nPopupWidth = nWidestText + 2 * nWidthShiftPixels;
 		}
 
-		// calc height offsets for texts and a line
+		// Calc height offsets for texts and a line
 		int nBorderHeightPixels = g_Config.cvars.vote_popup_h_border_pix;
 		int nHeightShiftPixels = nBorderHeightPixels; // for m_wszVoteMessage
 
@@ -149,27 +144,36 @@ void CUserVotePopup::Draw()
 		int nVoteYesHeightOffset = nLineHeightOffset + int(nBorderHeightPixels * 2.0f) + 2;
 		int nVoteNoHeightOffset = nVoteYesHeightOffset + int(nBorderHeightPixels * 2.0f) + rgVoteMessages[1].tall;
 
-		// auto size popup's height
+		// Auto size popup's height
 		if (nPopupHeight - (nVoteNoHeightOffset + rgVoteMessages[2].tall + nBorderHeightPixels) <= nBorderHeightPixels)
 		{
 			nPopupHeight = nVoteNoHeightOffset + rgVoteMessages[2].tall + nBorderHeightPixels;
 		}
 
-		// draw it finally
+		// Draw it finally
 		g_Drawing.DrawRect(widthBase, heightBase, nPopupWidth, nPopupHeight, 0, 0, 0, 200);
 		g_Drawing.DrawRect(widthBase + nWidthShiftPixels, heightBase + nLineHeightOffset, nPopupWidth - 2 * nWidthShiftPixels, 2, 100, 100, 100, 255);
 
-		g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nHeightShiftPixels, 232, 232, 232, 255, FONT_ALIGN_LEFT_BOT, m_wszVoteMessage);
+		// Info message
+		g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nHeightShiftPixels, 232, 232, 232, 255, FONT_ALIGN_LEFT_BOT, rgVoteMessages[0].wszMsg);
 
-		if (*m_wszVoteYes)
-			g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nVoteYesHeightOffset, 255, 255, 255, 255, FONT_ALIGN_LEFT_BOT, m_wszVoteYes);
-		else
-			g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nVoteYesHeightOffset, 255, 255, 255, 255, FONT_ALIGN_LEFT_BOT, s_wszDefaultVoteYes);
-		
-		if (*m_wszVoteNo)
-			g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nVoteNoHeightOffset, 255, 255, 255, 255, FONT_ALIGN_LEFT_BOT, m_wszVoteNo);
-		else
-			g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nVoteNoHeightOffset, 255, 255, 255, 255, FONT_ALIGN_LEFT_BOT, s_wszDefaultVoteNo);
+		// Yes message
+		g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nVoteYesHeightOffset, 232, 232, 232, 255, FONT_ALIGN_LEFT_BOT, rgVoteMessages[1].wszMsg);
+
+		// No message
+		g_Drawing.DrawWideString(g_hFontVotePopup, widthBase + nWidthShiftPixels, heightBase + nVoteNoHeightOffset, 232, 232, 232, 255, FONT_ALIGN_LEFT_BOT, rgVoteMessages[2].wszMsg);
+	}
+}
+
+void CUserVotePopup::ValidateMessage(const char **pszMessage)
+{
+	if ( !(**pszMessage) )
+	{
+		*pszMessage = NULL;
+	}
+	else
+	{
+		*pszMessage = strdup(*pszMessage);
 	}
 }
 
@@ -178,7 +182,13 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 	if (m_bVoteStarted)
 		return false;
 
+	BEGIN_READ(pBuffer, iSize);
+
 	wchar_t wszBuffer[256];
+
+	const char *pszVoteMessage;
+	const char *pszVoteYes;
+	const char *pszVoteNo;
 
 	// reset everything
 	*m_wszVoteTarget = 0;
@@ -186,24 +196,16 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 	*m_wszVoteYes = 0;
 	*m_wszVoteNo = 0;
 
-	BEGIN_READ(pBuffer, iSize);
-
 	m_voteType = (votetype_t)READ_BYTE();
 
-	const char *pszVoteMessage = strdup(READ_STRING());
-	const char *pszVoteYes = READ_STRING();
+	pszVoteMessage = READ_STRING();
+	ValidateMessage(&pszVoteMessage);
 
-	if (!pszVoteYes[0])
-		pszVoteYes = NULL;
-	else
-		pszVoteYes = strdup(pszVoteYes);
+	pszVoteYes = READ_STRING();
+	ValidateMessage(&pszVoteYes);
 	
-	const char *pszVoteNo = READ_STRING();
-
-	if (!pszVoteNo[0])
-		pszVoteNo = NULL;
-	else
-		pszVoteNo = strdup(pszVoteNo);
+	pszVoteNo = READ_STRING();
+	ValidateMessage(&pszVoteNo);
 
 #if DEBUG_VOTE_POPUP
 	Msg("[Vote] Started\n");
@@ -220,23 +222,26 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 	case VOTEBAN:
 	case VOTEMAP:
 	{
-		std::cmatch match;
-		std::regex regex_vote_target("\"(.*)\"");
-
-		if (std::regex_search(pszVoteMessage, match, regex_vote_target))
+		if (pszVoteMessage)
 		{
-			strcpy_s(m_szVoteTarget, sizeof(m_szVoteTarget), match[1].str().c_str());
+			std::cmatch match;
+			std::regex regex_vote_target("\"(.*)\"");
 
-		#if DEBUG_VOTE_POPUP
-			Msg("[Vote] Target: %s\n", m_szVoteTarget);
-		#endif
+			if (std::regex_search(pszVoteMessage, match, regex_vote_target))
+			{
+				strcpy_s(m_szVoteTarget, sizeof(m_szVoteTarget), match[1].str().c_str());
 
-			localize()->ConvertANSIToUnicode(m_szVoteTarget, m_wszVoteTarget, sizeof(m_wszVoteTarget));
-			localize()->ConstructString(m_wszVoteMessage, sizeof(m_wszVoteMessage), (wchar_t *)s_wszVoteFormats[m_voteType], 1, m_wszVoteTarget);
-		}
-		else // just for a case
-		{
-			localize()->ConvertANSIToUnicode(pszVoteMessage, m_wszVoteMessage, sizeof(m_wszVoteMessage));
+			#if DEBUG_VOTE_POPUP
+				Msg("[Vote] Target: %s\n", m_szVoteTarget);
+			#endif
+
+				localize()->ConvertANSIToUnicode(m_szVoteTarget, m_wszVoteTarget, sizeof(m_wszVoteTarget));
+				localize()->ConstructString(m_wszVoteMessage, sizeof(m_wszVoteMessage), (wchar_t *)s_wszVoteFormats[m_voteType], 1, m_wszVoteTarget);
+			}
+			else // just for a case
+			{
+				localize()->ConvertANSIToUnicode(pszVoteMessage, m_wszVoteMessage, sizeof(m_wszVoteMessage));
+			}
 		}
 
 		break;
@@ -244,7 +249,9 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 
 	default: // custom vote
 	{
-		localize()->ConvertANSIToUnicode(pszVoteMessage, m_wszVoteMessage, sizeof(m_wszVoteMessage));
+		if (pszVoteMessage)
+			localize()->ConvertANSIToUnicode(pszVoteMessage, m_wszVoteMessage, sizeof(m_wszVoteMessage));
+
 		break;
 	}
 	}
@@ -256,10 +263,6 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 
 		m_wszVoteYes[(sizeof(m_wszVoteYes) / sizeof(wchar_t)) - 1] = 0;
 	}
-	else
-	{
-		*m_wszVoteYes = 0;
-	}
 
 	if (pszVoteNo)
 	{
@@ -268,17 +271,12 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 
 		m_wszVoteNo[(sizeof(m_wszVoteNo) / sizeof(wchar_t)) - 1] = 0;
 	}
-	else
-	{
-		*m_wszVoteNo = 0;
-	}
 
 	// is it really needed?
 	m_wszVoteMessage[(sizeof(m_wszVoteMessage) / sizeof(wchar_t)) - 1] = 0;
-	m_szVoteTarget[(sizeof(m_szVoteTarget) / sizeof(wchar_t)) - 1] = 0;
 
-	free((void *)pszVoteMessage);
-
+	if (pszVoteMessage)
+		free((void *)pszVoteMessage);
 	if (pszVoteYes)
 		free((void *)pszVoteYes);
 	if (pszVoteNo)
@@ -286,6 +284,9 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 
 	m_bVoteStarted = true;
 	m_bShowPopup = true;
+
+	// Play a satisfying L4D sound
+	g_pEngineFuncs->pfnPlaySoundByName("sven_internal/beep_synthtone01.wav", 1.0f);
 
 	return true;
 }
@@ -336,6 +337,9 @@ void CUserVotePopup::OnKeyPress(int bKeyDown, int nKey)
 			Msg("[Vote] Pressed F2\n");
 		#endif
 		}
+
+		if (!m_bShowPopup)
+			g_pEngineFuncs->pfnPlaySoundByName("sven_internal/menu_click01.wav", 1.0f);
 	}
 }
 

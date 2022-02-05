@@ -28,6 +28,9 @@ public:
 	void OnKeyPress(int bKeyDown, int nKey);
 
 private:
+	void ValidateMessage(const char **pszMessage);
+
+private:
 	votetype_t m_voteType;
 
 	wchar_t m_wszVoteTarget[128];
