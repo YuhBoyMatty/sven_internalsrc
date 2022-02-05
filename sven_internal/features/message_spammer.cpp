@@ -9,6 +9,19 @@
 #include "../game/console.h"
 
 //-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+
+static int ms_contains_chars(char ch, const char *chars, size_t length);
+
+static char *ms_lstrip(char *str);
+static void ms_rstrip(char *str);
+static char *ms_strip(char *str);
+static void ms_strip_extension(const char **pszString);
+
+static void ms_remove_comment(char *str);
+
+//-----------------------------------------------------------------------------
 // Globals
 //-----------------------------------------------------------------------------
 
@@ -21,25 +34,46 @@ CMessageSpammer g_MessageSpammer;
 CON_COMMAND_FUNC(sc_ms_add, ConCommand_AddSpamTask, "sc_ms_add [taskname] - Add spam task from file ../sven_internal/message_spammer/[taskname].txt")
 {
 	if (CMD_ARGC() >= 2)
-		g_MessageSpammer.AddTask(CMD_ARGV(1));
+	{
+		const char *pszTask = CMD_ARGV(1);
+
+		ms_strip_extension(&pszTask);
+		g_MessageSpammer.AddTask(pszTask);
+	}
 	else
+	{
 		sc_ms_add.PrintUsage();
+	}
 }
 
 CON_COMMAND_FUNC(sc_ms_remove, ConCommand_RemoveSpamTask, "sc_ms_remove [taskname] - Remove spam task by name")
 {
 	if (CMD_ARGC() >= 2)
-		g_MessageSpammer.RemoveTask(CMD_ARGV(1));
+	{
+		const char *pszTask = CMD_ARGV(1);
+
+		ms_strip_extension(&pszTask);
+		g_MessageSpammer.RemoveTask(pszTask);
+	}
 	else
+	{
 		sc_ms_remove.PrintUsage();
+	}
 }
 
 CON_COMMAND_FUNC(sc_ms_reload, ConCommand_ReloadSpamTask, "sc_ms_reload [taskname] - Reload spam task by name")
 {
 	if (CMD_ARGC() >= 2)
-		g_MessageSpammer.ReloadTask(CMD_ARGV(1));
+	{
+		const char *pszTask = CMD_ARGV(1);
+
+		ms_strip_extension(&pszTask);
+		g_MessageSpammer.ReloadTask(pszTask);
+	}
 	else
+	{
 		sc_ms_reload.PrintUsage();
+	}
 }
 
 CON_COMMAND_FUNC(sc_ms_keywords, ConCommand_PrintSpamKeyWords, "sc_ms_keywords - Prints all keywords")
@@ -55,7 +89,7 @@ CON_COMMAND_FUNC(sc_ms_print, ConCommand_PrintSpamTasks, "sc_ms_print - Print al
 	g_MessageSpammer.PrintTasks();
 }
 
-CONVAR(sc_ms_debug, "0", "sc_ms_debug [0/1] - Enable debugging for Message Spammer");
+CConVar sc_ms_debug("sc_ms_debug", "0", "sc_ms_debug [0/1] - Enable debugging for Message Spammer");
 
 //-----------------------------------------------------------------------------
 // CMessageSpammer
@@ -117,11 +151,11 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 	if (GetTask(pszTaskName))
 		return ReloadTask(pszTaskName);
 
-	static char buffer[512];
+	static char szBuffer[512];
 
-	sprintf_s(buffer, sizeof(buffer), "sven_internal/message_spammer/%s.txt", pszTaskName);
+	sprintf_s(szBuffer, sizeof(szBuffer), "sven_internal/message_spammer/%s.txt", pszTaskName);
 
-	FILE *file = fopen(buffer, "r");
+	FILE *file = fopen(szBuffer, "r");
 
 	if (file)
 	{
@@ -140,10 +174,17 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 		if (bDebug)
 			Msg("< Parsing task: %s >\n", pszTaskName);
 
-		while (fgets(buffer, sizeof(buffer), file))
+		while (fgets(szBuffer, sizeof(szBuffer), file))
 		{
 			std::cmatch match;
 			nLine++;
+
+			char *buffer = ms_lstrip(szBuffer);
+			ms_remove_comment(buffer);
+			ms_rstrip(buffer);
+
+			if (!*buffer) // empty
+				continue;
 
 			if (!bParsingOperators && !bLoopVarFound)
 			{
@@ -180,6 +221,10 @@ bool CMessageSpammer::AddTask(const char *pszTaskName)
 				pTask->AddOperator(reinterpret_cast<ISpamOperator *>(pOperator));
 
 				bParsingOperators = true;
+			}
+			else
+			{
+				Msg("[MS] Unrecognized expression '%s' at line %d\n", buffer, nLine);
 			}
 		}
 
@@ -379,4 +424,82 @@ void CSpamOperatorSleep::Run(CSpamInfo &spamInfo)
 void CSpamOperatorSleep::SetOperand(float flSleepDelay)
 {
 	m_flSleepDelay = flSleepDelay;
+}
+
+//-----------------------------------------------------------------------------
+// Utilities for parsing files
+//-----------------------------------------------------------------------------
+
+#define MS_COMMENT_PREFIX ";#"
+#define MS_STRIP_CHARS (" \t\n")
+
+#define MS_STRIP_CHARS_LEN (sizeof(MS_STRIP_CHARS) - 1)
+#define MS_COMMENT_PREFIX_LEN (sizeof(MS_COMMENT_PREFIX) - 1)
+
+static int ms_contains_chars(char ch, const char *chars, size_t length)
+{
+	for (size_t i = 0; i < length; ++i)
+	{
+		if (chars[i] == ch)
+			return 1;
+	}
+
+	return 0;
+}
+
+static char *ms_lstrip(char *str)
+{
+	while (*str && ms_contains_chars(*str, MS_STRIP_CHARS, MS_STRIP_CHARS_LEN))
+		++str;
+
+	return str;
+}
+
+static void ms_rstrip(char *str)
+{
+	char *end = str + strlen(str) - 1;
+
+	if (end < str)
+		return;
+
+	while (end >= str && ms_contains_chars(*end, MS_STRIP_CHARS, MS_STRIP_CHARS_LEN))
+	{
+		*end = '\0';
+		--end;
+	}
+}
+
+static char *ms_strip(char *str)
+{
+	char *result = ms_lstrip(str);
+	ms_rstrip(result);
+	return result;
+}
+
+static void ms_strip_extension(const char **pszString)
+{
+	char *pszExtension = NULL;
+	char *str = (char *)* pszString;
+
+	while (*str)
+	{
+		if (*str == '.')
+			pszExtension = str;
+
+		str++;
+	}
+
+	if (pszExtension)
+	{
+		*pszExtension = 0;
+	}
+}
+
+static void ms_remove_comment(char *str)
+{
+	while (*str && !ms_contains_chars(*str, MS_COMMENT_PREFIX, MS_COMMENT_PREFIX_LEN))
+		++str;
+
+	if (*str)
+		*str = '\0';
 }
