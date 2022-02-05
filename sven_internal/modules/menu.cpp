@@ -504,6 +504,13 @@ void ShowMainMenu()
 				{
 					ConCommand_ChatColorsLoadPlayers();
 				}
+				
+				if (ImGui::Button("Reset Default Player Color"))
+				{
+					g_Config.cvars.player_name_color[0] = 0.6f;
+					g_Config.cvars.player_name_color[1] = 0.75f;
+					g_Config.cvars.player_name_color[2] = 1.0f;
+				}
 
 				ImGui::ColorEdit3("Default Player Color", g_Config.cvars.player_name_color);
 				ImGui::ColorEdit3("Custom Color One", g_Config.cvars.chat_color_one);
