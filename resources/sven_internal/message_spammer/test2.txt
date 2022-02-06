@@ -1,3 +1,5 @@
+; I am a comment!
+
 send stuck
 sleep 0.35
 send play
