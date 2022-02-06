@@ -174,6 +174,38 @@ CON_COMMAND(dump_ifaces, "dump_ifaces [module name] - Dumps all registered inter
 	}
 }
 
+CON_COMMAND(steamid_to_steamid64, "steamid_to_steamid64 [steamid] - Converts SteamID to SteamID64, apostrophes \"\" are required!")
+{
+	if (CMD_ARGC() > 1)
+	{
+		const char *pszSteamID = CMD_ARGV(1);
+
+		std::cmatch match;
+		std::regex regex_steamid("^STEAM_[0-5]:([01]):([0-9]+)$");
+
+		if (std::regex_search(pszSteamID, match, regex_steamid))
+		{
+			uint64_t steamID = 76561197960265728; // base num
+
+			uint64_t v1 = atoll(match[1].str().c_str());
+			uint64_t v2 = atoll(match[2].str().c_str());
+
+			steamID += v1 + v2 * 2;
+
+			Msg("SteamID64: %llu\n", steamID);
+			Msg("https://steamcommunity.com/profiles/%llu\n", steamID);
+		}
+		else
+		{
+			Msg("Invalid SteamID, did you forget to write SteamID with apostrophes? ( \"\" )\n");
+		}
+	}
+	else
+	{
+		steamid_to_steamid64.PrintUsage();
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Prints wrappers
 //-----------------------------------------------------------------------------

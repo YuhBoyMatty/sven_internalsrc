@@ -159,34 +159,6 @@ static float GetWeaponOffset(cl_entity_s *pViewModel, int iWeaponID)
 	return 0.0f;
 }
 
-static void ConCommand_DropEmptyWeapons_Iterator(WEAPON *pWeapon, bool bHasAmmo, int nAmmo, int nAmmo2)
-{
-#ifdef _DEBUG
-	g_pEngineFuncs->Con_Printf("===============================\n");
-	g_pEngineFuncs->Con_Printf("Name: %s\n", pWeapon->szName);
-	g_pEngineFuncs->Con_Printf("Has Ammo: %d\n", bHasAmmo);
-	g_pEngineFuncs->Con_Printf("iAmmoType (Ammo: %d): %d\n", nAmmo, pWeapon->iAmmoType);
-	g_pEngineFuncs->Con_Printf("iAmmo2Type (Ammo: %d): %d\n", nAmmo2, pWeapon->iAmmo2Type);
-	g_pEngineFuncs->Con_Printf("iMax1: %d\n", pWeapon->iMax1);
-	g_pEngineFuncs->Con_Printf("iMax2: %d\n", pWeapon->iMax2);
-	g_pEngineFuncs->Con_Printf("iSlot: %d\n", pWeapon->iSlot);
-	g_pEngineFuncs->Con_Printf("iSlotPos: %d\n", pWeapon->iSlotPos);
-	g_pEngineFuncs->Con_Printf("iFlags: %d\n", pWeapon->iFlags);
-	g_pEngineFuncs->Con_Printf("iId: %d\n", pWeapon->iId);
-	g_pEngineFuncs->Con_Printf("iClip: %d\n", pWeapon->iClip);
-	g_pEngineFuncs->Con_Printf("iCount: %d\n", pWeapon->iCount);
-	g_pEngineFuncs->Con_Printf("===============================\n\n");
-#endif
-
-	static char command_buffer[140] = { 0 };
-
-	if (!bHasAmmo)
-	{
-		sprintf_s(command_buffer, sizeof(command_buffer), "drop %s", pWeapon->szName);
-		g_pEngineFuncs->pfnClientCmd(command_buffer);
-	}
-}
-
 //-----------------------------------------------------------------------------
 // Commands, CVars..
 //-----------------------------------------------------------------------------
@@ -255,9 +227,37 @@ CON_COMMAND_FUNC(sc_sync_colors, ConCommand_SyncColors, "sc_sync_colors - Sync. 
 		s_flTopColorDelay = s_flBottomColorDelay;
 }
 
-CON_COMMAND_FUNC(drop_empty_weapons, ConCommand_DropEmptyWeapons, "drop_empty_weapons - Drop all empty weapons from your inventory")
+static void ConCommand_DropEmptyWeapon_Iterator(WEAPON *pWeapon, bool bHasAmmo, int nAmmo, int nAmmo2)
 {
-	g_pWR->IterateWeapons(ConCommand_DropEmptyWeapons_Iterator);
+#ifdef _DEBUG
+	Msg("===============================\n");
+	Msg("Name: %s\n", pWeapon->szName);
+	Msg("Has Ammo: %d\n", bHasAmmo);
+	Msg("iAmmoType (Ammo: %d): %d\n", nAmmo, pWeapon->iAmmoType);
+	Msg("iAmmo2Type (Ammo: %d): %d\n", nAmmo2, pWeapon->iAmmo2Type);
+	Msg("iMax1: %d\n", pWeapon->iMax1);
+	Msg("iMax2: %d\n", pWeapon->iMax2);
+	Msg("iSlot: %d\n", pWeapon->iSlot);
+	Msg("iSlotPos: %d\n", pWeapon->iSlotPos);
+	Msg("iFlags: %d\n", pWeapon->iFlags);
+	Msg("iId: %d\n", pWeapon->iId);
+	Msg("iClip: %d\n", pWeapon->iClip);
+	Msg("iCount: %d\n", pWeapon->iCount);
+	Msg("===============================\n\n");
+#endif
+
+	static char command_buffer[140] = { 0 };
+
+	if (!bHasAmmo)
+	{
+		sprintf_s(command_buffer, sizeof(command_buffer), "drop %s", pWeapon->szName);
+		g_pEngineFuncs->pfnClientCmd(command_buffer);
+	}
+}
+
+CON_COMMAND_FUNC(drop_empty_weapon, ConCommand_DropEmptyWeapon, "drop_empty_weapon - Drop an empty weapon from your inventory")
+{
+	g_pWR->IterateWeapons(ConCommand_DropEmptyWeapon_Iterator);
 }
 
 CON_COMMAND_FUNC(freeze, ConCommand_Freeze, "freeze - Block connection with a server")

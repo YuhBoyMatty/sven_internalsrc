@@ -236,7 +236,11 @@ bool CConfig::Load()
 	
 	INI_IMPORT_BEGIN_SECTION("ANTIAFK");
 		INI_IMPORT_VARIABLE("Type", cvars.antiafk);
+		INI_IMPORT_VARIABLE("RotateCamera", cvars.antiafk_rotate_camera);
+		INI_IMPORT_VARIABLE("StayWithinRange", cvars.antiafk_stay_within_range);
 		INI_IMPORT_VARIABLE("RotationAngle", cvars.antiafk_rotation_angle);
+		INI_IMPORT_VARIABLE("StayRadius", cvars.antiafk_stay_radius);
+		INI_IMPORT_VARIABLE("StayRadiusOffsetAngle", cvars.antiafk_stay_radius_offset_angle);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("MISC");
@@ -291,6 +295,10 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("PlayerName_R", cvars.player_name_color[0]);
 		INI_IMPORT_VARIABLE("PlayerName_G", cvars.player_name_color[1]);
 		INI_IMPORT_VARIABLE("PlayerName_B", cvars.player_name_color[2]);
+		INI_IMPORT_VARIABLE("RainbowUpdateDelay", cvars.chat_rainbow_update_delay);
+		INI_IMPORT_VARIABLE("RainbowHueDelta", cvars.chat_rainbow_hue_delta);
+		INI_IMPORT_VARIABLE("RainbowSaturation", cvars.chat_rainbow_saturation);
+		INI_IMPORT_VARIABLE("RainbowLightness", cvars.chat_rainbow_lightness);
 		INI_IMPORT_VARIABLE("ColorOne_R", cvars.chat_color_one[0]);
 		INI_IMPORT_VARIABLE("ColorOne_G", cvars.chat_color_one[1]);
 		INI_IMPORT_VARIABLE("ColorOne_B", cvars.chat_color_one[2]);
@@ -479,7 +487,11 @@ void CConfig::Save()
 	
 	INI_EXPORT_BEGIN_SECTION("ANTIAFK");
 		INI_EXPORT_VARIABLE("Type", cvars.antiafk);
+		INI_EXPORT_VARIABLE("RotateCamera", cvars.antiafk_rotate_camera);
+		INI_EXPORT_VARIABLE("StayWithinRange", cvars.antiafk_stay_within_range);
 		INI_EXPORT_VARIABLE("RotationAngle", cvars.antiafk_rotation_angle);
+		INI_EXPORT_VARIABLE("StayRadius", cvars.antiafk_stay_radius);
+		INI_EXPORT_VARIABLE("StayRadiusOffsetAngle", cvars.antiafk_stay_radius_offset_angle);
 	INI_EXPORT_END_SECTION();
 
 	INI_EXPORT_BEGIN_SECTION("MISC");
@@ -534,6 +546,10 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("PlayerName_R", cvars.player_name_color[0]);
 		INI_EXPORT_VARIABLE("PlayerName_G", cvars.player_name_color[1]);
 		INI_EXPORT_VARIABLE("PlayerName_B", cvars.player_name_color[2]);
+		INI_EXPORT_VARIABLE("RainbowUpdateDelay", cvars.chat_rainbow_update_delay);
+		INI_EXPORT_VARIABLE("RainbowHueDelta", cvars.chat_rainbow_hue_delta);
+		INI_EXPORT_VARIABLE("RainbowSaturation", cvars.chat_rainbow_saturation);
+		INI_EXPORT_VARIABLE("RainbowLightness", cvars.chat_rainbow_lightness);
 		INI_EXPORT_VARIABLE("ColorOne_R", cvars.chat_color_one[0]);
 		INI_EXPORT_VARIABLE("ColorOne_G", cvars.chat_color_one[1]);
 		INI_EXPORT_VARIABLE("ColorOne_B", cvars.chat_color_one[2]);

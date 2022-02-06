@@ -12,6 +12,8 @@
 #define CMD_ARGC() g_pEngineFuncs->Cmd_Argc()
 #define CMD_ARGV(arg) g_pEngineFuncs->Cmd_Argv(arg)
 
+#define M_SQR(x) (x * x)
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif

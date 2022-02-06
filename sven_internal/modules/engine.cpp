@@ -20,6 +20,12 @@
 typedef qboolean (*Netchan_CanPacketFn)(netchan_t *);
 
 //-----------------------------------------------------------------------------
+// Imports
+//-----------------------------------------------------------------------------
+
+extern playermove_s *g_pPlayerMove;
+
+//-----------------------------------------------------------------------------
 // Vars
 //-----------------------------------------------------------------------------
 
@@ -43,37 +49,123 @@ Netchan_CanPacketFn Netchan_CanPacket_Original = NULL;
 // ConCommands, CVars..
 //-----------------------------------------------------------------------------
 
-CON_COMMAND_FUNC(toggle, Toggle_Cmd, "toggle [cvar_name] [value #1] [value #2] [value #3].. - Toggle between values")
+CON_COMMAND(toggle, "toggle [cvar_name] [value #1] [value #2] [value #3].. - Toggle between values")
 {
 	int i;
 	int argc = CMD_ARGC();
 
-	if (argc > 3)
+	if (argc >= 2)
 	{
 		const char *pszCvar = CMD_ARGV(1);
 		cvar_s *pCvar = g_pEngineFuncs->pfnGetCvarPointer(pszCvar);
 
 		if (pCvar)
 		{
-			for (i = 2; i < argc; i++)
+			if (argc == 2)
 			{
-				if ( !strcmp(pCvar->string, CMD_ARGV(i)) )
-					break;
+				bool bValue = static_cast<bool>(pCvar->value);
+				g_pEngineFuncs->Cvar_SetValue(pszCvar, float(!bValue));
 			}
-
-			i++;
-
-			if (i >= argc)
+			else
 			{
-				i = 2;
-			}
+				for (i = 2; i < argc; i++)
+				{
+					if ( !strcmp(pCvar->string, CMD_ARGV(i)) )
+						break;
+				}
 
-			g_pEngineFuncs->pfnCvar_Set(pszCvar, CMD_ARGV(i));
+				i++;
+
+				if (i >= argc)
+				{
+					i = 2;
+				}
+
+				g_pEngineFuncs->pfnCvar_Set(pszCvar, CMD_ARGV(i));
+			}
 		}
 	}
 	else
 	{
 		toggle.PrintUsage();
+	}
+}
+
+CON_COMMAND(incrementvar, "incrementvar [cvar_name] [minvalue] [maxvalue] [delta] - Increment a cvar")
+{
+	int argc = CMD_ARGC();
+
+	if (argc >= 5)
+	{
+		const char *pszCvar = CMD_ARGV(1);
+		cvar_s *pCvar = g_pEngineFuncs->pfnGetCvarPointer(pszCvar);
+
+		if (pCvar)
+		{
+			float currentValue = pCvar->value;
+			float startValue = strtof( CMD_ARGV(2), NULL );
+			float endValue = strtof( CMD_ARGV(3), NULL );
+			float delta = strtof( CMD_ARGV(4), NULL );
+			float newValue = currentValue + delta;
+
+			if (newValue > endValue)
+			{
+				newValue = startValue;
+			}
+			else if (newValue < startValue)
+			{
+				newValue = endValue;
+			}
+
+			g_pEngineFuncs->Cvar_SetValue(pszCvar, newValue);
+		}
+	}
+	else
+	{
+		incrementvar.PrintUsage();
+	}
+}
+
+CON_COMMAND(multvar, "multvar [cvarname] [minvalue] [maxvalue] [factor] - Multiply a cvar")
+{
+	int argc = CMD_ARGC();
+
+	if (argc >= 5)
+	{
+		const char *pszCvar = CMD_ARGV(1);
+		cvar_s *pCvar = g_pEngineFuncs->pfnGetCvarPointer(pszCvar);
+
+		if (pCvar)
+		{
+			float currentValue = pCvar->value;
+			float startValue = strtof( CMD_ARGV(2), NULL );
+			float endValue = strtof( CMD_ARGV(3), NULL );
+			float factor = strtof( CMD_ARGV(4), NULL );
+			float newValue = currentValue * factor;
+
+			if (newValue > endValue)
+			{
+				newValue = startValue;
+			}
+			else if (newValue < startValue)
+			{
+				newValue = endValue;
+			}
+
+			g_pEngineFuncs->Cvar_SetValue(pszCvar, newValue);
+		}
+	}
+	else
+	{
+		multvar.PrintUsage();
+	}
+}
+
+CON_COMMAND(getpos, "getpos - Get current position")
+{
+	if (g_pPlayerMove)
+	{
+		Msg("Position: %.3f %.3f %.3f", g_pPlayerMove->origin.x, g_pPlayerMove->origin.y, g_pPlayerMove->origin.z);
 	}
 }
 

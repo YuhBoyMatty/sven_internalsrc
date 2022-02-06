@@ -314,7 +314,7 @@ void ShowMainMenu()
 			{
 				extern void ConCommand_AutoSelfSink();
 				extern void ConCommand_Freeze();
-				extern void ConCommand_DropEmptyWeapons();
+				extern void ConCommand_DropEmptyWeapon();
 
 				ImGui::Separator();
 
@@ -324,8 +324,8 @@ void ShowMainMenu()
 				if (ImGui::Button("Freeze"))
 					ConCommand_Freeze();
 				
-				if (ImGui::Button("Drop Empty Weapons"))
-					ConCommand_DropEmptyWeapons();
+				if (ImGui::Button("Drop Empty Weapon"))
+					ConCommand_DropEmptyWeapon();
 
 				ImGui::Checkbox("Autojump", &g_Config.cvars.autojump); ImGui::SameLine();
 				ImGui::Checkbox("Doubleduck", &g_Config.cvars.doubleduck); ImGui::SameLine();
@@ -381,6 +381,13 @@ void ShowMainMenu()
 				static const char *no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
 				ImGui::Combo("No Weapon Animations", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
 
+				ImGui::Text("");
+
+				if (ImGui::Button("Reset App Speed"))
+				{
+					g_Config.cvars.application_speed = 1.0f;
+				}
+
 				ImGui::SliderFloat("Application Speed", &g_Config.cvars.application_speed, 0.1f, 50.0f);
 
 				ImGui::Text("");
@@ -416,8 +423,19 @@ void ShowMainMenu()
 				ImGui::Separator();
 
 				static const char *antiafk_items[] = { "0 - Off", "1 - Step Forward & Back", "2 - Spam Gibme", "3 - Walk Around & Spam Inputs", "4 - Walk Around", "5 - Go Right" };
+
 				ImGui::Combo("Mode", &g_Config.cvars.antiafk, antiafk_items, IM_ARRAYSIZE(antiafk_items));
+
+				ImGui::Text("");
+
+				ImGui::Checkbox("Anti-AFK Rotate Camera", &g_Config.cvars.antiafk_rotate_camera);
+				ImGui::Checkbox("Anti-AFK Stay Within Range", &g_Config.cvars.antiafk_stay_within_range);
+
+				ImGui::Text("");
+
 				ImGui::SliderFloat("Rotation Angle", &g_Config.cvars.antiafk_rotation_angle, -7.0f, 7.0f);
+				ImGui::SliderFloat("Stay Within Radius", &g_Config.cvars.antiafk_stay_radius, 25.0f, 500.0f);
+				ImGui::SliderFloat("Stay Within Offset Angle", &g_Config.cvars.antiafk_stay_radius_offset_angle, 0.0f, 89.0f);
 				
 				ImGui::Text("");
 			}
@@ -513,6 +531,20 @@ void ShowMainMenu()
 				}
 
 				ImGui::ColorEdit3("Default Player Color", g_Config.cvars.player_name_color);
+
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Rainbow Names");
+
+				ImGui::SliderFloat("Rainbow Update Delay", &g_Config.cvars.chat_rainbow_update_delay, 0.0f, 0.5f);
+				ImGui::SliderFloat("Rainbow Hue Delta", &g_Config.cvars.chat_rainbow_hue_delta, 0.0f, 0.5f);
+				ImGui::SliderFloat("Rainbow Saturation", &g_Config.cvars.chat_rainbow_saturation, 0.0f, 1.0f);
+				ImGui::SliderFloat("Rainbow Lightness", &g_Config.cvars.chat_rainbow_lightness, 0.0f, 1.0f);
+
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Custom Colors");
+
 				ImGui::ColorEdit3("Custom Color One", g_Config.cvars.chat_color_one);
 				ImGui::ColorEdit3("Custom Color Two", g_Config.cvars.chat_color_two);
 				ImGui::ColorEdit3("Custom Color Three", g_Config.cvars.chat_color_three);

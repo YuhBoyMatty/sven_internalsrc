@@ -1,5 +1,5 @@
 # Sven Internal
-Imagine cheat in a co-op game =)
+Imagine cheating in a co-op game =)
 
 Don't forget to get more hax at kekma !!
 
@@ -26,14 +26,7 @@ The code is a bit mess, basically didn't plan to publish it.
 - Message Spammer
 - Skybox Replacement
 - Custom Vote Popup
-- Chat Colors
-
-# Autoload config
-Create file `sven_internal.cfg` in the following directory: `../Sven Co-op/svencoop/`.
-
-And add this command in the file: `sc_load_config`.
-
-If you load the cheat it will automatically execute file `sven_internal.cfg`, you can also use it for other purposes.
+- Custom Chat Colors
 
 # Files of cheat
 The cheat uses subfolder `sven_internal` in root directory of the game.
@@ -48,11 +41,11 @@ File `sven_internal.ini` is the config file (you can save it via menu or console
 
 File `muted_players.db` automatically saved by the cheat when you exit from the game.
 
-File `chat_colors_players.txt` allows to change chat color for a specific player.
+File `chat_colors_players.txt` allows to change chat color for a specific player, will be automatically loaded.
 
 Folder `message_spammer` is used by **Message Spammer** to load spam tasks.
 
-Also, when cheat injected it will execute `sven_internal.cfg` file from folder `../Sven Co-op/svencoop/`.
+Also, when cheat loaded it will execute `sven_internal.cfg` file from folder `../Sven Co-op/svencoop/`.
 
 # Console Variables/Commands
 Type in the console the following command: `sc_help`.
@@ -64,14 +57,19 @@ Lets you change the color of players when they write something in chat.
 
 File `chat_colors_players.txt` used for adding the players in such format: `STEAMID64 : COLOR_NUMBER`.
 
-There're currently 5 color numbers (slots) that let you use 5 unique and customizable colors (can be change in Menu).
+To convert traditional SteamID to SteamID64 faster, you can use the following console command: `steamid_to_steamid64 [SteamID]`.
+
+There're currently 5 color numbers (slots) plus rainbow color, this you can use 6 unique and customizable colors (can be change in Menu).
+
+Rainbow color has slot 0, others custom colors from 1 to 5.
 
 Example for the file:
 ```
-76561198819023292 : 1 ; it's a comment.. (76561198819023292 : 1) <<< (STEAMID64 : COLOR_NUMBER)
+76561198819023292 : 0 # it's a comment
+76561197962091295 : 5 ; it's a comment too!
 ```
 
-The file automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the players list.
+The file automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the list of players.
 
 # Message Spammer
 Roughly, it's some kind of AHK.

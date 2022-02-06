@@ -111,6 +111,10 @@ public:
 		
 		// Anti-AFK
 		int antiafk = 0; // enum
+		bool antiafk_rotate_camera = true;
+		bool antiafk_stay_within_range = true;
+		float antiafk_stay_radius = 200.0f;
+		float antiafk_stay_radius_offset_angle = 30.0f;
 		float antiafk_rotation_angle = -0.7f;
 
 		// Misc		funcs: autoselfsink
@@ -161,6 +165,10 @@ public:
 
 		// Chat Colors
 		float player_name_color[3] = { 0.6f, 0.75f, 1.0f };
+		float chat_rainbow_update_delay = 0.05f;
+		float chat_rainbow_hue_delta = 0.015f;
+		float chat_rainbow_saturation = 0.8f;
+		float chat_rainbow_lightness = 0.5f;
 		float chat_color_one[3] = { 0.25f, 0.25f, 1.0f };
 		float chat_color_two[3] = { 1.0f, 0.25f, 0.25f };
 		float chat_color_three[3] = { 1.0f, 1.0f, 0.25f };

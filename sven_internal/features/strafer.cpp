@@ -11,9 +11,13 @@
 #include "../config.h"
 
 //-----------------------------------------------------------------------------
+// Imports
+//-----------------------------------------------------------------------------
 
 extern playermove_s *g_pPlayerMove;
 
+//-----------------------------------------------------------------------------
+// Vars
 //-----------------------------------------------------------------------------
 
 CStrafer g_Strafer;
@@ -26,8 +30,9 @@ cvar_s *sv_airaccelerate = NULL;
 cvar_s *sv_stopspeed = NULL;
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-void UpdateStrafeData(float flYaw)
+static void UpdateStrafeData(float flYaw)
 {
 	*reinterpret_cast<Vector *>(g_strafeData.player.Velocity) = g_pPlayerMove->velocity;
 	*reinterpret_cast<Vector *>(g_strafeData.player.Origin) = g_pPlayerMove->origin;
@@ -53,6 +58,8 @@ void UpdateStrafeData(float flYaw)
 }
 
 //-----------------------------------------------------------------------------
+// ConCommands
+//-----------------------------------------------------------------------------
 
 CON_COMMAND_FUNC(sc_strafe, ConCommand_VectorialStrafe, "sc_strafe - Toggle Vectorial Strafing")
 {
@@ -60,6 +67,8 @@ CON_COMMAND_FUNC(sc_strafe, ConCommand_VectorialStrafe, "sc_strafe - Toggle Vect
 	g_Config.cvars.strafe = !g_Config.cvars.strafe;
 }
 
+//-----------------------------------------------------------------------------
+// CStrafer implementations
 //-----------------------------------------------------------------------------
 
 void CStrafer::CreateMove(float frametime, struct usercmd_s *cmd, int active)
@@ -72,7 +81,7 @@ void CStrafer::StrafeVectorial(struct usercmd_s *pCmd)
 	if (g_Config.cvars.strafe_ignore_ground && g_pPlayerMove->onground != -1 || pCmd->buttons & (IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT))
 		return;
 
-	if (g_Config.cvars.antiafk || g_pPlayerMove->dead || g_pPlayerMove->movetype != MOVETYPE_WALK)
+	if (g_Config.cvars.antiafk || g_pPlayerMove->dead || g_pPlayerMove->iuser1 != 0 || g_pPlayerMove->movetype != MOVETYPE_WALK || g_pPlayerMove->waterlevel > 1)
 		return;
 
 	Vector viewangles;

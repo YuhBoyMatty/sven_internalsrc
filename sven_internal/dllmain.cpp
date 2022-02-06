@@ -182,11 +182,13 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		InitClientModule();
 		InitMenuModule();
 
-		printf("Successfully loaded\n");
+		g_Config.Load();
 
+		printf("Sven Internal Loaded\n");
 		Msg("Sven Internal Loaded\n");
 
-		//g_pEngineFuncs->pfnClientCmd("cl_timeout 999999;rate 999999;cl_updaterate 1000;cl_cmdrate 1000;ex_interp 0.1"); // rate 50000; cl_updaterate 80; cl_cmdrate 205
+		//g_pEngineFuncs->pfnClientCmd("rate 999999;cl_updaterate 1000;cl_cmdrate 1000;ex_interp 0.1"); // rate 50000; cl_updaterate 80; cl_cmdrate 205
+		g_pEngineFuncs->pfnClientCmd("cl_timeout 999999;unbind F1;unbind F2");
 		g_pEngineFuncs->pfnClientCmd("exec sven_internal.cfg");
 
 		while (true)

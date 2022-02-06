@@ -311,10 +311,12 @@ void CVisual::ESP()
 			{
 				if (g_Config.cvars.esp_box_player_health)
 				{
-					int iHealth;
+					int iHealth, iActualHealth;
 
 					if ( ( iHealth = int(GetPlayerHealth(i)) ) != 0 )
 					{
+						iActualHealth = iHealth;
+
 						if (iHealth == -1)
 							iHealth = 0;
 						else if (iHealth > 100)
@@ -331,7 +333,7 @@ void CVisual::ESP()
 											  255,
 											  FONT_ALIGN_CENTER,
 											  "%d",
-											  iHealth);
+											  iActualHealth);
 					}
 				}
 

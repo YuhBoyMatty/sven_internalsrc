@@ -107,6 +107,9 @@ void OnMenuClose()
 int HUD_Init_Hooked(void)
 {
 	g_VotePopup.OnHUDInit();
+	g_ChatColors.OnHUDInit();
+	g_CamHack.OnHUDInit();
+	g_AntiAFK.OnHUDInit();
 
 	return HUD_Init_Original();
 }
@@ -114,6 +117,9 @@ int HUD_Init_Hooked(void)
 int HUD_VidInit_Hooked(void)
 {
 	g_VotePopup.OnVideoInit();
+	g_ChatColors.OnVideoInit();
+	g_CamHack.OnVideoInit();
+	g_AntiAFK.OnVideoInit();
 
 	return HUD_VidInit_Original();
 }
@@ -121,6 +127,7 @@ int HUD_VidInit_Hooked(void)
 void CL_CreateMove_Hooked(float frametime, struct usercmd_s *cmd, int active)
 {
 	g_Skybox.Think();
+	g_ChatColors.OnCreateMove();
 
 	bSendPacket = true;
 
@@ -159,10 +166,10 @@ SKIP_CREATEMOVE:
 
 	UpdateLocalPlayer();
 
-	g_AntiAFK.CreateMove(frametime, cmd, active);
 	g_Strafer.CreateMove(frametime, cmd, active);
 	g_KeySpam.CreateMove(frametime, cmd, active);
 	g_Misc.CreateMove(frametime, cmd, active);
+	g_AntiAFK.CreateMove(frametime, cmd, active);
 	g_CamHack.CreateMove(frametime, cmd, active);
 	g_MessageSpammer.CreateMove(frametime, cmd, active);
 }

@@ -101,6 +101,22 @@ bool CCamHack::StudioRenderModel()
 	return false;
 }
 
+void CCamHack::OnHUDInit()
+{
+	if (m_bEnabled)
+	{
+		Disable();
+	}
+}
+
+void CCamHack::OnVideoInit()
+{
+	if (m_bEnabled)
+	{
+		Disable();
+	}
+}
+
 void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
 	if (g_CamHack.IsEnabled())
