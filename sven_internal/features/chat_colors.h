@@ -13,7 +13,12 @@ public:
 
 	void Init();
 
-public:
+	void OnHUDInit();
+	void OnVideoInit();
+	void OnCreateMove();
+
+	float *GetRainbowColor();
+
 	void LoadPlayers();
 	int *FindPlayerInList(int playerIndex);
 
@@ -30,8 +35,18 @@ private:
 
 	token_state ReadToken(uint64_t *steamID, int *teamnum, const char *pszBuffer);
 
+private: // rainbow stuff
+	void UpdateRainbowColor();
+
+	void HSL2RGB(float h, float s, float l, /* Out: */ float &r, float &g, float &b);
+	float Hue2RGB(float p, float q, float t);
+
 private:
 	CHashTable<uint64_t, int> m_HashTable;
+
+	float m_flRainbowDelta;
+	float m_flRainbowColor[3];
+	float m_flRainbowUpdateTime;
 };
 
 extern CChatColors g_ChatColors;

@@ -144,6 +144,9 @@ float *GetClientColor_Hooked(int playerIndex)
 		{
 			switch (*nUserColorNumber)
 			{
+			case 0:
+				return g_ChatColors.GetRainbowColor();
+				
 			case 1:
 				return g_Config.cvars.chat_color_one;
 
@@ -175,6 +178,28 @@ float *GetClientColor_Hooked(int playerIndex)
 
 CChatColors::CChatColors() : m_HashTable(16)
 {
+	m_flRainbowDelta = 0.0f;
+
+	m_flRainbowColor[0] = 1.0f;
+	m_flRainbowColor[1] = 0.0f;
+	m_flRainbowColor[2] = 0.0f;
+
+	m_flRainbowUpdateTime = -1.0f;
+}
+
+void CChatColors::OnHUDInit()
+{
+	m_flRainbowUpdateTime = -1.0f;
+}
+
+void CChatColors::OnVideoInit()
+{
+	m_flRainbowUpdateTime = -1.0f;
+}
+
+void CChatColors::OnCreateMove()
+{
+	UpdateRainbowColor();
 }
 
 void CChatColors::LoadPlayers()
@@ -196,16 +221,16 @@ void CChatColors::LoadPlayers()
 			uint64_t steamID = 0;
 			int colornum = 0;
 
-			// Format >> ( STEAMID : TEAM_NUMBER )
+			// Format >> ( STEAMID64 : COLOR_NUMBER )
 			if ( (state = ReadToken(&steamID, &colornum, szBuffer)) == TOKEN_READ_OK )
 			{
-				if (colornum < 1 || colornum > 5)
+				if (colornum < 0 || colornum > 5)
 				{
 					Msg("[Chat Colors] Invalid color number!\n");
 				}
 				else
 				{
-					if (steamID & (((uint64_t)1 << 56) | ((uint64_t)1 << 52) | ((uint64_t)1 << 32)))
+					if ( IsSteamID64(steamID) )
 						m_HashTable.Insert(steamID, colornum);
 					else
 						Msg("[Chat Colors] Trying to insert invalid Steam ID!\n");
@@ -215,9 +240,10 @@ void CChatColors::LoadPlayers()
 				Msg(">> %llu : %d\n", steamID, colornum);
 			#endif
 			}
-			else if (state == TOKEN_READ_FAILED) // TOKEN_READ_FAILED
+			else if (state == TOKEN_READ_FAILED)
 			{
 				Msg("[Chat Colors] Failed to parse file 'sven_internal/chat_colors_players.txt' at line %d\n", nLine);
+				Msg("[Chat Colors] Follow this format >> STEAMID64 : COLOR_NUMBER\n");
 				break;
 			}
 		}
@@ -375,6 +401,62 @@ EOF_REACHED:
 int *CChatColors::FindPlayerInList(int playerIndex)
 {
 	return m_HashTable.Find( GetPlayerSteamID(playerIndex) );
+}
+
+float *CChatColors::GetRainbowColor()
+{
+	return m_flRainbowColor;
+}
+
+void CChatColors::UpdateRainbowColor()
+{
+	if (g_pEngineFuncs->GetClientTime() < m_flRainbowUpdateTime)
+		return;
+
+	HSL2RGB( m_flRainbowDelta, g_Config.cvars.chat_rainbow_saturation, g_Config.cvars.chat_rainbow_lightness, m_flRainbowColor[0], m_flRainbowColor[1], m_flRainbowColor[2] );
+
+	m_flRainbowDelta += g_Config.cvars.chat_rainbow_hue_delta;
+
+	while (m_flRainbowDelta > 1.0f)
+		m_flRainbowDelta -= 1.0f;
+
+	m_flRainbowUpdateTime = g_pEngineFuncs->GetClientTime() + g_Config.cvars.chat_rainbow_update_delay;
+}
+
+void CChatColors::HSL2RGB(float h, float s, float l, float &r, float &g, float &b)
+{
+	if (s == 0.f)
+	{
+		r = g = b = l;
+		return;
+	}
+
+	float q = l < 0.5f ? l * (1.f + s) : l + s - l * s;
+	float p = 2.f * l - q;
+
+	r = Hue2RGB(p, q, h + (1.f / 3.f));
+	g = Hue2RGB(p, q, h);
+	b = Hue2RGB(p, q, h - (1.f / 3.f));
+}
+
+float CChatColors::Hue2RGB(float p, float q, float t)
+{
+	if (t < 0.f)
+		t += 1.f;
+
+	if (t > 1.f)
+		t -= 1.f;
+
+	if (t < 1.f / 6.f)
+		return p + (q - p) * 6.f * t;
+
+	if (t < 1.f / 2.f)
+		return q;
+
+	if (t < 2.f / 3.f)
+		return p + (q - p) * ((2.f / 3.f) - t) * 6.f;
+
+	return p;
 }
 
 //-----------------------------------------------------------------------------
