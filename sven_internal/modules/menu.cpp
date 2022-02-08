@@ -328,6 +328,7 @@ void ShowMainMenu()
 					ConCommand_DropEmptyWeapon();
 
 				ImGui::Checkbox("Autojump", &g_Config.cvars.autojump); ImGui::SameLine();
+				ImGui::Checkbox("Enable Jumpbug", &g_Config.cvars.jumpbug); ImGui::SameLine();
 				ImGui::Checkbox("Doubleduck", &g_Config.cvars.doubleduck); ImGui::SameLine();
 				ImGui::Checkbox("Fastrun", &g_Config.cvars.fastrun);
 				ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns);
@@ -335,13 +336,6 @@ void ShowMainMenu()
 				ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
 				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
 				
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Jumpbug");
-				
-				ImGui::Checkbox("Enable Jumpbug", &g_Config.cvars.jumpbug);
-				ImGui::SliderFloat("Jumpbug Min. Height", &g_Config.cvars.jumpbug_min_height, 5.0f, 2000.0f);
-
 				ImGui::Text("");
 				ImGui::Separator();
 				ImGui::Text("Color Pulsator");

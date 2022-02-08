@@ -119,6 +119,7 @@ public:
 
 		// Misc		funcs: autoselfsink
 		bool autojump = true;
+		bool jumpbug = false;
 		bool doubleduck = false;
 		bool fastrun = false;
 		bool quake_guns = false;
@@ -126,9 +127,6 @@ public:
 		bool save_soundcache = false;
 		bool rotate_dead_body = false;
 		int no_weapon_anim = 0; // enum
-
-		bool jumpbug = false;
-		float jumpbug_min_height = 250.0f;
 
 		bool color_pulsator = false;
 		bool color_pulsator_top = true;

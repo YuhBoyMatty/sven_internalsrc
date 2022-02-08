@@ -246,7 +246,6 @@ bool CConfig::Load()
 	INI_IMPORT_BEGIN_SECTION("MISC");
 		INI_IMPORT_VARIABLE("AutoJump", cvars.autojump);
 		INI_IMPORT_VARIABLE("JumpBug", cvars.jumpbug);
-		INI_IMPORT_VARIABLE("JumpBugMinHeight", cvars.jumpbug_min_height);
 		INI_IMPORT_VARIABLE("DoubleDuck", cvars.doubleduck);
 		INI_IMPORT_VARIABLE("FastRun", cvars.fastrun);
 		INI_IMPORT_VARIABLE("QuakeGuns", cvars.quake_guns);
@@ -497,7 +496,6 @@ void CConfig::Save()
 	INI_EXPORT_BEGIN_SECTION("MISC");
 		INI_EXPORT_VARIABLE("AutoJump", cvars.autojump);
 		INI_EXPORT_VARIABLE("JumpBug", cvars.jumpbug);
-		INI_EXPORT_VARIABLE("JumpBugMinHeight", cvars.jumpbug_min_height);
 		INI_EXPORT_VARIABLE("DoubleDuck", cvars.doubleduck);
 		INI_EXPORT_VARIABLE("FastRun", cvars.fastrun);
 		INI_EXPORT_VARIABLE("QuakeGuns", cvars.quake_guns);

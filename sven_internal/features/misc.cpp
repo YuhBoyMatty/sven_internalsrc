@@ -401,7 +401,6 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 	static int nJumpBugState = 0;
 
 	if (g_Config.cvars.jumpbug &&
-		g_Config.cvars.jumpbug_min_height >= g_Local.flHeight &&
 		g_Local.flGroundNormalAngle <= acosf(0.7f) * 180.0f / static_cast<float>(M_PI) &&
 		g_pPlayerMove->flFallVelocity >= 500.0f)
 	{
