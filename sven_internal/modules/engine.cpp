@@ -165,7 +165,7 @@ CON_COMMAND(getpos, "getpos - Get current position")
 {
 	if (g_pPlayerMove)
 	{
-		Msg("Position: %.3f %.3f %.3f", g_pPlayerMove->origin.x, g_pPlayerMove->origin.y, g_pPlayerMove->origin.z);
+		Msg("Position: %.3f %.3f %.3f\n", g_pPlayerMove->origin.x, g_pPlayerMove->origin.y, g_pPlayerMove->origin.z);
 	}
 }
 
@@ -175,7 +175,7 @@ CON_COMMAND(getang, "getang - Get view angles")
 
 	g_pEngineFuncs->GetViewAngles(va);
 
-	Msg("View angles: %.3f %.3f %.3f", va.x, va.y, va.z);
+	Msg("View angles: %.3f %.3f %.3f\n", va.x, va.y, va.z);
 }
 
 CON_COMMAND(setang, "setang [pitch] [optional: yaw] [optional: roll] - Set view angles")
