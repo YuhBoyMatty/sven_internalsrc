@@ -37,8 +37,9 @@
 // Signatures
 //-----------------------------------------------------------------------------
 
-typedef int (*HUD_InitFn)(void);
+typedef void (*HUD_InitFn)(void);
 typedef int (*HUD_VidInitFn)(void);
+typedef int (*HUD_RedrawFn)(float, int);
 typedef void (*CL_CreateMoveFn)(float, struct usercmd_s *, int);
 typedef void (*HUD_PlayerMoveFn)(struct playermove_s *, int);
 typedef void (*V_CalcRefdefFn)(struct ref_params_s *);
@@ -65,6 +66,7 @@ extra_player_info_t *g_pPlayerExtraInfo = NULL;
 
 HUD_VidInitFn HUD_VidInit_Original = NULL;
 HUD_InitFn HUD_Init_Original = NULL;
+HUD_RedrawFn HUD_Redraw_Original = NULL;
 CL_CreateMoveFn CL_CreateMove_Original = NULL;
 HUD_PlayerMoveFn HUD_PlayerMove_Original = NULL;
 V_CalcRefdefFn V_CalcRefdef_Original = NULL;
@@ -104,14 +106,14 @@ void OnMenuClose()
 // Hooks
 //-----------------------------------------------------------------------------
 
-int HUD_Init_Hooked(void)
+void HUD_Init_Hooked(void)
 {
 	g_VotePopup.OnHUDInit();
 	g_ChatColors.OnHUDInit();
 	g_CamHack.OnHUDInit();
 	g_AntiAFK.OnHUDInit();
 
-	return HUD_Init_Original();
+	HUD_Init_Original();
 }
 
 int HUD_VidInit_Hooked(void)
@@ -122,6 +124,27 @@ int HUD_VidInit_Hooked(void)
 	g_AntiAFK.OnVideoInit();
 
 	return HUD_VidInit_Original();
+}
+
+int HUD_Redraw_Hooked(float time, int intermission)
+{
+	if (g_Config.cvars.glow_self)
+	{
+		// will be extended
+
+		dlight_t *pDynLight = g_pEngineFuncs->pEfxAPI->CL_AllocDlight(0);
+
+		pDynLight->color.r = int(255.f * g_Config.cvars.glow_self_color[0]);
+		pDynLight->color.g = int(255.f * g_Config.cvars.glow_self_color[1]);
+		pDynLight->color.b = int(255.f * g_Config.cvars.glow_self_color[2]);
+
+		pDynLight->origin = g_pPlayerMove->origin;
+		pDynLight->die = g_pEngineFuncs->GetClientTime() + 0.01f;
+		pDynLight->radius = g_Config.cvars.glow_self_radius;
+		pDynLight->decay = g_Config.cvars.glow_self_decay;
+	}
+
+	return HUD_Redraw_Original(time, intermission);
 }
 
 void CL_CreateMove_Hooked(float frametime, struct usercmd_s *cmd, int active)
@@ -261,6 +284,9 @@ void InitClientModule()
 	
 	HUD_VidInit_Original = g_pClientFuncs->HUD_VidInit;
 	g_pClientFuncs->HUD_VidInit = HUD_VidInit_Hooked;
+	
+	HUD_Redraw_Original = g_pClientFuncs->HUD_Redraw;
+	g_pClientFuncs->HUD_Redraw = HUD_Redraw_Hooked;
 	
 	HUD_PostRunCmd_Original = g_pClientFuncs->HUD_PostRunCmd;
 	g_pClientFuncs->HUD_PostRunCmd = HUD_PostRunCmd_Hooked;
