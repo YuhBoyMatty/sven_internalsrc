@@ -122,6 +122,8 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("ShowPlayerArmor", cvars.esp_box_player_armor);
 		INI_IMPORT_VARIABLE("ShowEntityName", cvars.esp_box_entity_name);
 		INI_IMPORT_VARIABLE("ShowPlayerName", cvars.esp_box_player_name);
+		INI_IMPORT_VARIABLE("ShowItems", cvars.esp_show_items);
+		INI_IMPORT_VARIABLE("IgnoreUnknownEnts", cvars.esp_ignore_unknown_ents);
 		INI_IMPORT_VARIABLE("Targets", cvars.esp_targets);
 		INI_IMPORT_VARIABLE("ShowSkeleton", cvars.esp_skeleton);
 		INI_IMPORT_VARIABLE("ShowBonesName", cvars.esp_bones_name);
@@ -135,6 +137,9 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("NeutralColor_R", cvars.esp_neutral_color[0]);
 		INI_IMPORT_VARIABLE("NeutralColor_G", cvars.esp_neutral_color[1]);
 		INI_IMPORT_VARIABLE("NeutralColor_B", cvars.esp_neutral_color[2]);
+		INI_IMPORT_VARIABLE("ItemColor_R", cvars.esp_item_color[0]);
+		INI_IMPORT_VARIABLE("ItemColor_G", cvars.esp_item_color[1]);
+		INI_IMPORT_VARIABLE("ItemColor_B", cvars.esp_item_color[2]);
 	INI_IMPORT_END_SECTION();
 		
 	INI_IMPORT_BEGIN_SECTION("WALLHACK");
@@ -165,6 +170,12 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("LightmapOverride_R", cvars.lightmap_color[0]);
 		INI_IMPORT_VARIABLE("LightmapOverride_G", cvars.lightmap_color[1]);
 		INI_IMPORT_VARIABLE("LightmapOverride_B", cvars.lightmap_color[2]);
+		INI_IMPORT_VARIABLE("GlowSelf", cvars.glow_self);
+		INI_IMPORT_VARIABLE("GlowSelfRadius", cvars.glow_self_radius);
+		INI_IMPORT_VARIABLE("GlowSelfDecay", cvars.glow_self_decay);
+		INI_IMPORT_VARIABLE("GlowSelfColor_R", cvars.glow_self_color[0]);
+		INI_IMPORT_VARIABLE("GlowSelfColor_G", cvars.glow_self_color[1]);
+		INI_IMPORT_VARIABLE("GlowSelfColor_B", cvars.glow_self_color[2]);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("CHAMS");
@@ -372,6 +383,8 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("ShowPlayerArmor", cvars.esp_box_player_armor);
 		INI_EXPORT_VARIABLE("ShowEntityName", cvars.esp_box_entity_name);
 		INI_EXPORT_VARIABLE("ShowPlayerName", cvars.esp_box_player_name);
+		INI_EXPORT_VARIABLE("ShowItems", cvars.esp_show_items);
+		INI_EXPORT_VARIABLE("IgnoreUnknownEnts", cvars.esp_ignore_unknown_ents);
 		INI_EXPORT_VARIABLE("Targets", cvars.esp_targets);
 		INI_EXPORT_VARIABLE("ShowSkeleton", cvars.esp_skeleton);
 		INI_EXPORT_VARIABLE("ShowBonesName", cvars.esp_bones_name);
@@ -385,6 +398,9 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("NeutralColor_R", cvars.esp_neutral_color[0]);
 		INI_EXPORT_VARIABLE("NeutralColor_G", cvars.esp_neutral_color[1]);
 		INI_EXPORT_VARIABLE("NeutralColor_B", cvars.esp_neutral_color[2]);
+		INI_EXPORT_VARIABLE("ItemColor_R", cvars.esp_item_color[0]);
+		INI_EXPORT_VARIABLE("ItemColor_G", cvars.esp_item_color[1]);
+		INI_EXPORT_VARIABLE("ItemColor_B", cvars.esp_item_color[2]);
 	INI_EXPORT_END_SECTION();
 		
 	INI_EXPORT_BEGIN_SECTION("WALLHACK");
@@ -415,6 +431,12 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("LightmapOverride_R", cvars.lightmap_color[0]);
 		INI_EXPORT_VARIABLE("LightmapOverride_G", cvars.lightmap_color[1]);
 		INI_EXPORT_VARIABLE("LightmapOverride_B", cvars.lightmap_color[2]);
+		INI_EXPORT_VARIABLE("GlowSelf", cvars.glow_self);
+		INI_EXPORT_VARIABLE("GlowSelfRadius", cvars.glow_self_radius);
+		INI_EXPORT_VARIABLE("GlowSelfDecay", cvars.glow_self_decay);
+		INI_EXPORT_VARIABLE("GlowSelfColor_R", cvars.glow_self_color[0]);
+		INI_EXPORT_VARIABLE("GlowSelfColor_G", cvars.glow_self_color[1]);
+		INI_EXPORT_VARIABLE("GlowSelfColor_B", cvars.glow_self_color[2]);
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("CHAMS");

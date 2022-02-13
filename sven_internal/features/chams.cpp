@@ -201,20 +201,12 @@ bool CChams::StudioRenderModel()
 
 			if (pszModelName && *pszModelName)
 			{
-				const char *pszModelNameEnd = pszModelName + strlen(pszModelName);
+				const char *pszSlashLastOccur = strrchr(pszModelName, '/');
 
-				while (pszModelNameEnd > pszModelName)
-				{
-					if (*(pszModelNameEnd - 1) == '/')
-					{
-						pszModelName = pszModelNameEnd;
-						break;
-					}
+				if (pszSlashLastOccur)
+					pszModelName = pszSlashLastOccur + 1;
 
-					--pszModelNameEnd;
-				}
-
-				if ((pszModelName[0] == 'v' || pszModelName[0] == 'w') && pszModelName[1] == '_') // view/world model entity
+				if ((pszModelName[0] == 'v' || pszModelName[0] == 'w') && pszModelName[1] == '_') // view / world item
 				{
 					bRenderHandled = Glow(pEntity, g_Config.cvars.glow_viewmodel, g_Config.cvars.glow_viewmodel_wall, g_Config.cvars.chams_viewmodel, g_Config.cvars.glow_viewmodel_width, g_Config.cvars.glow_viewmodel_color);
 					bRenderHandled = Chams(pEntity, g_Config.cvars.chams_viewmodel, g_Config.cvars.chams_viewmodel_wall, g_Config.cvars.chams_viewmodel_color, g_Config.cvars.chams_viewmodel_wall_color) || bRenderHandled;
@@ -229,7 +221,7 @@ bool CChams::StudioRenderModel()
 		else // player entity
 		{
 			bRenderHandled = Glow(pEntity, g_Config.cvars.glow_players, g_Config.cvars.glow_players_wall, g_Config.cvars.chams_players, g_Config.cvars.glow_players_width, g_Config.cvars.glow_players_color);
-			bRenderHandled = bRenderHandled || Chams(pEntity, g_Config.cvars.chams_players, g_Config.cvars.chams_players_wall, g_Config.cvars.chams_players_color, g_Config.cvars.chams_players_wall_color);
+			bRenderHandled = Chams(pEntity, g_Config.cvars.chams_players, g_Config.cvars.chams_players_wall, g_Config.cvars.chams_players_color, g_Config.cvars.chams_players_wall_color) || bRenderHandled;
 		}
 	}
 

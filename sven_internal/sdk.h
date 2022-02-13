@@ -42,11 +42,11 @@
 typedef struct cl_clientfuncs_s
 {
 	int (*Initialize) (cl_enginefunc_t *pEnginefuncs, int iVersion);
-	int (*HUD_Init) (void);
+	void (*HUD_Init) (void);
 	int (*HUD_VidInit) (void);
-	void (*HUD_Redraw) (float time, int intermission);
+	int (*HUD_Redraw) (float time, int intermission);
 	int (*HUD_UpdateClientData) (client_data_t *pcldata, float flTime);
-	int (*HUD_Reset) (void);
+	void (*HUD_Reset) (void);
 	void (*HUD_PlayerMove) (struct playermove_s *ppmove, int server);
 	void (*HUD_PlayerMoveInit) (struct playermove_s *ppmove);
 	char (*HUD_PlayerMoveTexture) (const char *name);
@@ -78,7 +78,7 @@ typedef struct cl_clientfuncs_s
 	int (*HUD_Key_Event) (int down, int keynum, const char *pszCurrentBinding);
 	void (*HUD_TempEntUpdate) (double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s *pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s *pTemp, float damp));
 	struct cl_entity_s *(*HUD_GetUserEntity) (int index);
-	int (*HUD_VoiceStatus) (int entindex, qboolean bTalking);
+	void (*HUD_VoiceStatus) (int entindex, qboolean bTalking);
 	int (*HUD_DirectorMessage) (unsigned char command, unsigned int firstObject, unsigned int secondObject, unsigned int flags);
 	int (*HUD_GetStudioModelInterface) (int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio);
 	void (*HUD_CHATINPUTPOSITION_FUNCTION) (int *x, int *y);

@@ -122,6 +122,10 @@ void ShowMainMenu()
 
 				ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
 				ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline);
+				ImGui::Checkbox("Show Items", &g_Config.cvars.esp_show_items);
+				ImGui::Checkbox("Ignore Unknown Entities", &g_Config.cvars.esp_ignore_unknown_ents);
+
+				ImGui::Text("");
 
 				ImGui::Checkbox("Draw Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
 				ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
@@ -141,6 +145,7 @@ void ShowMainMenu()
 				ImGui::ColorEdit3("Friend Color", g_Config.cvars.esp_friend_color);
 				ImGui::ColorEdit3("Enemy Color", g_Config.cvars.esp_enemy_color);
 				ImGui::ColorEdit3("Neutral Color", g_Config.cvars.esp_neutral_color);
+				ImGui::ColorEdit3("Item Color", g_Config.cvars.esp_item_color);
 
 				ImGui::Text("");
 
@@ -197,6 +202,15 @@ void ShowMainMenu()
 				ImGui::Checkbox("Override Lightmap", &g_Config.cvars.lightmap_override);
 				ImGui::SliderFloat("Lightmap Brightness", &g_Config.cvars.lightmap_brightness, 0.0f, 1.0f);
 				ImGui::ColorEdit3("Lightmap Color", g_Config.cvars.lightmap_color);
+
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Dynamic Light");
+
+				ImGui::Checkbox("Glow Self", &g_Config.cvars.glow_self);
+				ImGui::SliderFloat("Glow Self Radius", &g_Config.cvars.glow_self_radius, 0.f, 1000.f);
+				ImGui::SliderFloat("Glow Self Decay", &g_Config.cvars.glow_self_decay, 0.f, 1000.f);
+				ImGui::ColorEdit3("Glow Self Color", g_Config.cvars.glow_self_color);
 
 				ImGui::Text("");
 				ImGui::Separator();

@@ -163,6 +163,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 			if (m_bComingBackToAFKPoint && flDistanceToAFKPointSqr <= M_SQR(25.0f))
 			{
 				m_bComingBackToAFKPoint = false;
+				m_flComingBackStartTime = -1.0f;
 				return;
 			}
 

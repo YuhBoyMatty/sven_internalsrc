@@ -25,6 +25,8 @@ public:
 		bool esp_box_distance = true;
 		bool esp_box_entity_name = true;
 		bool esp_box_player_name = true;
+		bool esp_show_items = true;
+		bool esp_ignore_unknown_ents = false;
 		bool esp_skeleton = false;
 		bool esp_bones_name = false;
 		int esp_targets = 0;
@@ -33,6 +35,7 @@ public:
 		float esp_friend_color[3] = { 0.0f, 1.0f, 0.0f };
 		float esp_enemy_color[3] = { 1.0f, 0.0f, 0.0f };
 		float esp_neutral_color[3] = { 1.0f, 1.0f, 0.0f };
+		float esp_item_color[3] = { 0.0f, 0.53f, 1.0f };
 
 		// Visual
 		bool lightmap_override = false;
@@ -57,6 +60,11 @@ public:
 
 		float wh_wireframe_width = 1.5f;
 		float wh_wireframe_color[3] = { 0.0f, 1.0f, 0.0f };
+
+		bool glow_self = false;
+		float glow_self_radius = 100;
+		float glow_self_decay = 0;
+		float glow_self_color[3] = { 1.0f, 1.0f, 1.0f };
 
 		// Chams
 		bool chams = false;
