@@ -101,6 +101,26 @@ CON_COMMAND_FUNC(sc_wallhack_wireframe_models, ConCommand_WireframeModels, "sc_w
 	g_Config.cvars.wallhack_wireframe_models = !g_Config.cvars.wallhack_wireframe_models;
 }
 
+CON_COMMAND_FUNC(sc_esp, ConCommand_ESP, "sc_esp - Toggle ESP")
+{
+	Msg(g_Config.cvars.esp ? "ESP disabled\n" : "ESP enabled\n");
+	g_Config.cvars.esp = !g_Config.cvars.esp;
+}
+
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
+
+static bool IsWorldModelItem(const char *pszModelName)
+{
+	if (*pszModelName && *pszModelName == 'w' && pszModelName[1] && pszModelName[1] == '_')
+	{
+		return true;
+	}
+
+	return false;
+}
+
 //-----------------------------------------------------------------------------
 // Visual Hack
 //-----------------------------------------------------------------------------
@@ -187,40 +207,76 @@ void CVisual::ESP()
 	int nLocalPlayer = pLocal->index;
 
 	// What a mess lol
-	for (int i = 1; i <= MAXENTS; ++i)
+	for (register int i = 1; i <= MAXENTS; ++i)
 	{
 		if (i == nLocalPlayer)
 			continue;
 
-		cl_entity_s *pEntity = g_pEngineFuncs->GetEntityByIndex(i);
+		bool bPlayer;
+		bool bItem;
+		bool bClassInfoRetrieved = false;
+
+		float flDistance;
+		float vecScreenBottom[2], vecScreenTop[2];
+
+		const char *pszModelName;
+		const char *pszSlashLastOccur;
 
 		studiohdr_t *pStudioHeader = NULL;
 		model_s *pModel = NULL;
+
+		cl_entity_s *pEntity = g_pEngineFuncs->GetEntityByIndex(i);
 		class_info_t classInfo = { CLASS_PLAYER, FL_CLASS_FRIEND };
 
-		if (!pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || (!pEntity->player && pEntity->curstate.solid <= SOLID_TRIGGER) || pEntity->curstate.movetype == MOVETYPE_NONE)
+		if ( !pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || pEntity == pViewModel || pEntity->curstate.messagenum < pLocal->curstate.messagenum )
 			continue;
 
-		if (pEntity == pViewModel || pEntity->curstate.messagenum < pLocal->curstate.messagenum || pEntity->curstate.maxs.z == 0.0f && pEntity->curstate.mins.z == 0.0f)
+		if (pszSlashLastOccur = strrchr(pModel->name, '/'))
+			pszModelName = pszSlashLastOccur + 1;
+		else
 			continue;
 
-		if (!(pStudioHeader = (studiohdr_t *)g_pEngineStudio->Mod_Extradata(pModel)) || pStudioHeader->numhitboxes <= 3)
-			continue;
+		if ( bItem = IsWorldModelItem(pszModelName) )
+		{
+			classInfo = GetEntityClassInfo(pModel->name);
+			bClassInfoRetrieved = true;
 
-		bool bPlayer = pEntity->player;
-		float flDistance = (pEntity->origin - pLocal->origin).Length();
+			if ( !(classInfo.flags & FL_CLASS_ITEM) )
+				bItem = false;
+		}
+
+		if ( !bItem )
+		{
+			if ( (!pEntity->player && pEntity->curstate.solid <= SOLID_TRIGGER) || pEntity->curstate.movetype == MOVETYPE_NONE )
+				continue;
+
+			if ( pEntity->curstate.maxs.z == 0.0f && pEntity->curstate.mins.z == 0.0f )
+				continue;
+
+			if ( !(pStudioHeader = (studiohdr_t *)g_pEngineStudio->Mod_Extradata(pModel)) || pStudioHeader->numhitboxes == 0 )
+				continue;
+		}
+		else if ( !g_Config.cvars.esp_show_items )
+		{
+			continue;
+		}
+
+		bPlayer = pEntity->player;
+		flDistance = (pEntity->origin - pLocal->origin).Length();
 
 		if (flDistance > 4000.0f)
 			continue;
-
-		float vecScreenBottom[2], vecScreenTop[2];
 
 		Vector vecBottom = pEntity->origin;
 		Vector vecTop = pEntity->origin;
 
 		if (!bPlayer)
 		{
-			classInfo = GetEntityClassInfo(pModel->name);
+			if (!bClassInfoRetrieved)
+				classInfo = GetEntityClassInfo(pModel->name);
+
+			if (classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents)
+				continue;
 
 			// Don't process if entity isn't an ESP's target, or its dead body or trash
 			if (g_Config.cvars.esp_targets == 2 || IsEntityClassDeadbody(classInfo, pEntity->curstate.solid) || IsEntityClassTrash(classInfo))
@@ -253,13 +309,19 @@ void CVisual::ESP()
 			if (bPlayer)
 			{
 				if (pEntity->curstate.usehull)
-					boxHeight *= 0.9985f;
+					boxHeight *= 0.9986f;
+			}
+			else if (bItem)
+			{
+				r = int(255.f * g_Config.cvars.esp_item_color[0]);
+				g = int(255.f * g_Config.cvars.esp_item_color[1]);
+				b = int(255.f * g_Config.cvars.esp_item_color[2]);
 			}
 			else if (bIsEntityNeutral)
 			{
-				r = 255;
-				g = 255;
-				b = 0;
+				r = int(255.f * g_Config.cvars.esp_neutral_color[0]);
+				g = int(255.f * g_Config.cvars.esp_neutral_color[1]);
+				b = int(255.f * g_Config.cvars.esp_neutral_color[2]);
 			}
 			else if (!bIsEntityFriend)
 			{
@@ -318,7 +380,7 @@ void CVisual::ESP()
 						iActualHealth = iHealth;
 
 						if (iHealth == -1)
-							iHealth = 0;
+							iActualHealth = iHealth = 0;
 						else if (iHealth > 100)
 							iHealth = 100;
 
@@ -369,12 +431,18 @@ void CVisual::ESP()
 					continue;
 			}
 
+			if (bItem)
+				continue;
+
 		#ifdef PROCESS_PLAYER_BONES_ONLY
 			if ((g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name) && bPlayer)
 		#else
 			if (g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name)
 		#endif
 			{
+			#pragma warning(push)
+			#pragma warning(disable : 6011)
+
 				mstudiobone_t *pBone = (mstudiobone_t *)((byte *)pStudioHeader + pStudioHeader->boneindex);
 
 				for (int j = 0; j < pStudioHeader->numbones; ++j)
@@ -398,6 +466,8 @@ void CVisual::ESP()
 						g_Drawing.DrawLine(int(vBonePoint[0]), int(vBonePoint[1]), int(vParentPoint[0]), int(vParentPoint[1]), 255, 255, 255, 255);
 					}
 				}
+
+			#pragma warning(pop)
 			}
 		}
 	}
@@ -425,13 +495,16 @@ void CVisual::ProcessBones()
 	studiohdr_t *pStudioHeader = NULL;
 	model_s *pModel = NULL;
 
-	if (index == nLocalPlayer || !pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || (!pEntity->player && pEntity->curstate.solid <= 1) || pEntity->curstate.movetype == MOVETYPE_NONE)
+	if (index == nLocalPlayer)
+		return;
+
+	if (!pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || (!pEntity->player && pEntity->curstate.solid <= SOLID_TRIGGER) || pEntity->curstate.movetype == MOVETYPE_NONE)
 		return;
 
 	if (pEntity == pViewModel || pEntity->curstate.messagenum < pLocal->curstate.messagenum || pEntity->curstate.maxs.z == 0.0f && pEntity->curstate.mins.z == 0.0f)
 		return;
 
-	if (!(pStudioHeader = (studiohdr_t *)g_pEngineStudio->Mod_Extradata(pModel)) || pStudioHeader->numhitboxes <= 3)
+	if (!(pStudioHeader = (studiohdr_t *)g_pEngineStudio->Mod_Extradata(pModel)) || pStudioHeader->numhitboxes == 0)
 		return;
 
 	float vecScreenBottom[2], vecScreenTop[2];
