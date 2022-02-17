@@ -38,7 +38,7 @@ CON_COMMAND_FUNC(sc_spam_back, ConCommand_BackSpam, "sc_spam_back - Toggle S spa
 	g_Config.cvars.keyspam_s = !g_Config.cvars.keyspam_s;
 }
 
-CON_COMMAND_FUNC(sc_spam_snark, ConCommand_SnarkSpam, "sc_spam_snark - Toggle Q spam")
+CON_COMMAND_FUNC(sc_spam_q, ConCommand_SnarkSpam, "sc_spam_q - Toggle Q spam")
 {
 	Msg(g_Config.cvars.keyspam_q ? "Snark Spam disabled\n" : "Snark Spam enabled\n");
 	g_Config.cvars.keyspam_q = !g_Config.cvars.keyspam_q;
