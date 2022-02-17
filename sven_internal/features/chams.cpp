@@ -208,8 +208,8 @@ bool CChams::StudioRenderModel()
 
 				if ((pszModelName[0] == 'v' || pszModelName[0] == 'w') && pszModelName[1] == '_') // view / world item
 				{
-					bRenderHandled = Glow(pEntity, g_Config.cvars.glow_viewmodel, g_Config.cvars.glow_viewmodel_wall, g_Config.cvars.chams_viewmodel, g_Config.cvars.glow_viewmodel_width, g_Config.cvars.glow_viewmodel_color);
-					bRenderHandled = Chams(pEntity, g_Config.cvars.chams_viewmodel, g_Config.cvars.chams_viewmodel_wall, g_Config.cvars.chams_viewmodel_color, g_Config.cvars.chams_viewmodel_wall_color) || bRenderHandled;
+					bRenderHandled = Glow(pEntity, g_Config.cvars.glow_items, g_Config.cvars.glow_items_wall, g_Config.cvars.chams_items, g_Config.cvars.glow_items_width, g_Config.cvars.glow_items_color);
+					bRenderHandled = Chams(pEntity, g_Config.cvars.chams_items, g_Config.cvars.chams_items_wall, g_Config.cvars.chams_items_color, g_Config.cvars.chams_items_wall_color) || bRenderHandled;
 				}
 				else // world entity
 				{

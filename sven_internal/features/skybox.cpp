@@ -175,6 +175,11 @@ void CSkybox::Think()
 {
 	if (m_bSkyboxReplaced && g_pPlayerMove && g_pPlayerMove->movevars)
 	{
+		if (m_flNextThinkTime > g_pEngineFuncs->GetClientTime())
+			return;
+		else
+			m_flNextThinkTime = g_pEngineFuncs->GetClientTime() + 0.25f;
+
 		if ( memcmp( m_szSkyboxName, m_szCurrentSkyboxName, sizeof(m_szCurrentSkyboxName) ) )
 		{
 			s_bLoadingSkybox = true;
@@ -240,9 +245,16 @@ void CSkybox::OnConfigLoad()
 	}
 }
 
+void CSkybox::OnVideoInit()
+{
+	m_flNextThinkTime = -1.0f;
+}
+
 void CSkybox::Init()
 {
-	void *pR_LoadSkyboxInt = FIND_PATTERN(L"hw.dll", Patterns::Hardware::R_LoadSkyboxInt);
+	HMODULE hHardwareDLL = GetModuleHandle(L"hw.dll");
+
+	void *pR_LoadSkyboxInt = FindPattern(hHardwareDLL, Patterns::Hardware::R_LoadSkyboxInt);
 
 	if (!pR_LoadSkyboxInt)
 	{

@@ -79,11 +79,11 @@ typedef struct cl_clientfuncs_s
 	void (*HUD_TempEntUpdate) (double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s *pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s *pTemp, float damp));
 	struct cl_entity_s *(*HUD_GetUserEntity) (int index);
 	void (*HUD_VoiceStatus) (int entindex, qboolean bTalking);
-	int (*HUD_DirectorMessage) (unsigned char command, unsigned int firstObject, unsigned int secondObject, unsigned int flags);
+	void (*HUD_DirectorMessage) (unsigned char command, unsigned int firstObject, unsigned int secondObject, unsigned int flags);
 	int (*HUD_GetStudioModelInterface) (int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio);
-	void (*HUD_CHATINPUTPOSITION_FUNCTION) (int *x, int *y);
-	int (*HUD_GETPLAYERTEAM_FUNCTION) (int iplayer);
-	void (*CLIENTFACTORY) (void);
+	void (*HUD_ChatInputPosition) (int *x, int *y);
+	int (*HUD_GetPlayerTeam) (int iplayer);
+	void (*ClientFactory) (void);
 } cl_clientfunc_t;
 
 #endif

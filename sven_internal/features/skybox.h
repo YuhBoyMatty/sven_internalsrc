@@ -8,6 +8,8 @@ public:
 	void Init();
 	void OnConfigLoad();
 
+	void OnVideoInit();
+
 	void Think();
 
 	void Replace(const char *pszSkyboxName);
@@ -21,6 +23,8 @@ private:
 	char m_szSkyboxName[128] = { 0 };
 	char m_szCurrentSkyboxName[128] = { 0 };
 	char m_szOriginalSkyboxName[128] = { 0 };
+
+	float m_flNextThinkTime = -1.f;
 };
 
 extern CSkybox g_Skybox;
