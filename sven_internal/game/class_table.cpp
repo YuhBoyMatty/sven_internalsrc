@@ -188,6 +188,7 @@ CClassTable::CClassTable()
 
 	g_HashModelsTable.Insert("w_squeak.mdl", LinkClassInfo(CLASS_SNARK, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("chubby.mdl", LinkClassInfo(CLASS_CHUMTOAD, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("chumtoad.mdl", LinkClassInfo(CLASS_CHUMTOAD, FL_CLASS_FRIEND));
 
 	g_HashModelsTable.Insert("controller.mdl", LinkClassInfo(CLASS_ALIEN_CONTROLLER, FL_CLASS_ENEMY));
 
@@ -279,4 +280,5 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("rengine.mdl", LinkClassInfo(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
 	g_HashModelsTable.Insert("sat_globe.mdl", LinkClassInfo(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
 	g_HashModelsTable.Insert("w_pmedkit.mdl", LinkClassInfo(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("roach.mdl", LinkClassInfo(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
 }
