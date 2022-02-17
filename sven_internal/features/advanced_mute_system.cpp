@@ -584,7 +584,9 @@ bool HACK_GetPlayerUniqueID_Hooked(int nPlayerIndex, char *pszPlayerUniqueID)
 
 void InitAMS()
 {
-	void *pPrint = FIND_PATTERN(L"client.dll", Patterns::Client::CHudBaseTextBlock__Print);
+	HMODULE hClientDLL = GetModuleHandle(L"client.dll");
+
+	void *pPrint = FindPattern(hClientDLL, Patterns::Client::CHudBaseTextBlock__Print);
 
 	if (!pPrint)
 	{
@@ -592,7 +594,7 @@ void InitAMS()
 		return;
 	}
 	
-	void *pSaveState = FIND_PATTERN(L"client.dll", Patterns::Client::CVoiceBanMgr__SaveState);
+	void *pSaveState = FindPattern(hClientDLL, Patterns::Client::CVoiceBanMgr__SaveState);
 
 	if (!pSaveState)
 	{
@@ -600,7 +602,7 @@ void InitAMS()
 		return;
 	}
 	
-	void *pSetPlayerBan = FIND_PATTERN(L"client.dll", Patterns::Client::CVoiceBanMgr__SetPlayerBan);
+	void *pSetPlayerBan = FindPattern(hClientDLL, Patterns::Client::CVoiceBanMgr__SetPlayerBan);
 
 	if (!pSetPlayerBan)
 	{
@@ -608,7 +610,7 @@ void InitAMS()
 		return;
 	}
 	
-	void *pInternalFindPlayerSquelch = FIND_PATTERN(L"client.dll", Patterns::Client::CVoiceBanMgr__InternalFindPlayerSquelch);
+	void *pInternalFindPlayerSquelch = FindPattern(hClientDLL, Patterns::Client::CVoiceBanMgr__InternalFindPlayerSquelch);
 
 	if (!pInternalFindPlayerSquelch)
 	{
@@ -616,7 +618,7 @@ void InitAMS()
 		return;
 	}
 	
-	void *pIsPlayerBlocked = FIND_PATTERN(L"client.dll", Patterns::Client::CVoiceStatus__IsPlayerBlocked);
+	void *pIsPlayerBlocked = FindPattern(hClientDLL, Patterns::Client::CVoiceStatus__IsPlayerBlocked);
 
 	if (!pIsPlayerBlocked)
 	{
@@ -624,7 +626,7 @@ void InitAMS()
 		return;
 	}
 	
-	void *pSetPlayerBlockedState = FIND_PATTERN(L"client.dll", Patterns::Client::CVoiceStatus__SetPlayerBlockedState);
+	void *pSetPlayerBlockedState = FindPattern(hClientDLL, Patterns::Client::CVoiceStatus__SetPlayerBlockedState);
 
 	if (!pSetPlayerBlockedState)
 	{
@@ -632,7 +634,7 @@ void InitAMS()
 		return;
 	}
 
-	void *pUpdateServerState = FIND_PATTERN(L"client.dll", Patterns::Client::CVoiceStatus__UpdateServerState);
+	void *pUpdateServerState = FindPattern(hClientDLL, Patterns::Client::CVoiceStatus__UpdateServerState);
 
 	if (!pUpdateServerState)
 	{
@@ -640,7 +642,7 @@ void InitAMS()
 		return;
 	}
 	
-	void *pHACK_GetPlayerUniqueID = FIND_PATTERN(L"client.dll", Patterns::Client::HACK_GetPlayerUniqueID);
+	void *pHACK_GetPlayerUniqueID = FindPattern(hClientDLL, Patterns::Client::HACK_GetPlayerUniqueID);
 
 	if (!pHACK_GetPlayerUniqueID)
 	{

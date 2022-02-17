@@ -28,6 +28,7 @@
 #include "../features/skybox.h"
 #include "../features/custom_vote_popup.h"
 #include "../features/chat_colors.h"
+#include "../features/dynamic_glow.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -43,6 +44,7 @@ typedef int (*HUD_RedrawFn)(float, int);
 typedef void (*CL_CreateMoveFn)(float, struct usercmd_s *, int);
 typedef void (*HUD_PlayerMoveFn)(struct playermove_s *, int);
 typedef void (*V_CalcRefdefFn)(struct ref_params_s *);
+typedef int (*HUD_AddEntityFn)(int, struct cl_entity_s *, const char *);
 typedef void (*HUD_PostRunCmdFn)(struct local_state_s *, struct local_state_s *, struct usercmd_s *, int, double, unsigned int);
 typedef int (*HUD_Key_EventFn)(int, int, const char *);
 
@@ -70,6 +72,7 @@ HUD_RedrawFn HUD_Redraw_Original = NULL;
 CL_CreateMoveFn CL_CreateMove_Original = NULL;
 HUD_PlayerMoveFn HUD_PlayerMove_Original = NULL;
 V_CalcRefdefFn V_CalcRefdef_Original = NULL;
+HUD_AddEntityFn HUD_AddEntity_Original = NULL;
 HUD_PostRunCmdFn HUD_PostRunCmd_Original = NULL;
 HUD_Key_EventFn HUD_Key_Event_Original = NULL;
 
@@ -118,6 +121,8 @@ void HUD_Init_Hooked(void)
 
 int HUD_VidInit_Hooked(void)
 {
+	g_Skybox.OnVideoInit();
+
 	g_VotePopup.OnVideoInit();
 	g_ChatColors.OnVideoInit();
 	g_CamHack.OnVideoInit();
@@ -128,21 +133,7 @@ int HUD_VidInit_Hooked(void)
 
 int HUD_Redraw_Hooked(float time, int intermission)
 {
-	if (g_Config.cvars.glow_self)
-	{
-		// will be extended
-
-		dlight_t *pDynLight = g_pEngineFuncs->pEfxAPI->CL_AllocDlight(0);
-
-		pDynLight->color.r = int(255.f * g_Config.cvars.glow_self_color[0]);
-		pDynLight->color.g = int(255.f * g_Config.cvars.glow_self_color[1]);
-		pDynLight->color.b = int(255.f * g_Config.cvars.glow_self_color[2]);
-
-		pDynLight->origin = g_pPlayerMove->origin;
-		pDynLight->die = g_pEngineFuncs->GetClientTime() + 0.01f;
-		pDynLight->radius = g_Config.cvars.glow_self_radius;
-		pDynLight->decay = g_Config.cvars.glow_self_decay;
-	}
+	g_DynamicGlow.OnHUDRedraw();
 
 	return HUD_Redraw_Original(time, intermission);
 }
@@ -206,11 +197,24 @@ void HUD_PlayerMove_Hooked(struct playermove_s *ppmove, int server)
 
 void V_CalcRefdef_Hooked(struct ref_params_s *pparams)
 {
+	//pparams->punchangle[0] = 0.f;
+	//pparams->punchangle[1] = 0.f;
+	//pparams->punchangle[2] = 0.f;
+
 	V_CalcRefdef_Original(pparams);
 
 	g_Misc.V_CalcRefdef(pparams);
 	g_CamHack.V_CalcRefdef(pparams);
 	g_FirstPersonRoaming.V_CalcRefdef(pparams);
+}
+
+int HUD_AddEntity_Hooked(int type, struct cl_entity_s *ent, const char *modelname)
+{
+	int is_visible = HUD_AddEntity_Original(type, ent, modelname);
+
+	g_DynamicGlow.OnAddEntityPost(is_visible, type, ent, modelname);
+
+	return is_visible;
 }
 
 void HUD_PostRunCmd_Hooked(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed)
@@ -239,9 +243,11 @@ void InitClientModule()
 	extern void *pGetClientColor; // Chat Colors
 
 	INSTRUCTION instruction;
+	HMODULE hClientDLL = GetModuleHandle(L"client.dll");
+
 	int disassembledBytes = 0;
 
-	pGetClientColor = FIND_PATTERN(L"client.dll", Patterns::Client::GetClientColor);
+	pGetClientColor = FindPattern(hClientDLL, Patterns::Client::GetClientColor);
 
 	if (!pGetClientColor)
 	{
@@ -263,6 +269,7 @@ void InitClientModule()
 			g_pPlayerExtraInfo = reinterpret_cast<extra_player_info_t *>(instruction.op2.displacement);
 			break;
 		}
+
 	} while (disassembledBytes < 0x80);
 
 	// Init features
@@ -293,6 +300,9 @@ void InitClientModule()
 
 	V_CalcRefdef_Original = g_pClientFuncs->V_CalcRefdef;
 	g_pClientFuncs->V_CalcRefdef = V_CalcRefdef_Hooked;
+	
+	HUD_AddEntity_Original = g_pClientFuncs->HUD_AddEntity;
+	g_pClientFuncs->HUD_AddEntity = HUD_AddEntity_Hooked;
 
 	CL_CreateMove_Original = g_pClientFuncs->CL_CreateMove;
 	g_pClientFuncs->CL_CreateMove = CL_CreateMove_Hooked;

@@ -60,8 +60,9 @@ void WeaponsResource::IterateWeapons( void (*pfnCallback)(WEAPON *pWeapon, bool 
 void InitWeaponsResource()
 {
 	INSTRUCTION instruction;
+	HMODULE hClientDLL = GetModuleHandle(L"client.dll");
 
-	void *pWeaponsResource__GetFirstPos = FIND_PATTERN(L"client.dll", Patterns::Client::WeaponsResource__GetFirstPos);
+	void *pWeaponsResource__GetFirstPos = FindPattern(hClientDLL, Patterns::Client::WeaponsResource__GetFirstPos);
 
 	if (!pWeaponsResource__GetFirstPos)
 		Sys_Error("'WeaponsResource' failed initialization #1\n");

@@ -42,8 +42,9 @@ static void MainThreadRoutine();
 static bool InitInterfaces()
 {
 	INSTRUCTION instruction;
+	HMODULE hHardwareDLL = GetModuleHandle(L"hw.dll");
 
-	void *pEngineFuncs = FIND_PATTERN(L"hw.dll", Patterns::Interfaces::EngineFuncs);
+	void *pEngineFuncs = FindPattern(hHardwareDLL, Patterns::Interfaces::EngineFuncs);
 
 	if (!pEngineFuncs)
 	{
@@ -51,7 +52,7 @@ static bool InitInterfaces()
 		return false;
 	}
 
-	void *pClientFuncs = FIND_PATTERN(L"hw.dll", Patterns::Interfaces::ClientFuncs);
+	void *pClientFuncs = FindPattern(hHardwareDLL, Patterns::Interfaces::ClientFuncs);
 
 	if (!pClientFuncs)
 	{
@@ -59,7 +60,7 @@ static bool InitInterfaces()
 		return false;
 	}
 
-	void *pEngineStudio = FIND_PATTERN(L"hw.dll", Patterns::Interfaces::EngineStudio);
+	void *pEngineStudio = FindPattern(hHardwareDLL, Patterns::Interfaces::EngineStudio);
 
 	if (!pEngineStudio)
 	{

@@ -191,7 +191,9 @@ void V_RenderView_Hooked()
 
 void InitOpenGLModule()
 {
-	void *pV_SetupFrame = FIND_PATTERN(L"hw.dll", Patterns::Hardware::V_SetupFrame);
+	HMODULE hHardwareDLL = GetModuleHandle(L"hw.dll");
+
+	void *pV_SetupFrame = FindPattern(hHardwareDLL, Patterns::Hardware::V_SetupFrame);
 
 	if (!pV_SetupFrame)
 	{
@@ -199,7 +201,7 @@ void InitOpenGLModule()
 		return;
 	}
 
-	void *pV_RenderView = FIND_PATTERN(L"hw.dll", Patterns::Hardware::V_RenderView);
+	void *pV_RenderView = FindPattern(hHardwareDLL, Patterns::Hardware::V_RenderView);
 
 	if (!pV_RenderView)
 	{

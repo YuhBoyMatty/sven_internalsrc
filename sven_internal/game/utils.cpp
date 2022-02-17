@@ -397,8 +397,9 @@ bool IsTertiaryAttackGlitchInit_Server()
 static bool PatchInterp()
 {
 	DWORD dwProtection;
+	HMODULE hHardwareDLL = GetModuleHandle(L"hw.dll");
 
-	void *pPatchInterpString = LookupForString(L"hw.dll", "cl_updaterate min");
+	void *pPatchInterpString = FindString(hHardwareDLL, "cl_updaterate min");
 
 	if (!pPatchInterpString)
 	{
@@ -407,7 +408,7 @@ static bool PatchInterp()
 		return false;
 	}
 
-	BYTE *pPatchInterp = (BYTE *)FindAddress(L"hw.dll", pPatchInterpString);
+	BYTE *pPatchInterp = (BYTE *)FindAddress(hHardwareDLL, pPatchInterpString);
 
 	if (!pPatchInterp)
 	{
@@ -663,6 +664,7 @@ void InitUtils()
 {
 	DWORD dwProtection;
 	INSTRUCTION instruction;
+	HMODULE hHardwareDLL = GetModuleHandle(L"hw.dll");
 
 	if (!PatchInterp())
 	{
@@ -672,7 +674,7 @@ void InitUtils()
 
 	InitTertiaryAttackGlitch();
 
-	void *pNextCmdTime = FIND_PATTERN(L"hw.dll", Patterns::Hardware::flNextCmdTime);
+	void *pNextCmdTime = FindPattern(hHardwareDLL, Patterns::Hardware::flNextCmdTime);
 
 	if (!pNextCmdTime)
 	{
@@ -680,7 +682,7 @@ void InitUtils()
 		return;
 	}
 
-	void *pTextureLoadAddress = LookupForString(L"hw.dll", "Texture load: %6.1fms");
+	void *pTextureLoadAddress = FindString(hHardwareDLL, "Texture load: %6.1fms");
 
 	if (!pTextureLoadAddress)
 	{
@@ -688,7 +690,7 @@ void InitUtils()
 		return;
 	}
 
-	void *pTextureLoad = FindAddress(L"hw.dll", pTextureLoadAddress);
+	void *pTextureLoad = FindAddress(hHardwareDLL, pTextureLoadAddress);
 
 	if (!pTextureLoad)
 	{

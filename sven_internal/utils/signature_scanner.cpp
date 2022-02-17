@@ -1,153 +1,155 @@
-
 // Signature Scanner
 
 #pragma once
 
 #include "signature_scanner.h"
 
-static const wchar_t *s_wcModuleName = NULL;
-static MODULEINFO s_mInfo = { 0 };
+#include "../data_struct/hashtable.h"
 
-static inline bool RetrieveModuleInfo(const wchar_t *wcModuleName)
+//-----------------------------------------------------------------------------
+// Structure declarations
+//-----------------------------------------------------------------------------
+
+struct moduleinfo_s
 {
-	if (s_wcModuleName)
+	void *pBaseOfDll;
+	unsigned int SizeOfImage;
+};
+
+//-----------------------------------------------------------------------------
+// Vars
+//-----------------------------------------------------------------------------
+
+static CHashTable<HMODULE, moduleinfo_s> s_ModuleInfoHash(16);
+static moduleinfo_s s_ModuleInfo;
+
+//-----------------------------------------------------------------------------
+// Functions
+//-----------------------------------------------------------------------------
+
+static bool RetrieveModuleInfo(HMODULE hModule, struct moduleinfo_s *pModInfo)
+{
+	struct moduleinfo_s *pHashEntry = NULL;
+
+	if (pHashEntry = s_ModuleInfoHash.Find(hModule))
 	{
-		if (wcscmp(wcModuleName, s_wcModuleName))
-		{
-		GET_MODINFO:
-			HMODULE hModule = GetModuleHandle(wcModuleName);
-
-			if (!hModule)
-				return true;
-
-			GetModuleInformation(GetCurrentProcess(), hModule, &s_mInfo, sizeof(MODULEINFO));
-		}
+		*pModInfo = *pHashEntry;
+		return true;
 	}
-	else
+
+	MEMORY_BASIC_INFORMATION memInfo;
+
+	IMAGE_DOS_HEADER *dos;
+	IMAGE_NT_HEADERS *pe;
+	IMAGE_FILE_HEADER *file;
+	IMAGE_OPTIONAL_HEADER *opt;
+
+	if (VirtualQuery(hModule, &memInfo, sizeof(MEMORY_BASIC_INFORMATION)))
 	{
-		goto GET_MODINFO;
+		if (memInfo.State != MEM_COMMIT || memInfo.Protect == PAGE_NOACCESS)
+			return false;
+
+		unsigned int dwAllocationBase = (unsigned int)memInfo.AllocationBase;
+		pModInfo->pBaseOfDll = memInfo.AllocationBase;
+
+		dos = reinterpret_cast<IMAGE_DOS_HEADER *>(dwAllocationBase);
+		pe = reinterpret_cast<IMAGE_NT_HEADERS *>(dwAllocationBase + dos->e_lfanew);
+
+		file = &pe->FileHeader;
+		opt = &pe->OptionalHeader;
+
+		if (dos->e_magic == IMAGE_DOS_SIGNATURE && pe->Signature == IMAGE_NT_SIGNATURE && opt->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC && file->Machine == IMAGE_FILE_MACHINE_I386)
+		{
+			pModInfo->SizeOfImage = opt->SizeOfImage;
+
+			s_ModuleInfoHash.Insert(hModule, *pModInfo);
+
+			return true;
+		}
 	}
 
 	return false;
 }
 
-void *FindPatternWithOffset(const wchar_t *wcModuleName, BYTE byteSignature[], const char szMask[], const DWORD dwOffset)
+void *FindPattern(HMODULE hModule, struct pattern_s *pPattern, unsigned int offset /* = 0 */)
 {
-	if (RetrieveModuleInfo(wcModuleName))
-		return NULL;
-
-	s_wcModuleName = wcModuleName;
-
-	size_t i, nMaskLength = strlen(szMask);
-
-	BYTE *pModuleBase = (PBYTE)s_mInfo.lpBaseOfDll + dwOffset;
-	BYTE *pModuleEnd = pModuleBase + s_mInfo.SizeOfImage - (DWORD)nMaskLength;
-
-	if ((DWORD)pModuleBase > (DWORD)pModuleEnd)
-		return NULL;
-
-	while (pModuleBase < pModuleEnd)
+	if (RetrieveModuleInfo(hModule, &s_ModuleInfo))
 	{
-		for (i = 0; i < nMaskLength; i++)
+		unsigned long nLength = pPattern->length;
+		unsigned char *pSignature = &pPattern->signature;
+
+		unsigned char *pModuleBase = (unsigned char *)s_ModuleInfo.pBaseOfDll + offset;
+		unsigned char *pModuleEnd = pModuleBase + s_ModuleInfo.SizeOfImage - nLength;
+
+		while (pModuleBase < pModuleEnd)
 		{
-			if (szMask[i] != '?' && byteSignature[i] != pModuleBase[i])
-				break;
+			bool bFound = true;
+
+			for (register unsigned long i = 0; i < nLength; i++)
+			{
+				if (pSignature[i] != pPattern->ignorebyte && pSignature[i] != pModuleBase[i])
+				{
+					bFound = false;
+					break;
+				}
+			}
+
+			if (bFound)
+				return (void *)pModuleBase;
+
+			pModuleBase++;
 		}
-
-		if (i == nMaskLength)
-			return (void *)pModuleBase;
-
-		pModuleBase++;
 	}
 
 	return NULL;
 }
 
-void *FindPatternWithOffset(const wchar_t *wcModuleName, BYTE byteSignature[], const DWORD dwLength, const DWORD dwOffset, const BYTE byteIgnore = 0x2A)
+void *FindString(HMODULE hModule, const char *pszString, unsigned int offset /* = 0 */)
 {
-	if (RetrieveModuleInfo(wcModuleName))
-		return NULL;
-
-	s_wcModuleName = wcModuleName;
-
-	size_t i, nSigLength = static_cast<size_t>(dwLength);
-
-	BYTE *pModuleBase = (PBYTE)((DWORD)s_mInfo.lpBaseOfDll + dwOffset);
-	BYTE *pModuleEnd = pModuleBase + s_mInfo.SizeOfImage - (DWORD)nSigLength;
-
-	if ((DWORD)pModuleBase > (DWORD)pModuleEnd)
-		return NULL;
-
-	while (pModuleBase < pModuleEnd)
+	if (RetrieveModuleInfo(hModule, &s_ModuleInfo))
 	{
-		for (i = 0; i < nSigLength; i++)
+		unsigned long nLength = strlen(pszString);
+
+		unsigned char *pModuleBase = (unsigned char *)s_ModuleInfo.pBaseOfDll + offset;
+		unsigned char *pModuleEnd = pModuleBase + s_ModuleInfo.SizeOfImage - nLength;
+
+		while (pModuleBase < pModuleEnd)
 		{
-			if (byteSignature[i] != byteIgnore && byteSignature[i] != pModuleBase[i])
-				break;
+			bool bFound = true;
+
+			for (register unsigned long i = 0; i < nLength; i++)
+			{
+				if (pszString[i] != pModuleBase[i])
+				{
+					bFound = false;
+					break;
+				}
+			}
+
+			if (bFound)
+				return (void *)pModuleBase;
+
+			pModuleBase++;
 		}
-
-		if (i == nSigLength)
-			return (void *)pModuleBase;
-
-		pModuleBase++;
 	}
 
 	return NULL;
 }
 
-void *LookupForStringWithOffset(const wchar_t *wcModuleName, const char *szString, DWORD dwOffset)
+void *FindAddress(HMODULE hModule, void *pAddress, unsigned int offset /* = 0 */)
 {
-	if (RetrieveModuleInfo(wcModuleName))
-		return NULL;
-
-	s_wcModuleName = wcModuleName;
-
-	size_t i, nLength = strlen(szString);
-
-	BYTE *pModuleBase = (PBYTE)((DWORD)s_mInfo.lpBaseOfDll + dwOffset);
-	BYTE *pModuleEnd = pModuleBase + s_mInfo.SizeOfImage - (DWORD)nLength;
-
-	if ((DWORD)pModuleBase > (DWORD)pModuleEnd)
-		return NULL;
-
-	while (pModuleBase < pModuleEnd)
+	if (RetrieveModuleInfo(hModule, &s_ModuleInfo))
 	{
-		for (i = 0; i < nLength; i++)
+		unsigned char *pModuleBase = (unsigned char *)s_ModuleInfo.pBaseOfDll + offset;
+		unsigned char *pModuleEnd = pModuleBase + s_ModuleInfo.SizeOfImage - sizeof(void *);
+
+		while (pModuleBase < pModuleEnd)
 		{
-			if (szString[i] != pModuleBase[i])
-				break;
+			if (*(unsigned long *)pModuleBase == (unsigned long)pAddress)
+				return (void *)pModuleBase;
+
+			pModuleBase++;
 		}
-
-		if (i == nLength)
-			return (void *)pModuleBase;
-
-		pModuleBase++;
-	}
-
-	return NULL;
-}
-
-void *FindAddressWithOffset(const wchar_t *wcModuleName, void *pAddress, DWORD dwOffset)
-{
-	if (RetrieveModuleInfo(wcModuleName))
-		return NULL;
-
-	s_wcModuleName = wcModuleName;
-
-	DWORD dwAddress = (DWORD)pAddress;
-
-	BYTE *pModuleBase = (PBYTE)((DWORD)s_mInfo.lpBaseOfDll + dwOffset);
-	BYTE *pModuleEnd = pModuleBase + s_mInfo.SizeOfImage - (DWORD)4;
-
-	if ((DWORD)pModuleBase > (DWORD)pModuleEnd)
-		return NULL;
-
-	while (pModuleBase < pModuleEnd)
-	{
-		if (*(PDWORD)pModuleBase == dwAddress)
-			return (void *)pModuleBase;
-
-		pModuleBase++;
 	}
 
 	return NULL;

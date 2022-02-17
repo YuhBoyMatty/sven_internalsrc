@@ -1,52 +1,87 @@
-
-// Patterns
-
 #pragma once
 
-#include <Windows.h>
+//-----------------------------------------------------------------------------
+// Macro definitions
+//-----------------------------------------------------------------------------
 
-#define PATTERN_LENGTH(pattern, name) DWORD name = pattern.length
-#define PATTERN_SIGNATURE(pattern, name) BYTE *name = pattern.signature
+#define DEFINE_PATTERN(name, signature) struct tpattern_s<get_pattern_length(signature), (unsigned char)0x2A> __pattern_##name(signature); \
+	struct pattern_s *name = reinterpret_cast<struct pattern_s *>(&(__pattern_##name))
 
-#define INIT_PATTERN(name) extern DWORD (name##_len); extern BYTE *(name##_sig)
+#define DEFINE_PATTERN_IGNORE_BYTE(name, signature, ignorebyte) struct tpattern_s<get_pattern_length(signature), (unsigned char)ignorebyte> __pattern_##name(signature); \
+	struct pattern_s *name = reinterpret_cast<struct pattern_s *>(&(__pattern_##name))
 
-#define PATTERN(name, signature) struct Pattern<GetPatternLength(signature)> name(signature, 0x2A); PATTERN_LENGTH(name, name##_len); PATTERN_SIGNATURE(name, name##_sig)
-#define PATTERN_IGNORE_BYTE(name, signature, ignorebyte) struct Pattern<GetPatternLength(signature)> name(signature, ignorebyte); PATTERN_LENGTH(name, name##_len); PATTERN_SIGNATURE(name, name##_sig)
+#define EXTERN_PATTERN(name) extern struct pattern_s *name
 
-#define REPLACE_PATTERN(pattern1, pattern2) pattern1##_len = pattern2##_len; pattern1##_sig = pattern2##_sig
+#define REPLACE_PATTERN(dest, src) dest = src
 
-static constexpr DWORD GetPatternLength(const char *szPattern)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+static constexpr int hex_to_decimal_table[] =
 {
-	DWORD nCount = 0;
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+};
 
-	while (*szPattern)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+static inline int hex_to_decimal_fast(char *hex)
+{
+	int result = 0;
+
+	while (*hex && result >= 0)
 	{
-		char symbol = *szPattern;
+		result = (result << 4) | hex_to_decimal_table[*hex++];
+	}
+
+	return result;
+}
+
+static inline constexpr unsigned int get_pattern_length(const char *pszPattern)
+{
+	unsigned int nCount = 0;
+
+	while (*pszPattern)
+	{
+		char symbol = *pszPattern;
 
 		if (symbol != ' ')
 		{
 			++nCount;
 
 			if (symbol != '?')
-				++szPattern;
+				++pszPattern;
 		}
 
-		++szPattern;
+		++pszPattern;
 	}
 
 	return nCount;
 }
 
-template<DWORD bytesCount>
-struct Pattern
-{
-	constexpr Pattern(const char *szPattern, BYTE byteIgnore) : signature(), length(bytesCount)
-	{
-		DWORD nCount = 0;
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-		while (*szPattern)
+template<int bytesCount, unsigned char ignoreByte>
+struct tpattern_s
+{
+	constexpr tpattern_s(const char *pszPattern) : signature(), length(bytesCount), ignorebyte(ignoreByte)
+	{
+		int nLength = 0;
+
+		while (*pszPattern)
 		{
-			char symbol = *szPattern;
+			char symbol = *pszPattern;
 
 			if (symbol != ' ')
 			{
@@ -54,25 +89,34 @@ struct Pattern
 				{
 					char byte[3] = { 0 };
 
-					byte[0] = szPattern[0];
-					byte[1] = szPattern[1];
+					byte[0] = pszPattern[0];
+					byte[1] = pszPattern[1];
 
-					signature[nCount] = static_cast<BYTE>(strtol(byte, NULL, 16));
+					//signature[nLength] = static_cast<unsigned char>(strtoul(byte, NULL, 16));
+					signature[nLength] = static_cast<unsigned char>(hex_to_decimal_fast(byte));
 
-					++szPattern;
+					++pszPattern;
 				}
 				else
 				{
-					signature[nCount] = byteIgnore;
+					signature[nLength] = ignorebyte;
 				}
 
-				++nCount;
+				++nLength;
 			}
 
-			++szPattern;
+			++pszPattern;
 		}
 	}
 
-	DWORD length;
-	BYTE signature[bytesCount];
+	int length;
+	unsigned char ignorebyte;
+	unsigned char signature[bytesCount];
+};
+
+struct pattern_s
+{
+	unsigned int length;
+	unsigned char ignorebyte;
+	unsigned char signature;
 };

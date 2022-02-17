@@ -274,7 +274,9 @@ void InitEngineModule()
 
 	//pNetchan_Transmit = (void *)((BYTE *)pNetchan_Transmit - 0x75);
 
-	void *pNetchan_CanPacket = FIND_PATTERN(L"hw.dll", Patterns::Hardware::Netchan_CanPacket);
+	HMODULE hHardwareDLL = GetModuleHandle(L"hw.dll");
+
+	void *pNetchan_CanPacket = FindPattern(hHardwareDLL, Patterns::Hardware::Netchan_CanPacket);
 
 	if (!pNetchan_CanPacket)
 	{
