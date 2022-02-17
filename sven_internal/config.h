@@ -61,11 +61,6 @@ public:
 		float wh_wireframe_width = 1.5f;
 		float wh_wireframe_color[3] = { 0.0f, 1.0f, 0.0f };
 
-		bool glow_self = false;
-		float glow_self_radius = 100;
-		float glow_self_decay = 0;
-		float glow_self_color[3] = { 1.0f, 1.0f, 1.0f };
-
 		// Chams
 		bool chams = false;
 
@@ -79,10 +74,10 @@ public:
 		float chams_entities_color[3] = { 0.0f, 1.0f, 0.0f };
 		float chams_entities_wall_color[3] = { 1.0f, 0.0f, 0.0f };
 		
-		int chams_viewmodel = 0;
-		bool chams_viewmodel_wall = true;
-		float chams_viewmodel_color[3] = { 0.0f, 0.0f, 1.0f };
-		float chams_viewmodel_wall_color[3] = { 1.0f, 0.0f, 0.0f };
+		int chams_items = 0;
+		bool chams_items_wall = true;
+		float chams_items_color[3] = { 0.0f, 0.0f, 1.0f };
+		float chams_items_wall_color[3] = { 1.0f, 0.0f, 0.0f };
 
 		// Glow
 		bool glow = false;
@@ -98,10 +93,33 @@ public:
 		int glow_entities_width = 10;
 		float glow_entities_color[3] = { 1.0f, 0.0f, 0.0f };
 
-		int glow_viewmodel = 0;
-		bool glow_viewmodel_wall = true;
-		int glow_viewmodel_width = 10;
-		float glow_viewmodel_color[3] = { 1.0f, 0.0f, 0.0f };
+		int glow_items = 0;
+		bool glow_items_wall = true;
+		int glow_items_width = 10;
+		float glow_items_color[3] = { 0.0f, 0.0f, 1.0f };
+
+		// Dynamic Glow
+		bool dyn_glow_attach = false;
+
+		bool dyn_glow_self = false;
+		float dyn_glow_self_radius = 125.0f;
+		float dyn_glow_self_decay = 0;
+		float dyn_glow_self_color[3] = { 1.0f, 1.0f, 1.0f };
+
+		bool dyn_glow_players = false;
+		float dyn_glow_players_radius = 75.0f;
+		float dyn_glow_players_decay = 0;
+		float dyn_glow_players_color[3] = { 0.0f, 1.0f, 0.0f };
+		
+		bool dyn_glow_entities = false;
+		float dyn_glow_entities_radius = 75.0f;
+		float dyn_glow_entities_decay = 0;
+		float dyn_glow_entities_color[3] = { 1.0f, 0.0f, 0.0f };
+		
+		bool dyn_glow_items = false;
+		float dyn_glow_items_radius = 50.0f;
+		float dyn_glow_items_decay = 0;
+		float dyn_glow_items_color[3] = { 0.0f, 0.0f, 1.0f };
 
 		// Strafer
 		bool strafe = true;

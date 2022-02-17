@@ -104,6 +104,7 @@
     <ClCompile Include="features\chams.cpp" />
     <ClCompile Include="features\chat_colors.cpp" />
     <ClCompile Include="features\custom_vote_popup.cpp" />
+    <ClCompile Include="features\dynamic_glow.cpp" />
     <ClCompile Include="features\firstperson_roaming.cpp" />
     <ClCompile Include="features\keyspam.cpp" />
     <ClCompile Include="features\message_spammer.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="features\chams.h" />
     <ClInclude Include="features\chat_colors.h" />
     <ClInclude Include="features\custom_vote_popup.h" />
+    <ClInclude Include="features\dynamic_glow.h" />
     <ClInclude Include="features\firstperson_roaming.h" />
     <ClInclude Include="features\keyspam.h" />
     <ClInclude Include="features\message_spammer.h" />

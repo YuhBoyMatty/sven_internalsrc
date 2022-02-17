@@ -205,15 +205,6 @@ void ShowMainMenu()
 
 				ImGui::Text("");
 				ImGui::Separator();
-				ImGui::Text("Dynamic Light");
-
-				ImGui::Checkbox("Glow Self", &g_Config.cvars.glow_self);
-				ImGui::SliderFloat("Glow Self Radius", &g_Config.cvars.glow_self_radius, 0.f, 1000.f);
-				ImGui::SliderFloat("Glow Self Decay", &g_Config.cvars.glow_self_decay, 0.f, 1000.f);
-				ImGui::ColorEdit3("Glow Self Color", g_Config.cvars.glow_self_color);
-
-				ImGui::Text("");
-				ImGui::Separator();
 				ImGui::Text("Wallhack");
 
 				ImGui::Checkbox("Simple Wallhack", &g_Config.cvars.wallhack); ImGui::SameLine();
@@ -257,12 +248,12 @@ void ShowMainMenu()
 				
 				ImGui::Text("");
 				ImGui::Separator();
-				ImGui::Text("View Model");
+				ImGui::Text("Items");
 
-				ImGui::Checkbox("Chams View Model Behind Wall", &g_Config.cvars.chams_viewmodel_wall);
-				ImGui::SliderInt("Chams View Model", &g_Config.cvars.chams_viewmodel, 0, 3, chams_items[g_Config.cvars.chams_viewmodel]);
-				ImGui::ColorEdit3("Chams View Model Color", g_Config.cvars.chams_viewmodel_color);
-				ImGui::ColorEdit3("Chams View Model Wall Color", g_Config.cvars.chams_viewmodel_wall_color);
+				ImGui::Checkbox("Chams Items Behind Wall", &g_Config.cvars.chams_items_wall);
+				ImGui::SliderInt("Chams Items", &g_Config.cvars.chams_items, 0, 3, chams_items[g_Config.cvars.chams_items]);
+				ImGui::ColorEdit3("Chams Items Color", g_Config.cvars.chams_items_color);
+				ImGui::ColorEdit3("Chams Items Wall Color", g_Config.cvars.chams_items_wall_color);
 				
 				ImGui::Text("");
 			}
@@ -296,12 +287,59 @@ void ShowMainMenu()
 
 				ImGui::Text("");
 				ImGui::Separator();
-				ImGui::Text("View Model");
+				ImGui::Text("Items");
 
-				ImGui::Checkbox("Glow View Model Behind Wall", &g_Config.cvars.glow_viewmodel_wall);
-				ImGui::SliderInt("Glow View Model", &g_Config.cvars.glow_viewmodel, 0, 3, glow_items[g_Config.cvars.glow_viewmodel]);
-				ImGui::SliderInt("Glow View Model Width", &g_Config.cvars.glow_viewmodel_width, 0, 30);
-				ImGui::ColorEdit3("Glow View Model Color", g_Config.cvars.glow_viewmodel_color);
+				ImGui::Checkbox("Glow Items Behind Wall", &g_Config.cvars.glow_items_wall);
+				ImGui::SliderInt("Glow Items", &g_Config.cvars.glow_items, 0, 3, glow_items[g_Config.cvars.glow_items]);
+				ImGui::SliderInt("Glow Items Width", &g_Config.cvars.glow_items_width, 0, 30);
+				ImGui::ColorEdit3("Glow Items Color", g_Config.cvars.glow_items_color);
+
+				ImGui::Text("");
+			}
+			
+			// Dynamic Glow
+			if (ImGui::CollapsingHeader("Dynamic Glow"))
+			{
+				ImGui::Separator();
+
+				ImGui::Checkbox("Dyn. Glow Attach To Targets", &g_Config.cvars.dyn_glow_attach);
+
+				ImGui::Text("");
+
+				ImGui::Separator();
+				ImGui::Text("Self");
+
+				ImGui::Checkbox("Dyn. Glow Self", &g_Config.cvars.dyn_glow_self);
+				ImGui::SliderFloat("Dyn. Glow Self Radius", &g_Config.cvars.dyn_glow_self_radius, 0.f, 4096.f);
+				ImGui::SliderFloat("Dyn. Glow Self Decay", &g_Config.cvars.dyn_glow_self_decay, 0.f, 4096.f);
+				ImGui::ColorEdit3("Dyn. Glow Self Color", g_Config.cvars.dyn_glow_self_color);
+
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Players");
+
+				ImGui::Checkbox("Dyn. Glow Players", &g_Config.cvars.dyn_glow_players);
+				ImGui::SliderFloat("Dyn. Glow Players Radius", &g_Config.cvars.dyn_glow_players_radius, 0.f, 4096.f);
+				ImGui::SliderFloat("Dyn. Glow Players Decay", &g_Config.cvars.dyn_glow_players_decay, 0.f, 4096.f);
+				ImGui::ColorEdit3("Dyn. Glow Players Color", g_Config.cvars.dyn_glow_players_color);
+				
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Entities");
+
+				ImGui::Checkbox("Dyn. Glow Entities", &g_Config.cvars.dyn_glow_entities);
+				ImGui::SliderFloat("Dyn. Glow Entities Radius", &g_Config.cvars.dyn_glow_entities_radius, 0.f, 4096.f);
+				ImGui::SliderFloat("Dyn. Glow Entities Decay", &g_Config.cvars.dyn_glow_entities_decay, 0.f, 4096.f);
+				ImGui::ColorEdit3("Dyn. Glow Entities Color", g_Config.cvars.dyn_glow_entities_color);
+				
+				ImGui::Text("");
+				ImGui::Separator();
+				ImGui::Text("Items");
+
+				ImGui::Checkbox("Dyn. Glow Items", &g_Config.cvars.dyn_glow_items);
+				ImGui::SliderFloat("Dyn. Glow Items Radius", &g_Config.cvars.dyn_glow_items_radius, 0.f, 4096.f);
+				ImGui::SliderFloat("Dyn. Glow Items Decay", &g_Config.cvars.dyn_glow_items_decay, 0.f, 4096.f);
+				ImGui::ColorEdit3("Dyn. Glow Items Color", g_Config.cvars.dyn_glow_items_color);
 
 				ImGui::Text("");
 			}
@@ -790,15 +828,17 @@ void InitMenuModule()
 	using ValveUnhookFuncFn = void (__cdecl *)(void *, bool); // void *pAddress, bool unknown
 	static ValveUnhookFuncFn ValveUnhookFunc = NULL;
 
+	HMODULE hGameOverlayDLL = GetModuleHandle(L"gameoverlayrenderer.dll");
+
 	if (!ValveUnhookFunc)
 	{
-		ValveUnhookFunc = (ValveUnhookFuncFn)FIND_PATTERN(L"gameoverlayrenderer.dll", Patterns::GameOverlay::ValveUnhookFunc);
+		ValveUnhookFunc = (ValveUnhookFuncFn)FindPattern(hGameOverlayDLL, Patterns::GameOverlay::ValveUnhookFunc);
 
 		if (!ValveUnhookFunc)
 			Sys_Error("'ValveUnhookFunc' failed initialization\n");
 	}
 
-	SetCursorPos_GameOverlay = (SetCursorPosFn)FIND_PATTERN(L"gameoverlayrenderer.dll", Patterns::GameOverlay::SetCursorPos_Hook);
+	SetCursorPos_GameOverlay = (SetCursorPosFn)FindPattern(hGameOverlayDLL, Patterns::GameOverlay::SetCursorPos_Hook);
 
 	if (!SetCursorPos_GameOverlay)
 		Sys_Error("'SetCursorPos_GameOverlay' failed initialization\n");

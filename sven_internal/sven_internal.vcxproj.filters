@@ -175,6 +175,9 @@
     <ClCompile Include="game\player_utils.cpp">
       <Filter>Sven Internal\Game</Filter>
     </ClCompile>
+    <ClCompile Include="features\dynamic_glow.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\patterns_base.h">
@@ -338,6 +341,9 @@
     </ClInclude>
     <ClInclude Include="game\player_utils.h">
       <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\dynamic_glow.h">
+      <Filter>Sven Internal\Features</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
