@@ -27,7 +27,7 @@ CDynamicGlow g_DynamicGlow;
 
 void CDynamicGlow::OnHUDRedraw() // glow local player
 {
-	if (g_Config.cvars.dyn_glow_self)
+	if (g_Config.cvars.dyn_glow_self && g_pPlayerMove->iuser1 == 0)
 	{
 		float flRadius = g_Config.cvars.dyn_glow_self_radius;
 		float flDecay = g_Config.cvars.dyn_glow_self_decay;
