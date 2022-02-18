@@ -17,13 +17,18 @@
 
 #include "../config.h"
 
+#include "../patterns.h"
+#include "../utils/signature_scanner.h"
 #include "../utils/trampoline_hook.h"
+
+#include "cl_dll/hud.h"
 
 //-----------------------------------------------------------------------------
 // Typedefs
 //-----------------------------------------------------------------------------
 
 typedef BOOL (WINAPI *QueryPerformanceCounterFn)(LARGE_INTEGER *);
+typedef void (__thiscall *CHud__ThinkFn)(CHud *thisptr);
 
 //-----------------------------------------------------------------------------
 // Imports
@@ -37,6 +42,7 @@ extern bool bSendPacket;
 //-----------------------------------------------------------------------------
 
 TRAMPOLINE_HOOK(QueryPerformanceCounter_Hook);
+TRAMPOLINE_HOOK(CHud__Think_Hook);
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -45,8 +51,10 @@ TRAMPOLINE_HOOK(QueryPerformanceCounter_Hook);
 CMisc g_Misc;
 
 QueryPerformanceCounterFn QueryPerformanceCounter_Original = NULL;
+CHud__ThinkFn CHud__Think_Original = NULL;
 
 cvar_s *ex_interp = NULL;
+cvar_s *default_fov = NULL;
 
 static int s_nSinkState = 0;
 static int s_iWeaponID = -1;
@@ -314,6 +322,28 @@ BOOL WINAPI QueryPerformanceCounter_Hooked(LARGE_INTEGER *lpPerformanceCount)
 	lpPerformanceCount->QuadPart = newvalue;
 
 	return result;
+}
+
+void __fastcall CHud__Think_Hooked(CHud *pHud)
+{
+	if (g_Config.cvars.remove_fov_cap)
+	{
+		HUDLIST *pList = pHud->m_pHudList;
+
+		while (pList)
+		{
+			if ((pList->p->m_iFlags & HUD_ACTIVE) != 0)
+				pList->p->Think();
+			pList = pList->pNext;
+		}
+
+		*((float *)pHud + 4) = 0.f; // m_flMouseSensitivity
+		*((int *)pHud + 22) = int(default_fov->value); // m_iFOV
+	}
+	else
+	{
+		CHud__Think_Original(pHud);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -877,7 +907,19 @@ void CMisc::QuakeGuns_HUD_PostRunCmd(struct local_state_s *to)
 
 void CMisc::Init()
 {
+	HMODULE hClientDLL = GetModuleHandle(L"client.dll");
+
+	void *pCHud__Think = FindPattern(hClientDLL, Patterns::Client::CHud__Think);
+
+	if (!pCHud__Think)
+	{
+		Sys_Error("'CHud::Think' failed initialization");
+		return;
+	}
+
 	HOOK_FUNCTION(QueryPerformanceCounter_Hook, QueryPerformanceCounter, QueryPerformanceCounter_Hooked, QueryPerformanceCounter_Original, QueryPerformanceCounterFn);
+	HOOK_FUNCTION(CHud__Think_Hook, pCHud__Think, CHud__Think_Hooked, CHud__Think_Original, CHud__ThinkFn);
 
 	ex_interp = g_pEngineFuncs->pfnGetCvarPointer("ex_interp");
+	default_fov = g_pEngineFuncs->pfnGetCvarPointer("default_fov");
 }

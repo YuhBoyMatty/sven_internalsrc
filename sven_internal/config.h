@@ -152,6 +152,7 @@ public:
 		bool tertiary_attack_glitch = false;
 		bool save_soundcache = false;
 		bool rotate_dead_body = false;
+		bool remove_fov_cap = false;
 		int no_weapon_anim = 0; // enum
 
 		bool color_pulsator = false;

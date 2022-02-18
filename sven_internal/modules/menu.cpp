@@ -387,6 +387,7 @@ void ShowMainMenu()
 				ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch);
 				ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
 				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
+				ImGui::Checkbox("Remove FOV Cap", &g_Config.cvars.remove_fov_cap);
 				
 				ImGui::Text("");
 				ImGui::Separator();

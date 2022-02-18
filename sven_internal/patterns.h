@@ -44,6 +44,8 @@ namespace Patterns
 
 		EXTERN_PATTERN(GetClientColor);
 
+		EXTERN_PATTERN(CHud__Think);
+
 		EXTERN_PATTERN(WeaponsResource__GetFirstPos);
 	}
 

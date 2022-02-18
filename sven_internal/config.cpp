@@ -285,6 +285,7 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("TertiaryAttackGlitch", cvars.tertiary_attack_glitch);
 		INI_IMPORT_VARIABLE("SaveSoundcache", cvars.save_soundcache);
 		INI_IMPORT_VARIABLE("RotateDeadBody", cvars.rotate_dead_body);
+		INI_IMPORT_VARIABLE("RemoveFOVCap", cvars.remove_fov_cap);
 		INI_IMPORT_VARIABLE("NoWeaponAnim", cvars.no_weapon_anim);
 		INI_IMPORT_VARIABLE("ColorPulsator", cvars.color_pulsator);
 		INI_IMPORT_VARIABLE("ColorPulsatorTop", cvars.color_pulsator_top);
@@ -568,6 +569,7 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("TertiaryAttackGlitch", cvars.tertiary_attack_glitch);
 		INI_EXPORT_VARIABLE("SaveSoundcache", cvars.save_soundcache);
 		INI_EXPORT_VARIABLE("RotateDeadBody", cvars.rotate_dead_body);
+		INI_EXPORT_VARIABLE("RemoveFOVCap", cvars.remove_fov_cap);
 		INI_EXPORT_VARIABLE("NoWeaponAnim", cvars.no_weapon_anim);
 		INI_EXPORT_VARIABLE("ColorPulsator", cvars.color_pulsator);
 		INI_EXPORT_VARIABLE("ColorPulsatorTop", cvars.color_pulsator_top);
