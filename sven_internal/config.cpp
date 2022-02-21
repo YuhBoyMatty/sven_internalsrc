@@ -4,6 +4,7 @@
 
 #include "../ini-parser/ini_parser.h"
 #include "../features/skybox.h"
+#include "../utils/styles.h"
 #include "../interfaces.h"
 
 #include <stdio.h>
@@ -109,6 +110,7 @@ bool CConfig::Load()
 	INI_IMPORT_BEGIN_SECTION("SETTINGS");
 		INI_IMPORT_VARIABLE_SET_RADIX(16);
 		INI_IMPORT_VARIABLE("ToggleButton", dwToggleButton);
+		INI_IMPORT_VARIABLE("Theme", theme);
 	INI_IMPORT_END_SECTION();
 		
 	INI_IMPORT_BEGIN_SECTION("ESP");
@@ -393,6 +395,7 @@ void CConfig::Save()
 
 	INI_EXPORT_BEGIN_SECTION("SETTINGS");
 		INI_EXPORT_VARIABLE("ToggleButton", dwToggleButton);
+		INI_EXPORT_VARIABLE("Theme", theme);
 	INI_EXPORT_END_SECTION();
 		
 	INI_EXPORT_BEGIN_SECTION("ESP");

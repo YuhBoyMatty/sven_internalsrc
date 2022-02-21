@@ -178,6 +178,9 @@
     <ClCompile Include="features\dynamic_glow.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
+    <ClCompile Include="utils\styles.cpp">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\patterns_base.h">
@@ -344,6 +347,9 @@
     </ClInclude>
     <ClInclude Include="features\dynamic_glow.h">
       <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\styles.h">
+      <Filter>Sven Internal\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

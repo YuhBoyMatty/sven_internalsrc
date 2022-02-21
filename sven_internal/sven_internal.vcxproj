@@ -21,13 +21,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -140,6 +140,7 @@
     <ClCompile Include="strafe\strafe.cpp" />
     <ClCompile Include="utils\patcher.cpp" />
     <ClCompile Include="utils\signature_scanner.cpp" />
+    <ClCompile Include="utils\styles.cpp" />
     <ClCompile Include="utils\trampoline_hook.cpp" />
     <ClCompile Include="utils\vtable_hook.cpp" />
   </ItemGroup>
@@ -197,6 +198,7 @@
     <ClInclude Include="utils\patcher.h" />
     <ClInclude Include="utils\patterns_base.h" />
     <ClInclude Include="utils\signature_scanner.h" />
+    <ClInclude Include="utils\styles.h" />
     <ClInclude Include="utils\trampoline_hook.h" />
     <ClInclude Include="utils\vtable_hook.h" />
   </ItemGroup>

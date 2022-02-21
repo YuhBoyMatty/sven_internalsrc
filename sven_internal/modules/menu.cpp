@@ -15,8 +15,8 @@
 #include "../patterns.h"
 #include "../utils/trampoline_hook.h"
 #include "../utils/signature_scanner.h"
+#include "../utils/styles.h"
 
-#include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
 
@@ -38,6 +38,7 @@ static WNDPROC hGameWndProc;
 
 bool g_bMenuEnabled = false;
 bool g_bMenuClosed = false;
+static bool StyleLoaded = false;
 
 //-----------------------------------------------------------------------------
 // Declare hooks
@@ -60,6 +61,12 @@ SetCursorPosFn SetCursorPos_GameOverlay = NULL;
 
 void ShowMainMenu()
 {
+	if (!StyleLoaded) 
+	{
+		LoadTheme();
+		StyleLoaded = true;
+	}
+
 	ImGui::GetIO().MouseDrawCursor = g_bMenuEnabled;
 
 	if (g_bMenuEnabled)
@@ -78,8 +85,8 @@ void ShowMainMenu()
 			}
 			ImGui::EndMenuBar();
 
-			// Config
-			if (ImGui::CollapsingHeader("Config"))
+			// Settings
+			if (ImGui::CollapsingHeader("Settings")) 
 			{
 				ImGui::Separator();
 				ImGui::Text("Save & Load Config");
@@ -113,557 +120,709 @@ void ShowMainMenu()
 					g_Config.dwToggleButton = 0x23;
 
 				ImGui::Text("");
-			}
-
-			// ESP
-			if (ImGui::CollapsingHeader("ESP"))
-			{
 				ImGui::Separator();
 
-				ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
-				ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline);
-				ImGui::Checkbox("Show Items", &g_Config.cvars.esp_show_items);
-				ImGui::Checkbox("Ignore Unknown Entities", &g_Config.cvars.esp_ignore_unknown_ents);
+				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
 
 				ImGui::Text("");
+				ImGui::Separator();
 
-				ImGui::Checkbox("Draw Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
-				ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
+				ImGui::Text("Style");
 
-				ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health); ImGui::SameLine();
-				ImGui::Checkbox("Draw Player Armor", &g_Config.cvars.esp_box_player_armor);
-
-				ImGui::Checkbox("Draw Entity Name", &g_Config.cvars.esp_box_entity_name); ImGui::SameLine();
-				ImGui::Checkbox("Draw Nicknames", &g_Config.cvars.esp_box_player_name);
-
-				ImGui::Checkbox("Draw Skeleton", &g_Config.cvars.esp_skeleton); ImGui::SameLine();
-				ImGui::Checkbox("Draw Bones Name", &g_Config.cvars.esp_bones_name);
-
-				ImGui::Text("");
-				ImGui::Text("ESP Colors");
-
-				ImGui::ColorEdit3("Friend Color", g_Config.cvars.esp_friend_color);
-				ImGui::ColorEdit3("Enemy Color", g_Config.cvars.esp_enemy_color);
-				ImGui::ColorEdit3("Neutral Color", g_Config.cvars.esp_neutral_color);
-				ImGui::ColorEdit3("Item Color", g_Config.cvars.esp_item_color);
-
-				ImGui::Text("");
-
-				static const char *esp_process_items[] = { "0 - Everyone", "1 - Entities", "2 - Players" };
-				ImGui::Combo("ESP Targets", &g_Config.cvars.esp_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
-				ImGui::Combo("Draw Skeleton Type", &g_Config.cvars.esp_skeleton_type, esp_process_items, IM_ARRAYSIZE(esp_process_items));
-
-				static const char *esp_box_items[] = { "0 - Off", "1 - Default", "2 - Coal", "3 - Corner" };
-				ImGui::Combo("Box Type", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
-
-				ImGui::Text("");
-
-				ImGui::SliderInt("Box Fill Alpha", &g_Config.cvars.esp_box_fill, 0, 255);
+				const char* items[] = { "Dark", "Light", "Classic", "Berserk"};
+				if (ImGui::Combo("Theme", &g_Config.theme, items, IM_ARRAYSIZE(items)))
+				    LoadTheme();
 
 				ImGui::Text("");
 			}
+			
+			ImGui::Separator();
 
-			// Visual
+			// Visual Stuff
 			if (ImGui::CollapsingHeader("Visual"))
 			{
 				ImGui::Separator();
 
-				ImGui::Checkbox("No Shake", &g_Config.cvars.no_shake); ImGui::SameLine();
-				ImGui::Checkbox("No Fade", &g_Config.cvars.no_fade);
-				ImGui::Checkbox("Draw Crosshair", &g_Config.cvars.draw_crosshair);
-
-				ImGui::Text("");
-
-				static const char *draw_entities_items[] =
+				// Render
+				if (ImGui::TreeNode("Render"))
 				{
-					"0 - Default",
-					"1 - Draw Bones",
-					"2 - Draw Hitboxes",
-					"3 - Draw Model & Hitboxes",
-					"4 - Draw Hulls",
-					"5 - Draw Players Bones"
-				};
+					ImGui::Separator();
 
-				ImGui::Combo("Draw Entities", &g_Config.cvars.draw_entities, draw_entities_items, IM_ARRAYSIZE(draw_entities_items));
-				
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Speed");
+					ImGui::Text("Game");
 
-				ImGui::Checkbox("Show Speed", &g_Config.cvars.show_speed);
-				ImGui::SliderFloat("Speed Width Fraction", &g_Config.cvars.speed_width_fraction, 0.0f, 1.0f);
-				ImGui::SliderFloat("Speed Height Fraction", &g_Config.cvars.speed_height_fraction, 0.0f, 1.0f);
-				ImGui::ColorEdit4("Speed Color", g_Config.cvars.speed_color);
+					ImGui::Checkbox("No Shake", &g_Config.cvars.no_shake); ImGui::SameLine();
+					ImGui::Checkbox("No Fade", &g_Config.cvars.no_fade);
+					ImGui::Checkbox("Remove FOV Cap", &g_Config.cvars.remove_fov_cap);
 
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Light Map");
+					ImGui::Separator();
 
-				ImGui::Checkbox("Override Lightmap", &g_Config.cvars.lightmap_override);
-				ImGui::SliderFloat("Lightmap Brightness", &g_Config.cvars.lightmap_brightness, 0.0f, 1.0f);
-				ImGui::ColorEdit3("Lightmap Color", g_Config.cvars.lightmap_color);
 
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Wallhack");
+					ImGui::Text("Draw Entities");
 
-				ImGui::Checkbox("Simple Wallhack", &g_Config.cvars.wallhack); ImGui::SameLine();
-				ImGui::Checkbox("Lambert Wallhack", &g_Config.cvars.wallhack_white_walls);
-				ImGui::Checkbox("Wireframe World", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
-				ImGui::Checkbox("Wireframe Models", &g_Config.cvars.wallhack_wireframe_models);
+					static const char* draw_entities_items[] =
+					{
+						"0 - Default",
+						"1 - Draw Bones",
+						"2 - Draw Hitboxes",
+						"3 - Draw Model & Hitboxes",
+						"4 - Draw Hulls",
+						"5 - Draw Players Bones"
+					};
 
-				ImGui::Text("");
+					ImGui::Combo(" ", &g_Config.cvars.draw_entities, draw_entities_items, IM_ARRAYSIZE(draw_entities_items));
 
-				ImGui::SliderFloat("Wireframe Line Width", &g_Config.cvars.wh_wireframe_width, 0.0f, 10.0f);
-				ImGui::ColorEdit3("Wireframe Color", g_Config.cvars.wh_wireframe_color);
 
-				ImGui::Text("");
-			}
+					ImGui::Text("");
 
-			// Chams
-			if (ImGui::CollapsingHeader("Chams"))
-			{
-				static const char *chams_items[] = { "0 - Disable", "1 - Flat", "2 - Texture", "3 - Material" };
+					ImGui::Separator();
 
-				ImGui::Separator();
-				ImGui::Checkbox("Enable Chams", &g_Config.cvars.chams);
-				ImGui::Text("");
 
-				ImGui::Separator();
-				ImGui::Text("Players");
+					ImGui::Text("Light Map");
 
-				ImGui::Checkbox("Chams Players Behind Wall", &g_Config.cvars.chams_players_wall);
-				ImGui::SliderInt("Chams Players", &g_Config.cvars.chams_players, 0, 3, chams_items[g_Config.cvars.chams_players]);
-				ImGui::ColorEdit3("Chams Players Color", g_Config.cvars.chams_players_color);
-				ImGui::ColorEdit3("Chams Players Wall Color", g_Config.cvars.chams_players_wall_color);
+					ImGui::Checkbox("Override Lightmap", &g_Config.cvars.lightmap_override);
+					ImGui::SliderFloat("Lightmap Brightness", &g_Config.cvars.lightmap_brightness, 0.0f, 1.0f);
+					ImGui::ColorEdit3("Lightmap Color", g_Config.cvars.lightmap_color);
 
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Entities");
+					ImGui::Text("");
+					ImGui::Separator();
 
-				ImGui::Checkbox("Chams Entities Behind Wall", &g_Config.cvars.chams_entities_wall);
-				ImGui::SliderInt("Chams Entities", &g_Config.cvars.chams_entities, 0, 3, chams_items[g_Config.cvars.chams_entities]);
-				ImGui::ColorEdit3("Chams Entities Color", g_Config.cvars.chams_entities_color);
-				ImGui::ColorEdit3("Chams Entities Wall Color", g_Config.cvars.chams_entities_wall_color);
-				
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Items");
+					ImGui::Text("No Weapon Animations");
 
-				ImGui::Checkbox("Chams Items Behind Wall", &g_Config.cvars.chams_items_wall);
-				ImGui::SliderInt("Chams Items", &g_Config.cvars.chams_items, 0, 3, chams_items[g_Config.cvars.chams_items]);
-				ImGui::ColorEdit3("Chams Items Color", g_Config.cvars.chams_items_color);
-				ImGui::ColorEdit3("Chams Items Wall Color", g_Config.cvars.chams_items_wall_color);
-				
-				ImGui::Text("");
-			}
-			
-			// Glow
-			if (ImGui::CollapsingHeader("Glow"))
-			{
-				static const char *glow_items[] = { "0 - Disable", "1 - Glow Outline", "2 - Glow Shell", "3 - Ghost" };
+					static const char* no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
+					ImGui::Combo("      ", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
 
-				ImGui::Separator();
-				ImGui::Checkbox("Enable Glow", &g_Config.cvars.glow);
-				ImGui::Checkbox("Optimize Glow Behind Wall", &g_Config.cvars.glow_optimize);
-				ImGui::Text("");
-
-				ImGui::Separator();
-				ImGui::Text("Players");
-
-				ImGui::Checkbox("Glow Players Behind Wall", &g_Config.cvars.glow_players_wall);
-				ImGui::SliderInt("Glow Players", &g_Config.cvars.glow_players, 0, 3, glow_items[g_Config.cvars.glow_players]);
-				ImGui::SliderInt("Glow Players Width", &g_Config.cvars.glow_players_width, 0, 30);
-				ImGui::ColorEdit3("Glow Players Color", g_Config.cvars.glow_players_color);
-
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Entities");
-
-				ImGui::Checkbox("Glow Entities Behind Wall", &g_Config.cvars.glow_entities_wall);
-				ImGui::SliderInt("Glow Entities", &g_Config.cvars.glow_entities, 0, 3, glow_items[g_Config.cvars.glow_entities]);
-				ImGui::SliderInt("Glow Entities Width", &g_Config.cvars.glow_entities_width, 0, 30);
-				ImGui::ColorEdit3("Glow Entities Color", g_Config.cvars.glow_entities_color);
-
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Items");
-
-				ImGui::Checkbox("Glow Items Behind Wall", &g_Config.cvars.glow_items_wall);
-				ImGui::SliderInt("Glow Items", &g_Config.cvars.glow_items, 0, 3, glow_items[g_Config.cvars.glow_items]);
-				ImGui::SliderInt("Glow Items Width", &g_Config.cvars.glow_items_width, 0, 30);
-				ImGui::ColorEdit3("Glow Items Color", g_Config.cvars.glow_items_color);
-
-				ImGui::Text("");
-			}
-			
-			// Dynamic Glow
-			if (ImGui::CollapsingHeader("Dynamic Glow"))
-			{
-				ImGui::Separator();
-
-				ImGui::Checkbox("Dyn. Glow Attach To Targets", &g_Config.cvars.dyn_glow_attach);
-
-				ImGui::Text("");
-
-				ImGui::Separator();
-				ImGui::Text("Self");
-
-				ImGui::Checkbox("Dyn. Glow Self", &g_Config.cvars.dyn_glow_self);
-				ImGui::SliderFloat("Dyn. Glow Self Radius", &g_Config.cvars.dyn_glow_self_radius, 0.f, 4096.f);
-				ImGui::SliderFloat("Dyn. Glow Self Decay", &g_Config.cvars.dyn_glow_self_decay, 0.f, 4096.f);
-				ImGui::ColorEdit3("Dyn. Glow Self Color", g_Config.cvars.dyn_glow_self_color);
-
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Players");
-
-				ImGui::Checkbox("Dyn. Glow Players", &g_Config.cvars.dyn_glow_players);
-				ImGui::SliderFloat("Dyn. Glow Players Radius", &g_Config.cvars.dyn_glow_players_radius, 0.f, 4096.f);
-				ImGui::SliderFloat("Dyn. Glow Players Decay", &g_Config.cvars.dyn_glow_players_decay, 0.f, 4096.f);
-				ImGui::ColorEdit3("Dyn. Glow Players Color", g_Config.cvars.dyn_glow_players_color);
-				
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Entities");
-
-				ImGui::Checkbox("Dyn. Glow Entities", &g_Config.cvars.dyn_glow_entities);
-				ImGui::SliderFloat("Dyn. Glow Entities Radius", &g_Config.cvars.dyn_glow_entities_radius, 0.f, 4096.f);
-				ImGui::SliderFloat("Dyn. Glow Entities Decay", &g_Config.cvars.dyn_glow_entities_decay, 0.f, 4096.f);
-				ImGui::ColorEdit3("Dyn. Glow Entities Color", g_Config.cvars.dyn_glow_entities_color);
-				
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Items");
-
-				ImGui::Checkbox("Dyn. Glow Items", &g_Config.cvars.dyn_glow_items);
-				ImGui::SliderFloat("Dyn. Glow Items Radius", &g_Config.cvars.dyn_glow_items_radius, 0.f, 4096.f);
-				ImGui::SliderFloat("Dyn. Glow Items Decay", &g_Config.cvars.dyn_glow_items_decay, 0.f, 4096.f);
-				ImGui::ColorEdit3("Dyn. Glow Items Color", g_Config.cvars.dyn_glow_items_color);
-
-				ImGui::Text("");
-			}
-			
-			// Strafe
-			if (ImGui::CollapsingHeader("Strafer"))
-			{
-				ImGui::Separator();
-
-				ImGui::Checkbox("Enable Strafer", &g_Config.cvars.strafe);
-				ImGui::Checkbox("Ignore Ground", &g_Config.cvars.strafe_ignore_ground);
-
-				static const char *strafe_dir_items[] = { "0 - To the left", "1 - To the right", "2 - Best strafe", "3 - View angles" };
-				ImGui::Combo("Strafe Direction", &g_Config.cvars.strafe_dir, strafe_dir_items, IM_ARRAYSIZE(strafe_dir_items));
-				
-				static const char *strafe_type_items[] = { "0 - Max. acceleration", "1 - Max. angle", "2 - Max. deceleration", "3 - Const speed" };
-				ImGui::Combo("Strafe Type", &g_Config.cvars.strafe_type, strafe_type_items, IM_ARRAYSIZE(strafe_type_items));
-				
-				ImGui::Text("");
-			}
-
-			// Misc
-			if (ImGui::CollapsingHeader("Misc"))
-			{
-				extern void ConCommand_AutoSelfSink();
-				extern void ConCommand_Freeze();
-				extern void ConCommand_DropEmptyWeapon();
-
-				ImGui::Separator();
-
-				if (ImGui::Button("Selfsink"))
-					ConCommand_AutoSelfSink();
-				
-				if (ImGui::Button("Freeze"))
-					ConCommand_Freeze();
-				
-				if (ImGui::Button("Drop Empty Weapon"))
-					ConCommand_DropEmptyWeapon();
-
-				ImGui::Checkbox("Autojump", &g_Config.cvars.autojump); ImGui::SameLine();
-				ImGui::Checkbox("Enable Jumpbug", &g_Config.cvars.jumpbug); ImGui::SameLine();
-				ImGui::Checkbox("Doubleduck", &g_Config.cvars.doubleduck); ImGui::SameLine();
-				ImGui::Checkbox("Fastrun", &g_Config.cvars.fastrun);
-				ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns);
-				ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch);
-				ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
-				ImGui::Checkbox("Save Soundcache", &g_Config.cvars.save_soundcache);
-				ImGui::Checkbox("Remove FOV Cap", &g_Config.cvars.remove_fov_cap);
-				
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Color Pulsator");
-
-				extern void ConCommand_ResetColors();
-				extern void ConCommand_SyncColors();
-
-				if (ImGui::Button("Reset Colors"))
-					ConCommand_ResetColors();
-				
-				if (ImGui::Button("Sync. Colors"))
-					ConCommand_SyncColors();
-
-				ImGui::Checkbox("Enable Pulsator", &g_Config.cvars.color_pulsator);
-				ImGui::Checkbox("Change Top Color", &g_Config.cvars.color_pulsator_top);
-				ImGui::Checkbox("Change Bottom Color", &g_Config.cvars.color_pulsator_bottom);
-
-				ImGui::Text("");
-
-				ImGui::SliderFloat("Change Color Delay", &g_Config.cvars.color_pulsator_delay, 0.1f, 2.5f);
-
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Spinner");
-
-				ImGui::Checkbox("Enable Spinner", &g_Config.cvars.spinner);
-				ImGui::SliderFloat("Set Pitch Angle", &g_Config.cvars.spinner_pitch_angle, -180.0f, 180.0f);
-				ImGui::SliderFloat("Yaw Angle Rotation", &g_Config.cvars.spinner_rotation_yaw_angle, -10.0f, 10.0f);
-				ImGui::Text("");
-				ImGui::Checkbox("Rotate Pitch Angle", &g_Config.cvars.spinner_rotate_pitch_angle);
-				ImGui::SliderFloat("Pitch Angle Rotation", &g_Config.cvars.spinner_rotation_pitch_angle, -10.0f, 10.0f);
-
-				ImGui::Text("");
-				ImGui::Separator();
-				ImGui::Text("Various Junk");
-
-				static const char *no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
-				ImGui::Combo("No Weapon Animations", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
-
-				ImGui::Text("");
-
-				if (ImGui::Button("Reset App Speed"))
-				{
-					g_Config.cvars.application_speed = 1.0f;
+					ImGui::Text("");
+					ImGui::TreePop();
 				}
 
-				ImGui::SliderFloat("Application Speed", &g_Config.cvars.application_speed, 0.1f, 50.0f);
-
-				ImGui::Text("");
-			}
-
-			// Fake Lag
-			if (ImGui::CollapsingHeader("Fake Lag"))
-			{
 				ImGui::Separator();
 
-				ImGui::Checkbox("Enable Fake Lag", &g_Config.cvars.fakelag);
-				ImGui::Checkbox("Adaptive Ex Interp", &g_Config.cvars.fakelag_adaptive_ex_interp);
-
-				ImGui::Text("");
-
-				ImGui::SliderInt("Limit", &g_Config.cvars.fakelag_limit, 0, 256);
-				ImGui::SliderFloat("Variance", &g_Config.cvars.fakelag_variance, 0.0f, 100.0f);
-
-				ImGui::Text("");
-
-				static const char *fakelag_type_items[] = { "0 - Dynamic", "1 - Maximum", "2 - Jitter", "3 - Break Lag Compensation" };
-				ImGui::Combo("Fake Lag Type", &g_Config.cvars.fakelag_type, fakelag_type_items, IM_ARRAYSIZE(fakelag_type_items));
-				
-				static const char *fakelag_move_items[] = { "0 - Everytime", "1 - On Land", "2 - On Move", "3 - In Air" };
-				ImGui::Combo("Fake Move Type", &g_Config.cvars.fakelag_move, fakelag_move_items, IM_ARRAYSIZE(fakelag_move_items));
-				
-				ImGui::Text("");
-			}
-			
-			// Anti-AFK
-			if (ImGui::CollapsingHeader("Anti-AFK"))
-			{
-				ImGui::Separator();
-
-				static const char *antiafk_items[] = { "0 - Off", "1 - Step Forward & Back", "2 - Spam Gibme", "3 - Walk Around & Spam Inputs", "4 - Walk Around", "5 - Go Right" };
-
-				ImGui::Combo("Mode", &g_Config.cvars.antiafk, antiafk_items, IM_ARRAYSIZE(antiafk_items));
-
-				ImGui::Text("");
-
-				ImGui::Checkbox("Anti-AFK Rotate Camera", &g_Config.cvars.antiafk_rotate_camera);
-				ImGui::Checkbox("Anti-AFK Stay Within Range", &g_Config.cvars.antiafk_stay_within_range);
-
-				ImGui::Text("");
-
-				ImGui::SliderFloat("Rotation Angle", &g_Config.cvars.antiafk_rotation_angle, -7.0f, 7.0f);
-				ImGui::SliderFloat("Stay Within Radius", &g_Config.cvars.antiafk_stay_radius, 25.0f, 500.0f);
-				ImGui::SliderFloat("Stay Within Offset Angle", &g_Config.cvars.antiafk_stay_radius_offset_angle, 0.0f, 89.0f);
-				
-				ImGui::Text("");
-			}
-
-			// Keyspam
-			if (ImGui::CollapsingHeader("Key Spam"))
-			{
-				ImGui::Separator();
-
-				ImGui::Checkbox("Hold Mode", &g_Config.cvars.keyspam_hold_mode);
-
-				ImGui::Checkbox("Spam E", &g_Config.cvars.keyspam_e); ImGui::SameLine();
-				ImGui::Checkbox("Spam Q", &g_Config.cvars.keyspam_q);
-
-				ImGui::Checkbox("Spam W", &g_Config.cvars.keyspam_w); ImGui::SameLine();
-				ImGui::Checkbox("Spam S", &g_Config.cvars.keyspam_s);
-
-				ImGui::Checkbox("Spam CTRL", &g_Config.cvars.keyspam_ctrl);
-
-				ImGui::Text("");
-			}
-			
-			// Fog
-			if (ImGui::CollapsingHeader("Fog"))
-			{
-				ImGui::Separator();
-
-				ImGui::Checkbox("Enable Fog", &g_Config.cvars.fog);
-				ImGui::Checkbox("Fog Skybox", &g_Config.cvars.fog_skybox);
-				ImGui::Checkbox("Disable Water Fog", &g_Config.cvars.remove_water_fog);
-
-				ImGui::Text("");
-
-				ImGui::SliderFloat("Fog Start", &g_Config.cvars.fog_start, 0.0f, 10000.0f);
-				ImGui::SliderFloat("Fog End", &g_Config.cvars.fog_end, 0.0f, 10000.0f);
-
-				ImGui::Text("");
-
-				ImGui::SliderFloat("Density", &g_Config.cvars.fog_density, 0.0f, 10.0f);
-
-				ImGui::ColorEdit3("Color", g_Config.cvars.fog_color);
-
-				ImGui::Text("");
-			}
-			
-			// Skybox
-			if (ImGui::CollapsingHeader("Skybox"))
-			{
-				ImGui::Separator();
-
-				extern void ConCommand_ChangeSkybox();
-				extern void ConCommand_ResetSkybox();
-
-				extern const char *g_szSkyboxes[];
-				extern int g_iSkyboxesSize;
-
-				extern bool g_bMenuChangeSkybox;
-
-				ImGui::Combo("Skybox Name", &g_Config.cvars.skybox, g_szSkyboxes, g_iSkyboxesSize);
-
-				if (ImGui::Button("Change Skybox"))
+				// ESP
+				if (ImGui::TreeNode("ESP"))
 				{
-					g_bMenuChangeSkybox = true;
-					ConCommand_ChangeSkybox();
-					g_bMenuChangeSkybox = false;
+					ImGui::Separator();
+
+					ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
+					ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline);
+					ImGui::Checkbox("Show Items", &g_Config.cvars.esp_show_items);
+					ImGui::Checkbox("Ignore Unknown Entities", &g_Config.cvars.esp_ignore_unknown_ents);
+
+					ImGui::Text("");
+
+					ImGui::Checkbox("Draw Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
+					ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
+
+					ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health); ImGui::SameLine();
+					ImGui::Checkbox("Draw Player Armor", &g_Config.cvars.esp_box_player_armor);
+
+					ImGui::Checkbox("Draw Entity Name", &g_Config.cvars.esp_box_entity_name); ImGui::SameLine();
+					ImGui::Checkbox("Draw Nicknames", &g_Config.cvars.esp_box_player_name);
+
+					ImGui::Checkbox("Draw Skeleton", &g_Config.cvars.esp_skeleton); ImGui::SameLine();
+					ImGui::Checkbox("Draw Bones Name", &g_Config.cvars.esp_bones_name);
+
+					ImGui::Text("");
+					ImGui::Text("ESP Colors");
+
+					ImGui::ColorEdit3("Friend Color", g_Config.cvars.esp_friend_color);
+					ImGui::ColorEdit3("Enemy Color", g_Config.cvars.esp_enemy_color);
+					ImGui::ColorEdit3("Neutral Color", g_Config.cvars.esp_neutral_color);
+					ImGui::ColorEdit3("Item Color", g_Config.cvars.esp_item_color);
+
+					static const char* esp_process_items[] = { "0 - Everyone", "1 - Entities", "2 - Players" };
+					ImGui::Combo("ESP Targets", &g_Config.cvars.esp_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+					ImGui::Combo("Draw Skeleton Type", &g_Config.cvars.esp_skeleton_type, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+
+					static const char* esp_box_items[] = { "0 - Off", "1 - Default", "2 - Coal", "3 - Corner" };
+					ImGui::Combo("Box Type", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
+
+					ImGui::Text("");
+
+					ImGui::SliderInt("Box Fill Alpha", &g_Config.cvars.esp_box_fill, 0, 255);
+
+					ImGui::Text("");
+					ImGui::TreePop();
 				}
 
-				if (ImGui::Button("Reset Skybox"))
+				ImGui::Separator();
+
+				// Chams
+				if (ImGui::TreeNode("Chams"))
 				{
-					ConCommand_ResetSkybox();
+					ImGui::Separator();
+					static const char* chams_items[] = { "0 - Disable", "1 - Flat", "2 - Texture", "3 - Material" };
+					ImGui::Checkbox("Enable Chams", &g_Config.cvars.chams);
+
+					ImGui::Text("");
+					ImGui::Text("Players");
+
+					ImGui::Checkbox("Chams Players Behind Wall", &g_Config.cvars.chams_players_wall);
+					ImGui::SliderInt("Chams Players", &g_Config.cvars.chams_players, 0, 3, chams_items[g_Config.cvars.chams_players]);
+					ImGui::ColorEdit3("Chams Players Color", g_Config.cvars.chams_players_color);
+					ImGui::ColorEdit3("Chams Players Wall Color", g_Config.cvars.chams_players_wall_color);
+
+					ImGui::Text("");
+					ImGui::Text("Entities");
+
+					ImGui::Checkbox("Chams Entities Behind Wall", &g_Config.cvars.chams_entities_wall);
+					ImGui::SliderInt("Chams Entities", &g_Config.cvars.chams_entities, 0, 3, chams_items[g_Config.cvars.chams_entities]);
+					ImGui::ColorEdit3("Chams Entities Color", g_Config.cvars.chams_entities_color);
+					ImGui::ColorEdit3("Chams Entities Wall Color", g_Config.cvars.chams_entities_wall_color);
+
+					ImGui::Text("");
+					ImGui::Text("Items");
+
+					ImGui::Checkbox("Chams Items Behind Wall", &g_Config.cvars.chams_items_wall);
+					ImGui::SliderInt("Chams Items", &g_Config.cvars.chams_items, 0, 3, chams_items[g_Config.cvars.chams_items]);
+					ImGui::ColorEdit3("Chams Items Color", g_Config.cvars.chams_items_color);
+					ImGui::ColorEdit3("Chams Items Wall Color", g_Config.cvars.chams_items_wall_color);
+
+					ImGui::Text("");
+					ImGui::TreePop();
 				}
 
-				ImGui::Text("");
-			}
-
-			// Chat Colors
-			if (ImGui::CollapsingHeader("Chat Colors"))
-			{
-				extern void ConCommand_ChatColorsLoadPlayers();
-
 				ImGui::Separator();
 
-				if (ImGui::Button("Load Players List"))
+				// Glow
+				if (ImGui::TreeNode("Glow"))
 				{
-					ConCommand_ChatColorsLoadPlayers();
+					static const char* glow_items[] = { "0 - Disable", "1 - Glow Outline", "2 - Glow Shell", "3 - Ghost" };
+
+					ImGui::Separator();
+					ImGui::Checkbox("Enable Glow", &g_Config.cvars.glow);
+					ImGui::Checkbox("Optimize Glow Behind Wall", &g_Config.cvars.glow_optimize);
+
+					ImGui::Text("");
+					ImGui::Text("Players");
+
+					ImGui::Checkbox("Glow Players Behind Wall", &g_Config.cvars.glow_players_wall);
+					ImGui::SliderInt("Glow Players", &g_Config.cvars.glow_players, 0, 3, glow_items[g_Config.cvars.glow_players]);
+					ImGui::SliderInt("Glow Players Width", &g_Config.cvars.glow_players_width, 0, 30);
+					ImGui::ColorEdit3("Glow Players Color", g_Config.cvars.glow_players_color);
+
+					ImGui::Text("");
+					ImGui::Text("Entities");
+
+					ImGui::Checkbox("Glow Entities Behind Wall", &g_Config.cvars.glow_entities_wall);
+					ImGui::SliderInt("Glow Entities", &g_Config.cvars.glow_entities, 0, 3, glow_items[g_Config.cvars.glow_entities]);
+					ImGui::SliderInt("Glow Entities Width", &g_Config.cvars.glow_entities_width, 0, 30);
+					ImGui::ColorEdit3("Glow Entities Color", g_Config.cvars.glow_entities_color);
+
+					ImGui::Text("");
+					ImGui::Text("Items");
+
+					ImGui::Checkbox("Glow Items Behind Wall", &g_Config.cvars.glow_items_wall);
+					ImGui::SliderInt("Glow Items", &g_Config.cvars.glow_items, 0, 3, glow_items[g_Config.cvars.glow_items]);
+					ImGui::SliderInt("Glow Items Width", &g_Config.cvars.glow_items_width, 0, 30);
+					ImGui::ColorEdit3("Glow Items Color", g_Config.cvars.glow_items_color);
+
+					ImGui::Text("");
+					ImGui::TreePop();
 				}
-				
-				if (ImGui::Button("Reset Default Player Color"))
+
+				ImGui::Separator();
+
+				// Dynamic Glow
+				if (ImGui::TreeNode("Dynamic Glow"))
 				{
-					g_Config.cvars.player_name_color[0] = 0.6f;
-					g_Config.cvars.player_name_color[1] = 0.75f;
-					g_Config.cvars.player_name_color[2] = 1.0f;
+					ImGui::Separator();
+
+					ImGui::Checkbox("Dyn. Glow Attach To Targets", &g_Config.cvars.dyn_glow_attach);
+
+					ImGui::Text("");
+
+					ImGui::Text("Self");
+
+					ImGui::Checkbox("Dyn. Glow Self", &g_Config.cvars.dyn_glow_self);
+					ImGui::SliderFloat("Dyn. Glow Self Radius", &g_Config.cvars.dyn_glow_self_radius, 0.f, 4096.f);
+					ImGui::SliderFloat("Dyn. Glow Self Decay", &g_Config.cvars.dyn_glow_self_decay, 0.f, 4096.f);
+					ImGui::ColorEdit3("Dyn. Glow Self Color", g_Config.cvars.dyn_glow_self_color);
+
+					ImGui::Text("");
+					ImGui::Text("Players");
+
+					ImGui::Checkbox("Dyn. Glow Players", &g_Config.cvars.dyn_glow_players);
+					ImGui::SliderFloat("Dyn. Glow Players Radius", &g_Config.cvars.dyn_glow_players_radius, 0.f, 4096.f);
+					ImGui::SliderFloat("Dyn. Glow Players Decay", &g_Config.cvars.dyn_glow_players_decay, 0.f, 4096.f);
+					ImGui::ColorEdit3("Dyn. Glow Players Color", g_Config.cvars.dyn_glow_players_color);
+
+					ImGui::Text("");
+					ImGui::Text("Entities");
+
+					ImGui::Checkbox("Dyn. Glow Entities", &g_Config.cvars.dyn_glow_entities);
+					ImGui::SliderFloat("Dyn. Glow Entities Radius", &g_Config.cvars.dyn_glow_entities_radius, 0.f, 4096.f);
+					ImGui::SliderFloat("Dyn. Glow Entities Decay", &g_Config.cvars.dyn_glow_entities_decay, 0.f, 4096.f);
+					ImGui::ColorEdit3("Dyn. Glow Entities Color", g_Config.cvars.dyn_glow_entities_color);
+
+					ImGui::Text("");
+					ImGui::Text("Items");
+
+					ImGui::Checkbox("Dyn. Glow Items", &g_Config.cvars.dyn_glow_items);
+					ImGui::SliderFloat("Dyn. Glow Items Radius", &g_Config.cvars.dyn_glow_items_radius, 0.f, 4096.f);
+					ImGui::SliderFloat("Dyn. Glow Items Decay", &g_Config.cvars.dyn_glow_items_decay, 0.f, 4096.f);
+					ImGui::ColorEdit3("Dyn. Glow Items Color", g_Config.cvars.dyn_glow_items_color);
+
+					ImGui::Text("");
+					ImGui::TreePop();
 				}
 
-				ImGui::ColorEdit3("Default Player Color", g_Config.cvars.player_name_color);
-
-				ImGui::Text("");
 				ImGui::Separator();
-				ImGui::Text("Rainbow Names");
 
-				ImGui::SliderFloat("Rainbow Update Delay", &g_Config.cvars.chat_rainbow_update_delay, 0.0f, 0.5f);
-				ImGui::SliderFloat("Rainbow Hue Delta", &g_Config.cvars.chat_rainbow_hue_delta, 0.0f, 0.5f);
-				ImGui::SliderFloat("Rainbow Saturation", &g_Config.cvars.chat_rainbow_saturation, 0.0f, 1.0f);
-				ImGui::SliderFloat("Rainbow Lightness", &g_Config.cvars.chat_rainbow_lightness, 0.0f, 1.0f);
+				// Wallhack
+				if (ImGui::TreeNode("Wallhack"))
+				{
+					ImGui::Separator();
 
-				ImGui::Text("");
+					ImGui::Checkbox("Simple Wallhack", &g_Config.cvars.wallhack); ImGui::SameLine();
+					ImGui::Checkbox("Lambert Wallhack", &g_Config.cvars.wallhack_white_walls);
+					ImGui::Checkbox("Wireframe World", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
+					ImGui::Checkbox("Wireframe Models", &g_Config.cvars.wallhack_wireframe_models);
+
+					ImGui::Text("");
+
+					ImGui::SliderFloat("Wireframe Line Width", &g_Config.cvars.wh_wireframe_width, 0.0f, 10.0f);
+					ImGui::ColorEdit3("Wireframe Color", g_Config.cvars.wh_wireframe_color);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
 				ImGui::Separator();
-				ImGui::Text("Custom Colors");
 
-				ImGui::ColorEdit3("Custom Color One", g_Config.cvars.chat_color_one);
-				ImGui::ColorEdit3("Custom Color Two", g_Config.cvars.chat_color_two);
-				ImGui::ColorEdit3("Custom Color Three", g_Config.cvars.chat_color_three);
-				ImGui::ColorEdit3("Custom Color Four", g_Config.cvars.chat_color_four);
-				ImGui::ColorEdit3("Custom Color Five", g_Config.cvars.chat_color_five);
+				// Fog
+				if (ImGui::TreeNode("Fog"))
+				{
+					ImGui::Separator();
 
-				ImGui::Text("");
+					ImGui::Checkbox("Enable Fog", &g_Config.cvars.fog);
+					ImGui::Checkbox("Fog Skybox", &g_Config.cvars.fog_skybox);
+					ImGui::Checkbox("Disable Water Fog", &g_Config.cvars.remove_water_fog);
+
+					ImGui::Text("");
+
+					ImGui::SliderFloat("Fog Start", &g_Config.cvars.fog_start, 0.0f, 10000.0f);
+					ImGui::SliderFloat("Fog End", &g_Config.cvars.fog_end, 0.0f, 10000.0f);
+
+					ImGui::Text("");
+
+					ImGui::SliderFloat("Density", &g_Config.cvars.fog_density, 0.0f, 10.0f);
+
+					ImGui::ColorEdit3("Color", g_Config.cvars.fog_color);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+
+				// Skybox Changer
+				if (ImGui::TreeNode("Skybox Changer"))
+				{
+					ImGui::Separator();
+
+					extern void ConCommand_ChangeSkybox();
+					extern void ConCommand_ResetSkybox();
+
+					extern const char* g_szSkyboxes[];
+					extern int g_iSkyboxesSize;
+					extern bool g_bMenuChangeSkybox;
+
+					ImGui::Combo("Skybox Name", &g_Config.cvars.skybox, g_szSkyboxes, g_iSkyboxesSize);
+
+					if (ImGui::Button("Change Skybox"))
+					{
+						g_bMenuChangeSkybox = true;
+						ConCommand_ChangeSkybox();
+						g_bMenuChangeSkybox = false;
+					}
+
+					if (ImGui::Button("Reset Skybox"))
+					{
+						ConCommand_ResetSkybox();
+					}
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+			}
+
+			// HUD Stuff
+			if (ImGui::CollapsingHeader("HUD"))
+			{
+
+				ImGui::Separator();
+
+				// Crosshair
+				if (ImGui::TreeNode("Crosshair"))
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Draw Crosshair", &g_Config.cvars.draw_crosshair);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Speedometer
+				if (ImGui::TreeNode("Speedometer"))
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Show Speedometer", &g_Config.cvars.show_speed);
+					ImGui::SliderFloat("Speed Width Fraction", &g_Config.cvars.speed_width_fraction, 0.0f, 1.0f);
+					ImGui::SliderFloat("Speed Height Fraction", &g_Config.cvars.speed_height_fraction, 0.0f, 1.0f);
+					ImGui::ColorEdit4("Speed Color", g_Config.cvars.speed_color);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Chat Colors
+				if (ImGui::TreeNode("Chat Colors"))
+				{
+					extern void ConCommand_ChatColorsLoadPlayers();
+
+					ImGui::Separator();
+
+					if (ImGui::Button("Load Players List"))
+					{
+						ConCommand_ChatColorsLoadPlayers();
+					}
+
+					if (ImGui::Button("Reset Default Player Color"))
+					{
+						g_Config.cvars.player_name_color[0] = 0.6f;
+						g_Config.cvars.player_name_color[1] = 0.75f;
+						g_Config.cvars.player_name_color[2] = 1.0f;
+					}
+
+					ImGui::ColorEdit3("Default Player Color", g_Config.cvars.player_name_color);
+
+					ImGui::Text("");
+					ImGui::Text("Rainbow Names");
+
+					ImGui::SliderFloat("Rainbow Update Delay", &g_Config.cvars.chat_rainbow_update_delay, 0.0f, 0.5f);
+					ImGui::SliderFloat("Rainbow Hue Delta", &g_Config.cvars.chat_rainbow_hue_delta, 0.0f, 0.5f);
+					ImGui::SliderFloat("Rainbow Saturation", &g_Config.cvars.chat_rainbow_saturation, 0.0f, 1.0f);
+					ImGui::SliderFloat("Rainbow Lightness", &g_Config.cvars.chat_rainbow_lightness, 0.0f, 1.0f);
+
+					ImGui::Text("");
+					ImGui::Text("Custom Colors");
+
+					ImGui::ColorEdit3("Custom Color One", g_Config.cvars.chat_color_one);
+					ImGui::ColorEdit3("Custom Color Two", g_Config.cvars.chat_color_two);
+					ImGui::ColorEdit3("Custom Color Three", g_Config.cvars.chat_color_three);
+					ImGui::ColorEdit3("Custom Color Four", g_Config.cvars.chat_color_four);
+					ImGui::ColorEdit3("Custom Color Five", g_Config.cvars.chat_color_five);
+
+					ImGui::Text("");
+				}
+
+				ImGui::Separator();
+
+				// Custom Vote Popup
+				if (ImGui::TreeNode("Custom Vote Popup"))
+				{
+					extern void LoadVoteFilter();
+
+					ImGui::Separator();
+
+					ImGui::Checkbox("Custom Vote Popup", &g_Config.cvars.vote_popup);
+
+					ImGui::Text("");
+
+					ImGui::SliderInt("VP: Width Size", &g_Config.cvars.vote_popup_width_size, 0, 1000);
+					ImGui::SliderInt("VP: Height Size", &g_Config.cvars.vote_popup_height_size, 0, 1000);
+
+					ImGui::Text("");
+
+					ImGui::SliderInt("VP: Width Border Pixels", &g_Config.cvars.vote_popup_w_border_pix, 0, 100);
+					ImGui::SliderInt("VP: Height Border Pixels", &g_Config.cvars.vote_popup_h_border_pix, 0, 100);
+
+					ImGui::Text("");
+
+					ImGui::SliderFloat("VP: Width Fraction", &g_Config.cvars.vote_popup_width_frac, 0.0f, 1.0f);
+					ImGui::SliderFloat("VP: Height Fraction", &g_Config.cvars.vote_popup_height_frac, 0.0f, 1.0f);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
 			}
 			
-			// Cam Hack
-			if (ImGui::CollapsingHeader("Cam Hack"))
+			// Utility Stuff
+			if (ImGui::CollapsingHeader("Utility"))
 			{
-				extern void ConCommand_CamHack(void);
-				extern void ConCommand_CamHackResetRoll(void);
-				extern void ConCommand_CamHackReset(void);
 
 				ImGui::Separator();
 
-				if (ImGui::Button("Toggle Cam Hack"))
-					ConCommand_CamHack();
-				
-				if (ImGui::Button("Reset Roll Axis"))
-					ConCommand_CamHackResetRoll();
-				
-				if (ImGui::Button("Reset Cam Hack"))
-					ConCommand_CamHackReset();
+				// Player
+				if (ImGui::TreeNode("Player"))
+				{
 
-				ImGui::SliderFloat("Speed Factor", &g_Config.cvars.camhack_speed_factor, 0.0f, 15.0f);
-				ImGui::Checkbox("Show Model", &g_Config.cvars.camhack_show_model);
-				
-				ImGui::Text("");
-			}
-			
-			// First-Person Roaming
-			if (ImGui::CollapsingHeader("First-Person Roaming"))
-			{
-				ImGui::Separator();
+					extern void ConCommand_AutoSelfSink();
+					extern void ConCommand_Freeze();
+					extern void ConCommand_DropEmptyWeapon();
 
-				ImGui::Checkbox("Enable First-Person Roaming", &g_Config.cvars.fp_roaming);
-				ImGui::Checkbox("Draw Crosshair in Roaming", &g_Config.cvars.fp_roaming_draw_crosshair);
-				ImGui::Checkbox("Lerp First-Person View", &g_Config.cvars.fp_roaming_lerp);
+					ImGui::Separator();
 
-				ImGui::SliderFloat("Lerp Value", &g_Config.cvars.fp_roaming_lerp_value, 0.001f, 1.0f);
-				
-				ImGui::Text("");
-			}
-			
-			// Custom Vote Popup
-			if (ImGui::CollapsingHeader("Vote Popup"))
-			{
-				extern void LoadVoteFilter();
+					if (ImGui::Button("Selfsink"))
+						ConCommand_AutoSelfSink();
+
+					if (ImGui::Button("Freeze"))
+						ConCommand_Freeze();
+
+					if (ImGui::Button("Drop Empty Weapon"))
+						ConCommand_DropEmptyWeapon();
+
+					ImGui::Checkbox("Autojump", &g_Config.cvars.autojump); ImGui::SameLine();
+					ImGui::Checkbox("Enable Jumpbug", &g_Config.cvars.jumpbug); ImGui::SameLine();
+					ImGui::Checkbox("Doubleduck", &g_Config.cvars.doubleduck); ImGui::SameLine();
+					ImGui::Checkbox("Fastrun", &g_Config.cvars.fastrun);
+					ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns);
+					ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch);
+					ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
 
 				ImGui::Separator();
 
-				ImGui::Checkbox("Custom Vote Popup", &g_Config.cvars.vote_popup);
 
-				ImGui::Text("");
+				// Strafer
+				if (ImGui::TreeNode("Strafer"))
+				{
 
-				ImGui::SliderInt("VP: Width Size", &g_Config.cvars.vote_popup_width_size, 0, 1000);
-				ImGui::SliderInt("VP: Height Size", &g_Config.cvars.vote_popup_height_size, 0, 1000);
-				
-				ImGui::Text("");
+					ImGui::Separator();
 
-				ImGui::SliderInt("VP: Width Border Pixels", &g_Config.cvars.vote_popup_w_border_pix, 0, 100);
-				ImGui::SliderInt("VP: Height Border Pixels", &g_Config.cvars.vote_popup_h_border_pix, 0, 100);
+					ImGui::Checkbox("Enable Strafer", &g_Config.cvars.strafe);
+					ImGui::Checkbox("Ignore Ground", &g_Config.cvars.strafe_ignore_ground);
 
-				ImGui::Text("");
+					static const char* strafe_dir_items[] = { "0 - To the left", "1 - To the right", "2 - Best strafe", "3 - View angles" };
+					ImGui::Combo("Strafe Direction", &g_Config.cvars.strafe_dir, strafe_dir_items, IM_ARRAYSIZE(strafe_dir_items));
 
-				ImGui::SliderFloat("VP: Width Fraction", &g_Config.cvars.vote_popup_width_frac, 0.0f, 1.0f);
-				ImGui::SliderFloat("VP: Height Fraction", &g_Config.cvars.vote_popup_height_frac, 0.0f, 1.0f);
-				ImGui::Text("");
-			}
+					static const char* strafe_type_items[] = { "0 - Max. acceleration", "1 - Max. angle", "2 - Max. deceleration", "3 - Const speed" };
+					ImGui::Combo("Strafe Type", &g_Config.cvars.strafe_type, strafe_type_items, IM_ARRAYSIZE(strafe_type_items));
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Color Pulsator
+				if (ImGui::TreeNode("Color Pulsator"))
+				{
+					extern void ConCommand_ResetColors();
+					extern void ConCommand_SyncColors();
+
+					ImGui::Separator();
+
+					ImGui::Text("Color Pulsator");
+
+					if (ImGui::Button("Reset Colors"))
+						ConCommand_ResetColors();
+
+					if (ImGui::Button("Sync. Colors"))
+						ConCommand_SyncColors();
+
+					ImGui::Checkbox("Enable Pulsator", &g_Config.cvars.color_pulsator);
+					ImGui::Checkbox("Change Top Color", &g_Config.cvars.color_pulsator_top);
+					ImGui::Checkbox("Change Bottom Color", &g_Config.cvars.color_pulsator_bottom);
+
+					ImGui::Text("");
+
+					ImGui::SliderFloat("Change Color Delay", &g_Config.cvars.color_pulsator_delay, 0.1f, 2.5f);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Spinner
+				if (ImGui::TreeNode("Spinner"))
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Enable Spinner", &g_Config.cvars.spinner);
+					ImGui::SliderFloat("Set Pitch Angle", &g_Config.cvars.spinner_pitch_angle, -180.0f, 180.0f);
+					ImGui::SliderFloat("Yaw Angle Rotation", &g_Config.cvars.spinner_rotation_yaw_angle, -10.0f, 10.0f);
+					ImGui::Text("");
+					ImGui::Checkbox("Rotate Pitch Angle", &g_Config.cvars.spinner_rotate_pitch_angle);
+					ImGui::SliderFloat("Pitch Angle Rotation", &g_Config.cvars.spinner_rotation_pitch_angle, -10.0f, 10.0f);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Application Speed
+				if (ImGui::TreeNode("Application Speed"))
+				{
+					ImGui::Separator();
+
+					if (ImGui::Button("Reset App Speed"))
+					{
+						g_Config.cvars.application_speed = 1.0f;
+					}
+
+					ImGui::SliderFloat("Application Speed", &g_Config.cvars.application_speed, 0.1f, 50.0f);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Fake Lag
+				if (ImGui::TreeNode("Fake Lag"))
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Enable Fake Lag", &g_Config.cvars.fakelag);
+					ImGui::Checkbox("Adaptive Ex Interp", &g_Config.cvars.fakelag_adaptive_ex_interp);
+
+					ImGui::Text("");
+
+					ImGui::SliderInt("Limit", &g_Config.cvars.fakelag_limit, 0, 256);
+					ImGui::SliderFloat("Variance", &g_Config.cvars.fakelag_variance, 0.0f, 100.0f);
+
+					ImGui::Text("");
+
+					static const char* fakelag_type_items[] = { "0 - Dynamic", "1 - Maximum", "2 - Jitter", "3 - Break Lag Compensation" };
+					ImGui::Combo("Fake Lag Type", &g_Config.cvars.fakelag_type, fakelag_type_items, IM_ARRAYSIZE(fakelag_type_items));
+
+					static const char* fakelag_move_items[] = { "0 - Everytime", "1 - On Land", "2 - On Move", "3 - In Air" };
+					ImGui::Combo("Fake Move Type", &g_Config.cvars.fakelag_move, fakelag_move_items, IM_ARRAYSIZE(fakelag_move_items));
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Anti-AFK
+				if (ImGui::TreeNode("Anti-AFK"))
+				{
+					ImGui::Separator();
+
+					static const char* antiafk_items[] = { "0 - Off", "1 - Step Forward & Back", "2 - Spam Gibme", "3 - Walk Around & Spam Inputs", "4 - Walk Around", "5 - Go Right" };
+					ImGui::Combo("Mode", &g_Config.cvars.antiafk, antiafk_items, IM_ARRAYSIZE(antiafk_items));
+
+					ImGui::Text("");
+
+					ImGui::Checkbox("Anti-AFK Rotate Camera", &g_Config.cvars.antiafk_rotate_camera);
+					ImGui::Checkbox("Anti-AFK Stay Within Range", &g_Config.cvars.antiafk_stay_within_range);
+
+					ImGui::Text("");
+
+					ImGui::SliderFloat("Rotation Angle", &g_Config.cvars.antiafk_rotation_angle, -7.0f, 7.0f);
+					ImGui::SliderFloat("Stay Within Radius", &g_Config.cvars.antiafk_stay_radius, 25.0f, 500.0f);
+					ImGui::SliderFloat("Stay Within Offset Angle", &g_Config.cvars.antiafk_stay_radius_offset_angle, 0.0f, 89.0f);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Key Spam
+				if (ImGui::TreeNode("Key Spam"))
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Hold Mode", &g_Config.cvars.keyspam_hold_mode);
+
+					ImGui::Checkbox("Spam E", &g_Config.cvars.keyspam_e); ImGui::SameLine();
+					ImGui::Checkbox("Spam Q", &g_Config.cvars.keyspam_q);
+
+					ImGui::Checkbox("Spam W", &g_Config.cvars.keyspam_w); ImGui::SameLine();
+					ImGui::Checkbox("Spam S", &g_Config.cvars.keyspam_s);
+
+					ImGui::Checkbox("Spam CTRL", &g_Config.cvars.keyspam_ctrl);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Cam Hack
+				if (ImGui::TreeNode("Cam Hack"))
+				{
+					extern void ConCommand_CamHack(void);
+					extern void ConCommand_CamHackResetRoll(void);
+					extern void ConCommand_CamHackReset(void);
+
+					ImGui::Separator();
+
+					if (ImGui::Button("Toggle Cam Hack"))
+						ConCommand_CamHack();
+
+					if (ImGui::Button("Reset Roll Axis"))
+						ConCommand_CamHackResetRoll();
+
+					if (ImGui::Button("Reset Cam Hack"))
+						ConCommand_CamHackReset();
+
+					ImGui::SliderFloat("Speed Factor", &g_Config.cvars.camhack_speed_factor, 0.0f, 15.0f);
+					ImGui::Checkbox("Show Model", &g_Config.cvars.camhack_show_model);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// First-Person Roaming
+				if (ImGui::TreeNode("First-Person Roaming"))
+				{
+					ImGui::Separator();
+
+					ImGui::Checkbox("Enable First-Person Roaming", &g_Config.cvars.fp_roaming);
+					ImGui::Checkbox("Draw Crosshair in Roaming", &g_Config.cvars.fp_roaming_draw_crosshair);
+					ImGui::Checkbox("Lerp First-Person View", &g_Config.cvars.fp_roaming_lerp);
+
+					ImGui::SliderFloat("Lerp Value", &g_Config.cvars.fp_roaming_lerp_value, 0.001f, 1.0f);
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				// Message Spammer
+				if (ImGui::TreeNode("Message Spammer"))
+				{
+					extern void ConCommand_PrintSpamKeyWords(void);
+					extern void ConCommand_PrintSpamTasks(void);
+
+					ImGui::Separator();
+
+					if (ImGui::Button("Show Spam Tasks"))
+						ConCommand_PrintSpamTasks();
+
+					if (ImGui::Button("Show Spam Keywords"))
+						ConCommand_PrintSpamKeyWords();
+
+					ImGui::Text("");
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+			}	
 			
 			// Auto Vote
 			/*
@@ -686,23 +845,6 @@ void ShowMainMenu()
 			}
 			*/
 
-			// Message Spammer
-			if (ImGui::CollapsingHeader("Message Spammer"))
-			{
-				extern void ConCommand_PrintSpamKeyWords(void);
-				extern void ConCommand_PrintSpamTasks(void);
-
-				ImGui::Separator();
-
-				if (ImGui::Button("Show Spam Tasks"))
-					ConCommand_PrintSpamTasks();
-
-				if (ImGui::Button("Show Spam Keywords"))
-					ConCommand_PrintSpamKeyWords();
-				
-				ImGui::Text("");
-			}
-
 			// Advanced Mute System
 			if (ImGui::CollapsingHeader("Advanced Mute System"))
 			{
@@ -722,6 +864,7 @@ void ShowMainMenu()
 				ImGui::Checkbox("Mute Everything", &g_Config.cvars.ams_mute_everything);
 				
 				ImGui::Text("");
+				ImGui::Separator();
 			}
 		}
 		ImGui::End();
