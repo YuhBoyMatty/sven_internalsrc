@@ -230,6 +230,7 @@ public:
 
 	config_cvars cvars;
 	DWORD dwToggleButton = VK_INSERT;
+	int theme = 0;
 };
 
 //-----------------------------------------------------------------------------
