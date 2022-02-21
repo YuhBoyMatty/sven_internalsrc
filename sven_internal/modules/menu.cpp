@@ -68,6 +68,7 @@ void ShowMainMenu()
 	}
 
 	ImGui::GetIO().MouseDrawCursor = g_bMenuEnabled;
+	ImGui::GetStyle().Alpha = g_Config.opacity;
 
 	if (g_bMenuEnabled)
 	{
@@ -129,14 +130,38 @@ void ShowMainMenu()
 
 				ImGui::Text("Style");
 
-				const char* items[] = { "Dark", "Light", "Classic", "Berserk"};
-				if (ImGui::Combo("Theme", &g_Config.theme, items, IM_ARRAYSIZE(items)))
-				    LoadTheme();
+				static const char* theme_items[] =
+				{
+					"Dark",
+					"Light",
+					"Classic",
+					"Berserk",
+					"Deep Dark",
+					"Carbon",
+					"Corporate Grey",
+					"Grey",
+					"Dark Light",
+					"Soft Dark",
+					"Gold & Black",
+					"Monochrome",
+					"Pink",
+					"Half-Life"
+				};
+
+				if (ImGui::Combo("Theme", &g_Config.theme, theme_items, IM_ARRAYSIZE(theme_items)))
+				{
+					LoadTheme();
+				}
+
+				ImGui::Text("");
+
+				ImGui::SliderFloat("Opacity", &g_Config.opacity, 0.1f, 1.0f);
 
 				ImGui::Text("");
 			}
 			
 			ImGui::Separator();
+			ImGui::Text("General");
 
 			// Visual Stuff
 			if (ImGui::CollapsingHeader("Visual"))
@@ -201,6 +226,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("ESP"))
 				{
 					ImGui::Separator();
+					ImGui::Text("ESP");
 
 					ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
 					ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline);
@@ -209,7 +235,7 @@ void ShowMainMenu()
 
 					ImGui::Text("");
 
-					ImGui::Checkbox("Draw Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
+					ImGui::Checkbox("Draw Entity Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
 					ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
 
 					ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health); ImGui::SameLine();
@@ -238,7 +264,7 @@ void ShowMainMenu()
 
 					ImGui::Text("");
 
-					ImGui::SliderInt("Box Fill Alpha", &g_Config.cvars.esp_box_fill, 0, 255);
+					ImGui::SliderInt("Box Alpha", &g_Config.cvars.esp_box_fill, 0, 255);
 
 					ImGui::Text("");
 					ImGui::TreePop();
@@ -250,6 +276,8 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Chams"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Chams");
+
 					static const char* chams_items[] = { "0 - Disable", "1 - Flat", "2 - Texture", "3 - Material" };
 					ImGui::Checkbox("Enable Chams", &g_Config.cvars.chams);
 
@@ -289,6 +317,8 @@ void ShowMainMenu()
 					static const char* glow_items[] = { "0 - Disable", "1 - Glow Outline", "2 - Glow Shell", "3 - Ghost" };
 
 					ImGui::Separator();
+					ImGui::Text("Glow");
+
 					ImGui::Checkbox("Enable Glow", &g_Config.cvars.glow);
 					ImGui::Checkbox("Optimize Glow Behind Wall", &g_Config.cvars.glow_optimize);
 
@@ -326,6 +356,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Dynamic Glow"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Dynamic Glow");
 
 					ImGui::Checkbox("Dyn. Glow Attach To Targets", &g_Config.cvars.dyn_glow_attach);
 
@@ -372,6 +403,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Wallhack"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Wallhack");
 
 					ImGui::Checkbox("Simple Wallhack", &g_Config.cvars.wallhack); ImGui::SameLine();
 					ImGui::Checkbox("Lambert Wallhack", &g_Config.cvars.wallhack_white_walls);
@@ -393,6 +425,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Fog"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Fog");
 
 					ImGui::Checkbox("Enable Fog", &g_Config.cvars.fog);
 					ImGui::Checkbox("Fog Skybox", &g_Config.cvars.fog_skybox);
@@ -420,6 +453,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Skybox Changer"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Skybox Changer");
 
 					extern void ConCommand_ChangeSkybox();
 					extern void ConCommand_ResetSkybox();
@@ -452,13 +486,13 @@ void ShowMainMenu()
 			// HUD Stuff
 			if (ImGui::CollapsingHeader("HUD"))
 			{
-
 				ImGui::Separator();
 
 				// Crosshair
 				if (ImGui::TreeNode("Crosshair"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Crosshair");
 
 					ImGui::Checkbox("Draw Crosshair", &g_Config.cvars.draw_crosshair);
 
@@ -472,6 +506,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Speedometer"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Speedometer");
 
 					ImGui::Checkbox("Show Speedometer", &g_Config.cvars.show_speed);
 					ImGui::SliderFloat("Speed Width Fraction", &g_Config.cvars.speed_width_fraction, 0.0f, 1.0f);
@@ -490,6 +525,7 @@ void ShowMainMenu()
 					extern void ConCommand_ChatColorsLoadPlayers();
 
 					ImGui::Separator();
+					ImGui::Text("Chat Colors");
 
 					if (ImGui::Button("Load Players List"))
 					{
@@ -516,11 +552,11 @@ void ShowMainMenu()
 					ImGui::Text("");
 					ImGui::Text("Custom Colors");
 
-					ImGui::ColorEdit3("Custom Color One", g_Config.cvars.chat_color_one);
-					ImGui::ColorEdit3("Custom Color Two", g_Config.cvars.chat_color_two);
-					ImGui::ColorEdit3("Custom Color Three", g_Config.cvars.chat_color_three);
-					ImGui::ColorEdit3("Custom Color Four", g_Config.cvars.chat_color_four);
-					ImGui::ColorEdit3("Custom Color Five", g_Config.cvars.chat_color_five);
+					ImGui::ColorEdit3("Custom Color #1", g_Config.cvars.chat_color_one);
+					ImGui::ColorEdit3("Custom Color #2", g_Config.cvars.chat_color_two);
+					ImGui::ColorEdit3("Custom Color #3", g_Config.cvars.chat_color_three);
+					ImGui::ColorEdit3("Custom Color #4", g_Config.cvars.chat_color_four);
+					ImGui::ColorEdit3("Custom Color #5", g_Config.cvars.chat_color_five);
 
 					ImGui::Text("");
 				}
@@ -533,6 +569,7 @@ void ShowMainMenu()
 					extern void LoadVoteFilter();
 
 					ImGui::Separator();
+					ImGui::Text("Custom Vote Popup");
 
 					ImGui::Checkbox("Custom Vote Popup", &g_Config.cvars.vote_popup);
 
@@ -562,18 +599,17 @@ void ShowMainMenu()
 			// Utility Stuff
 			if (ImGui::CollapsingHeader("Utility"))
 			{
-
 				ImGui::Separator();
 
 				// Player
 				if (ImGui::TreeNode("Player"))
 				{
-
 					extern void ConCommand_AutoSelfSink();
 					extern void ConCommand_Freeze();
 					extern void ConCommand_DropEmptyWeapon();
 
 					ImGui::Separator();
+					ImGui::Text("Player");
 
 					if (ImGui::Button("Selfsink"))
 						ConCommand_AutoSelfSink();
@@ -602,8 +638,8 @@ void ShowMainMenu()
 				// Strafer
 				if (ImGui::TreeNode("Strafer"))
 				{
-
 					ImGui::Separator();
+					ImGui::Text("Strafer");
 
 					ImGui::Checkbox("Enable Strafer", &g_Config.cvars.strafe);
 					ImGui::Checkbox("Ignore Ground", &g_Config.cvars.strafe_ignore_ground);
@@ -654,6 +690,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Spinner"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Spinner");
 
 					ImGui::Checkbox("Enable Spinner", &g_Config.cvars.spinner);
 					ImGui::SliderFloat("Set Pitch Angle", &g_Config.cvars.spinner_pitch_angle, -180.0f, 180.0f);
@@ -672,6 +709,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Application Speed"))
 				{
 					ImGui::Separator();
+					ImGui::Text("App. Speed");
 
 					if (ImGui::Button("Reset App Speed"))
 					{
@@ -690,6 +728,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Fake Lag"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Fake Lag");
 
 					ImGui::Checkbox("Enable Fake Lag", &g_Config.cvars.fakelag);
 					ImGui::Checkbox("Adaptive Ex Interp", &g_Config.cvars.fakelag_adaptive_ex_interp);
@@ -717,6 +756,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Anti-AFK"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Anti-AFK");
 
 					static const char* antiafk_items[] = { "0 - Off", "1 - Step Forward & Back", "2 - Spam Gibme", "3 - Walk Around & Spam Inputs", "4 - Walk Around", "5 - Go Right" };
 					ImGui::Combo("Mode", &g_Config.cvars.antiafk, antiafk_items, IM_ARRAYSIZE(antiafk_items));
@@ -742,6 +782,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("Key Spam"))
 				{
 					ImGui::Separator();
+					ImGui::Text("Key Spam");
 
 					ImGui::Checkbox("Hold Mode", &g_Config.cvars.keyspam_hold_mode);
 
@@ -767,6 +808,7 @@ void ShowMainMenu()
 					extern void ConCommand_CamHackReset(void);
 
 					ImGui::Separator();
+					ImGui::Text("Cam Hack");
 
 					if (ImGui::Button("Toggle Cam Hack"))
 						ConCommand_CamHack();
@@ -790,6 +832,7 @@ void ShowMainMenu()
 				if (ImGui::TreeNode("First-Person Roaming"))
 				{
 					ImGui::Separator();
+					ImGui::Text("First-Person Roaming");
 
 					ImGui::Checkbox("Enable First-Person Roaming", &g_Config.cvars.fp_roaming);
 					ImGui::Checkbox("Draw Crosshair in Roaming", &g_Config.cvars.fp_roaming_draw_crosshair);
@@ -810,6 +853,7 @@ void ShowMainMenu()
 					extern void ConCommand_PrintSpamTasks(void);
 
 					ImGui::Separator();
+					ImGui::Text("Message Spammer");
 
 					if (ImGui::Button("Show Spam Tasks"))
 						ConCommand_PrintSpamTasks();
@@ -852,6 +896,7 @@ void ShowMainMenu()
 				extern void ConCommand_ShowCurrentMutedPlayers(void);
 
 				ImGui::Separator();
+				ImGui::Text("Advanced Mute System");
 
 				if (ImGui::Button("Show Muted Players"))
 					ConCommand_ShowMutedPlayers();

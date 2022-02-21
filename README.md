@@ -35,7 +35,7 @@ How it looks: `../Sven Co-op/sven_internal/`.
 
 Note: some files/folders may not appear, you need to create them.
 
-This folder is used to save the config, muted players, load players (their SteamID 64) for **Chat Colors** and load spam tasks for **Message Spammer**.
+This folder is used to save the config, save list of muted players, load list of players (their SteamID64) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
 File `sven_internal.ini` is the config file (you can save it via menu or console command `sc_save_config`).
 
@@ -59,7 +59,7 @@ File `chat_colors_players.txt` used for adding the players in such format: `STEA
 
 To convert traditional SteamID to SteamID64 faster, you can use the following console command: `steamid_to_steamid64 [SteamID]`.
 
-There're currently 5 color numbers (slots) plus rainbow color, this you can use 6 unique and customizable colors (can be change in Menu).
+There're currently 5 color numbers (slots) plus rainbow color, thus you can use 6 unique and customizable colors (can be changed in Menu).
 
 Rainbow color has slot 0, others custom colors from 1 to 5.
 
@@ -69,16 +69,16 @@ Example for the file:
 76561197962091295 : 5 ; it's a comment too!
 ```
 
-The file automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the list of players.
+File `chat_colors_players.txt` automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the list of players.
 
 # Message Spammer
 Roughly, it's some kind of AHK.
 
-Uses `*.txt` files from folder `message_spammer` to run spam tasks.
+It uses `*.txt` files from folder `message_spammer` to run spam tasks. Use the following console command to run a spam task: `sc_ms_add [FILENAME]`.
 
 It supports 3 keywords: `loop`, `send` and `sleep`.
 
-Important: Message Spammer reads the `*.txt` files sequentially. Also, use the following console command to run a spam task: `sc_ms_add [FILENAME]`.
+Important: Message Spammer reads the `*.txt` files sequentially.
 
 For example:
 ```

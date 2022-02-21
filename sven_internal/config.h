@@ -231,6 +231,7 @@ public:
 	config_cvars cvars;
 	DWORD dwToggleButton = VK_INSERT;
 	int theme = 0;
+	float opacity = 1.0f;
 };
 
 //-----------------------------------------------------------------------------
