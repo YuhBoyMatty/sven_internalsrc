@@ -70,21 +70,21 @@ void WindowStyle()
 {
 	ImGuiStyle* style = &ImGui::GetStyle();
 
-	style->FramePadding = ImVec2(6, 4);
-	style->WindowPadding = ImVec2(8, 8);
-	style->WindowTitleAlign = ImVec2(0.5, 0.5);
+	style->FramePadding = ImVec2(6.f, 4.f);
+	style->WindowPadding = ImVec2(8.f, 8.f);
+	style->WindowTitleAlign = ImVec2(0.5f, 0.5f);
 	style->WindowMenuButtonPosition = ImGuiDir_None;
-	style->ItemSpacing = ImVec2(20, 5);
-	style->ItemInnerSpacing = ImVec2(20, 20);
-	style->ScrollbarSize = 15.0;
-	style->ScrollbarRounding = 15.0;
-	style->GrabMinSize = 15.0;
-	style->GrabRounding = 7.0;
+	style->ItemSpacing = ImVec2(20.f, 5.f);
+	style->ItemInnerSpacing = ImVec2(20.f, 20.f);
+	style->ScrollbarSize = 15.0f;
+	style->ScrollbarRounding = 15.0f;
+	style->GrabMinSize = 15.0f;
+	style->GrabRounding = 7.0f;
 }
 
 ImVec4 FramerateColor(ImVec4)
 {
-	if (ImGui::GetIO().Framerate <= 30)
+	if (ImGui::GetIO().Framerate <= 30.f)
 	{
 		return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
@@ -128,7 +128,7 @@ void ShowMainMenu()
 			SYSTEMTIME SysTime;
 			GetLocalTime(&SysTime);
 
-			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (42.5));
+			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (42.5f));
 			ImGui::Text("Time: %02d:%02d:%02d", SysTime.wHour, SysTime.wMinute, SysTime.wSecond);
 
 			ImGui::Spacing();
@@ -188,7 +188,7 @@ void ShowMainMenu()
 				Settings ^= true;
 			}
 		}
-		ImGui::End;
+		ImGui::End();
 
 		// Visuals
 		if (Visuals)
@@ -313,7 +313,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (3.5));
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (3.5f));
 						ImGui::Text("ESP");
 
 						ImGui::Spacing();
@@ -323,7 +323,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (47.5));
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (47.5f));
 						ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
 
 						ImGui::Spacing();
@@ -413,6 +413,12 @@ void ShowMainMenu()
 						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
 						ImGui::Combo("Box Type", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
 
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
+						ImGui::SliderFloat("ESP Distance", &g_Config.cvars.esp_distance, 1.0f, 10000.0f);
+						
 						ImGui::Spacing();
 						ImGui::Spacing();
 
@@ -947,21 +953,19 @@ void ShowMainMenu()
 
 						ImGui::PushItemWidth(160);
 						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
-						ImGui::Combo("Skybox Name", &g_Config.cvars.skybox, g_szSkyboxes, g_iSkyboxesSize);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (100));
-						if (ImGui::Button("Change Skybox"))
+						if (ImGui::Combo("Skybox Name", &g_Config.cvars.skybox, g_szSkyboxes, g_iSkyboxesSize))
 						{
 							g_bMenuChangeSkybox = true;
+
 							ConCommand_ChangeSkybox();
+
 							g_bMenuChangeSkybox = false;
 						}
 
-						ImGui::SameLine();
+						ImGui::Spacing();
+						ImGui::Spacing();
 
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (55));
 						if (ImGui::Button("Reset Skybox"))
 						{
 							ConCommand_ResetSkybox();
@@ -975,7 +979,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (3.5));
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (3.5f));
 						ImGui::Text("Fog");
 
 						ImGui::Spacing();
@@ -1071,6 +1075,11 @@ void ShowMainMenu()
 						ImGui::Checkbox("Show Speedometer", &g_Config.cvars.show_speed);
 
 						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (68));
+						ImGui::Checkbox("Store Vertical Speed", &g_Config.cvars.show_vertical_speed);
+
+						ImGui::Spacing();
 						ImGui::Spacing();
 
 						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
@@ -1107,7 +1116,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (23));
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (32));
 						ImGui::Text("Crosshair");
 
 						ImGui::Spacing();
@@ -1117,9 +1126,51 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (62));
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (73));
 						ImGui::Checkbox("Draw Crosshair", &g_Config.cvars.draw_crosshair);
 
+						ImGui::Spacing();
+						
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (73));
+						ImGui::Checkbox("Draw Crosshair Dot", &g_Config.cvars.draw_crosshair_dot);
+
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (73));
+						ImGui::Checkbox("Draw Crosshair Outline", &g_Config.cvars.draw_crosshair_outline);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
+						ImGui::SliderInt("Crosshair Size", &g_Config.cvars.crosshair_size, 1, 30);
+						
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
+						ImGui::SliderInt("Crosshair Gap", &g_Config.cvars.crosshair_gap, 0, 30);
+						
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
+						ImGui::SliderInt("Crosshair Thickness", &g_Config.cvars.crosshair_thickness, 1, 30);
+						
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
+						ImGui::SliderInt("Crosshair Outline Thickness", &g_Config.cvars.crosshair_outline_thickness, 1, 30);
+						
+						ImGui::Spacing();
+						ImGui::Spacing();
+						
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
+						ImGui::ColorEdit4("Crosshair Color", g_Config.cvars.crosshair_color);
+						
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
+						ImGui::ColorEdit4("Crosshair Outline Color", g_Config.cvars.crosshair_outline_color);
+						
 						ImGui::Spacing();
 						ImGui::Spacing();
 
@@ -1145,6 +1196,12 @@ void ShowMainMenu()
 						ImGui::Spacing();
 
 						ImGui::Separator();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (70));
+						ImGui::Checkbox("Enable Chat Colors", &g_Config.cvars.enable_chat_colors);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1233,6 +1290,11 @@ void ShowMainMenu()
 
 						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #5", g_Config.cvars.chat_color_five);
+
+						ImGui::Spacing();
+
+						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
+						ImGui::ColorEdit3("Custom Color #6", g_Config.cvars.chat_color_six);
 						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
@@ -1579,7 +1641,15 @@ void ShowMainMenu()
                     // Anti-AFK
 					if (ImGui::BeginTabItem("Anti-AFK"))
 					{
-						static const char* antiafk_items[] = { "0 - Off", "1 - Step Forward & Back", "2 - Spam Gibme", "3 - Walk Around & Spam Inputs", "4 - Walk Around", "5 - Go Right" };
+						static const char* antiafk_items[] =
+						{
+							"0 - Off",
+							"1 - Step Forward & Back",
+							"2 - Spam Gibme",
+							"3 - Walk Around & Spam Inputs",
+							"4 - Walk Around",
+							"5 - Go Right"
+						};
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -2010,7 +2080,7 @@ void ShowMainMenu()
 				ImGui::Spacing();
 				ImGui::Spacing();
 
-				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (83.5));
+				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (83.5f));
 				if (ImGui::Button("Use Insert"))
 					g_Config.dwToggleButton = 0x2D;
 
@@ -2097,11 +2167,12 @@ void ShowMainMenu()
 				ImGui::PushItemWidth(150);
 				if (ImGui::Combo("", &g_Config.theme, theme_items, IM_ARRAYSIZE(theme_items)))
 				{
+					LoadSavedStyle();
+
 					LoadTheme();
 					WindowStyle();
-					//LoadSavedStyle();
 				}
-				ImGui::PopItemWidth;
+				ImGui::PopItemWidth();
 
 				ImGui::Spacing();
 				ImGui::Spacing();
@@ -2116,11 +2187,11 @@ void ShowMainMenu()
 				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (130 / 2));
 				ImGui::SliderFloat(" ", &g_Config.opacity, 0.1f, 1.0f);
 
-				ImGui::PopItemWidth;
+				ImGui::PopItemWidth();
 				ImGui::Spacing();
 				ImGui::Spacing();
 			}
-			ImGui::End;
+			ImGui::End();
 		}
 	}
 }
@@ -2174,7 +2245,7 @@ BOOL APIENTRY wglSwapBuffers_Hooked(HDC hdc)
 		ImGui_ImplOpenGL2_Init();
 
 		ImGui::StyleColorsDark();
-		//SaveCurrentStyle();
+		SaveCurrentStyle();
 
 		ImGuiIO &io = ImGui::GetIO();
 		io.IniFilename = NULL;

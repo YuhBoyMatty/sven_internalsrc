@@ -12,7 +12,7 @@ public:
 	bool Load();
 	void Save();
 
-	struct config_cvars
+	struct config_cvars // why cvars lol
 	{
 		// ESP
 		bool esp = true;
@@ -32,6 +32,8 @@ public:
 		int esp_targets = 0;
 		int esp_skeleton_type = 1;
 
+		float esp_distance = 5000.0f;
+
 		float esp_friend_color[3] = { 0.0f, 1.0f, 0.0f };
 		float esp_enemy_color[3] = { 1.0f, 0.0f, 0.0f };
 		float esp_neutral_color[3] = { 1.0f, 1.0f, 0.0f };
@@ -46,9 +48,19 @@ public:
 		bool no_fade = false;
 
 		bool draw_crosshair = true;
+		bool draw_crosshair_dot = false;
+		bool draw_crosshair_outline = true;
+		int crosshair_size = 10;
+		int crosshair_gap = 4;
+		int crosshair_thickness = 2;
+		int crosshair_outline_thickness = 1;
+		float crosshair_outline_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		float crosshair_color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 		int draw_entities = 0; // enum
 
 		bool show_speed = false;
+		bool show_vertical_speed = false;
 		float speed_width_fraction = 0.5f;
 		float speed_height_fraction = 0.88f;
 		float speed_color[4] = { 1.0f, 0.75f, 0.0f, 0.882f };
@@ -91,7 +103,7 @@ public:
 		int glow_entities = 0;
 		bool glow_entities_wall = true;
 		int glow_entities_width = 10;
-		float glow_entities_color[3] = { 1.0f, 0.0f, 0.0f };
+		float glow_entities_color[3] = { 0.0f, 0.0f, 1.0f };
 
 		int glow_items = 0;
 		bool glow_items_wall = true;
@@ -189,6 +201,7 @@ public:
 		int skybox = 0;
 
 		// Chat Colors
+		bool enable_chat_colors = true;
 		float player_name_color[3] = { 0.6f, 0.75f, 1.0f };
 		float chat_rainbow_update_delay = 0.05f;
 		float chat_rainbow_hue_delta = 0.015f;
@@ -199,6 +212,7 @@ public:
 		float chat_color_three[3] = { 1.0f, 1.0f, 0.25f };
 		float chat_color_four[3] = { 0.25f, 1.0f, 0.25f };
 		float chat_color_five[3] = { 1.0f, 0.57f, 0.0f };
+		float chat_color_six[3] = { 1.0f, 1.0f, 1.0f };
 
 		// Cam Hack		funcs: toggle camhack, reset
 		bool camhack_show_model = true;

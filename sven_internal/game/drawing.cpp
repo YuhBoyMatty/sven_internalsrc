@@ -380,19 +380,70 @@ void CDrawing::DrawWideString(vgui::HFont font, int x, int y, int r, int g, int 
 // Misc. draw methods
 //-----------------------------------------------------------------------------
 
-void CDrawing::DrawCrosshair(int x, int y, int r, int g, int b, int a, int Size /* = 10 */, int Gap /* = 4 */, int Thickness /* = 2 */)
+void CDrawing::DrawCrosshair(int x, int y, int r, int g, int b, int a, int iSize /* = 10 */, int iGap /* = 4 */, int iThickness /* = 2 */)
 {
-	int thickness = Thickness - 1;
+	int thickness = iThickness - 1;
 
-	g_Drawing.FillArea(x - Gap - Size + 1 - thickness, y - thickness, Size, Thickness, r, g, b, a);
-	g_Drawing.FillArea(x + Gap, y - thickness, Size, Thickness, r, g, b, a);
-	g_Drawing.FillArea(x - thickness, y - Gap - Size + 1 - thickness, Thickness, Size, r, g, b, a);
-	g_Drawing.FillArea(x - thickness, y + Gap, Thickness, Size, r, g, b, a);
+	// Left
+	g_Drawing.FillArea(x - iGap - iSize + 1, y - (thickness / 2), iSize, iThickness, r, g, b, a);
+
+	// Right
+	g_Drawing.FillArea(x + iGap, y - (thickness / 2), iSize, iThickness, r, g, b, a);
+
+	// Up
+	g_Drawing.FillArea(x - (thickness / 2), y - iGap - iSize + 1, iThickness, iSize, r, g, b, a);
+
+	// Down
+	g_Drawing.FillArea(x - (thickness / 2), y + iGap, iThickness, iSize, r, g, b, a);
 }
 
-void CDrawing::DrawDot(int x, int y, int r, int g, int b, int a, int Thickness /* = 2 */)
+void CDrawing::DrawDot(int x, int y, int r, int g, int b, int a, int iThickness /* = 2 */)
 {
-	int thickness = Thickness - 1;
+	int thickness = iThickness - 1;
 
-	g_Drawing.FillArea(x - thickness, y - thickness, Thickness, Thickness, r, g, b, a);
+	g_Drawing.FillArea(x - (thickness / 2), y - (thickness / 2), iThickness, iThickness, r, g, b, a);
+}
+
+void CDrawing::DrawCrosshairShadow(int x, int y, int r, int g, int b, int a, int iSize /* = 10 */, int iGap /* = 4 */, int iThickness /* = 2 */, int iShadowThickness /* = 1 */)
+{
+	int thickness = iThickness - 1;
+
+	// Left
+	g_Drawing.FillArea(x - iGap - iSize + 1 - iShadowThickness + (iShadowThickness / 2),
+					   y - (thickness / 2) - iShadowThickness + (iShadowThickness / 2),
+					   iSize + iShadowThickness,
+					   iThickness + iShadowThickness,
+					   r, g, b, a);
+
+	// Right
+	g_Drawing.FillArea(x + iGap - iShadowThickness + (iShadowThickness / 2),
+					   y - (thickness / 2) - iShadowThickness + (iShadowThickness / 2),
+					   iSize + iShadowThickness,
+					   iThickness + iShadowThickness,
+					   r, g, b, a);
+
+	// Up
+	g_Drawing.FillArea(x - (thickness / 2) - iShadowThickness + (iShadowThickness / 2),
+					   y - iGap - iSize + 1 - iShadowThickness + (iShadowThickness / 2),
+					   iThickness + iShadowThickness,
+					   iSize + iShadowThickness,
+					   r, g, b, a);
+
+	// Down
+	g_Drawing.FillArea(x - (thickness / 2) - iShadowThickness + (iShadowThickness / 2),
+					   y + iGap - iShadowThickness + (iShadowThickness / 2),
+					   iThickness + iShadowThickness,
+					   iSize + iShadowThickness,
+					   r, g, b, a);
+}
+
+void CDrawing::DrawDotShadow(int x, int y, int r, int g, int b, int a, int iThickness /* = 2 */, int iShadowThickness /* = 1 */)
+{
+	int thickness = iThickness - 1;
+
+	g_Drawing.FillArea(x - (thickness / 2) - iShadowThickness + (iShadowThickness / 2),
+					   y - (thickness / 2) - iShadowThickness + (iShadowThickness / 2),
+					   iThickness + iShadowThickness,
+					   iThickness + iShadowThickness,
+					   r, g, b, a);
 }

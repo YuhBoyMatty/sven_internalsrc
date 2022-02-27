@@ -57,8 +57,10 @@ public:
 	void DrawStringACP(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const char *pszString);
 	void DrawWideString(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const wchar_t *pwszString);
 
-	void DrawCrosshair(int x, int y, int r, int g, int b, int a, int Size = 10, int Gap = 4, int Thickness = 2);
-	void DrawDot(int x, int y, int r, int g, int b, int a, int Thickness = 2);
+	void DrawCrosshair(int x, int y, int r, int g, int b, int a, int iSize = 10, int iGap = 4, int iThickness = 2);
+	void DrawDot(int x, int y, int r, int g, int b, int a, int iThickness = 2);
+	void DrawCrosshairShadow(int x, int y, int r, int g, int b, int a, int iSize = 10, int Giap = 4, int iThickness = 2, int iShadowThickness = 1);
+	void DrawDotShadow(int x, int y, int r, int g, int b, int a, int iThickness = 2, int iShadowThickness = 1);
 
 private:
 	void ApplyTextAlignment(FontAlignFlags_t alignment, int &x, int &y, int textWidth, int textHeight);

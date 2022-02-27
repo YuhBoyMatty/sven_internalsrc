@@ -143,7 +143,12 @@ void CVisual::ShowSpeed()
 	if (!g_Config.cvars.show_speed || g_pPlayerMove->iuser1 != 0)
 		return;
 
-	float flSpeed = g_Local.flVelocity;
+	float flSpeed;
+
+	if (g_Config.cvars.show_vertical_speed)
+		flSpeed = g_pPlayerMove->velocity.Length();
+	else
+		flSpeed = g_Local.flVelocity;
 
 	g_Drawing.DrawStringF(g_hESP2,
 						 int(m_iScreenWidth * g_Config.cvars.speed_width_fraction),
@@ -191,8 +196,70 @@ void CVisual::DrawCrosshair()
 
 	if (g_pPlayerMove->iuser1 == 0 || g_Config.cvars.fp_roaming_draw_crosshair && g_FirstPersonRoaming.GetTargetPlayer())
 	{
-		g_Drawing.DrawCrosshair((m_iScreenWidth / 2) + 1, (m_iScreenHeight / 2) + 1, 0, 0, 0, 255, 10, 4, 3);
-		g_Drawing.DrawCrosshair((m_iScreenWidth / 2) + 1, (m_iScreenHeight / 2) + 1, 255, 255, 255, 255);
+		if (g_Config.cvars.draw_crosshair_outline)
+		{
+			g_Drawing.DrawCrosshairShadow((m_iScreenWidth / 2) - 1,
+											(m_iScreenHeight / 2) - 1,
+											int(255.f * g_Config.cvars.crosshair_outline_color[0]),
+											int(255.f * g_Config.cvars.crosshair_outline_color[1]),
+											int(255.f * g_Config.cvars.crosshair_outline_color[2]),
+											int(255.f * g_Config.cvars.crosshair_outline_color[3]),
+											g_Config.cvars.crosshair_size,
+											g_Config.cvars.crosshair_gap,
+											g_Config.cvars.crosshair_thickness,
+											g_Config.cvars.crosshair_outline_thickness);
+			
+			//g_Drawing.DrawCrosshair((m_iScreenWidth / 2) - 1,
+			//						(m_iScreenHeight / 2) - 1,
+			//						int(255.f * g_Config.cvars.crosshair_outline_color[0]),
+			//						int(255.f * g_Config.cvars.crosshair_outline_color[1]),
+			//						int(255.f * g_Config.cvars.crosshair_outline_color[2]),
+			//						int(255.f * g_Config.cvars.crosshair_outline_color[3]),
+			//						g_Config.cvars.crosshair_size,
+			//						g_Config.cvars.crosshair_gap,
+			//						g_Config.cvars.crosshair_thickness + g_Config.cvars.crosshair_outline_thickness);
+
+			if (g_Config.cvars.draw_crosshair_dot)
+			{
+				g_Drawing.DrawDotShadow((m_iScreenWidth / 2) - 1,
+										(m_iScreenHeight / 2) - 1,
+										int(255.f * g_Config.cvars.crosshair_outline_color[0]),
+										int(255.f * g_Config.cvars.crosshair_outline_color[1]),
+										int(255.f * g_Config.cvars.crosshair_outline_color[2]),
+										int(255.f * g_Config.cvars.crosshair_outline_color[3]),
+										g_Config.cvars.crosshair_thickness,
+										g_Config.cvars.crosshair_outline_thickness);
+
+				//g_Drawing.DrawDot((m_iScreenWidth / 2) - 1,
+				//				  (m_iScreenHeight / 2) - 1,
+				//				  int(255.f * g_Config.cvars.crosshair_outline_color[0]),
+				//				  int(255.f * g_Config.cvars.crosshair_outline_color[1]),
+				//				  int(255.f * g_Config.cvars.crosshair_outline_color[2]),
+				//				  int(255.f * g_Config.cvars.crosshair_outline_color[3]),
+				//				  g_Config.cvars.crosshair_thickness + g_Config.cvars.crosshair_outline_thickness);
+			}
+		}
+
+		if (g_Config.cvars.draw_crosshair_dot)
+		{
+			g_Drawing.DrawDot((m_iScreenWidth / 2) - 1,
+							  (m_iScreenHeight / 2) - 1,
+							  int(255.f * g_Config.cvars.crosshair_color[0]),
+							  int(255.f * g_Config.cvars.crosshair_color[1]),
+							  int(255.f * g_Config.cvars.crosshair_color[2]),
+							  int(255.f * g_Config.cvars.crosshair_color[3]),
+							  g_Config.cvars.crosshair_thickness);
+		}
+
+		g_Drawing.DrawCrosshair((m_iScreenWidth / 2) - 1,
+								(m_iScreenHeight / 2) - 1,
+								int(255.f * g_Config.cvars.crosshair_color[0]),
+								int(255.f * g_Config.cvars.crosshair_color[1]),
+								int(255.f * g_Config.cvars.crosshair_color[2]),
+								int(255.f * g_Config.cvars.crosshair_color[3]),
+								g_Config.cvars.crosshair_size,
+								g_Config.cvars.crosshair_gap,
+								g_Config.cvars.crosshair_thickness);
 	}
 }
 
@@ -264,7 +331,7 @@ void CVisual::ESP()
 		bPlayer = pEntity->player;
 		flDistance = (pEntity->origin - pLocal->origin).Length();
 
-		if (flDistance > 4000.0f)
+		if (flDistance > g_Config.cvars.esp_distance)
 			continue;
 
 		Vector vecBottom = pEntity->origin;

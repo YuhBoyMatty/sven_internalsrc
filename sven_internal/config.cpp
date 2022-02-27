@@ -117,6 +117,7 @@ bool CConfig::Load()
 		
 	INI_IMPORT_BEGIN_SECTION("ESP");
 		INI_IMPORT_VARIABLE("Enable", cvars.esp);
+		INI_IMPORT_VARIABLE("Distance", cvars.esp_distance);
 		INI_IMPORT_VARIABLE("Box", cvars.esp_box);
 		INI_IMPORT_VARIABLE("Outline", cvars.esp_box_outline);
 		INI_IMPORT_VARIABLE("Fill", cvars.esp_box_fill);
@@ -157,12 +158,31 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Wireframe_B", cvars.wh_wireframe_color[1]);
 	INI_IMPORT_END_SECTION();
 	
+	INI_IMPORT_BEGIN_SECTION("CROSSHAIR");
+		INI_IMPORT_VARIABLE("Enable", cvars.draw_crosshair);
+		INI_IMPORT_VARIABLE("EnableDot", cvars.draw_crosshair_dot);
+		INI_IMPORT_VARIABLE("EnableOutline", cvars.draw_crosshair_outline);
+		INI_IMPORT_VARIABLE("Size", cvars.crosshair_size);
+		INI_IMPORT_VARIABLE("Gap", cvars.crosshair_gap);
+		INI_IMPORT_VARIABLE("Thickness", cvars.crosshair_thickness);
+		INI_IMPORT_VARIABLE("OutlineThickness", cvars.crosshair_outline_thickness);
+		INI_IMPORT_VARIABLE("OutlineColor_R", cvars.crosshair_outline_color[0]);
+		INI_IMPORT_VARIABLE("OutlineColor_G", cvars.crosshair_outline_color[1]);
+		INI_IMPORT_VARIABLE("OutlineColor_B", cvars.crosshair_outline_color[2]);
+		INI_IMPORT_VARIABLE("OutlineColor_A", cvars.crosshair_outline_color[3]);
+		INI_IMPORT_VARIABLE("Color_R", cvars.crosshair_color[0]);
+		INI_IMPORT_VARIABLE("Color_G", cvars.crosshair_color[1]);
+		INI_IMPORT_VARIABLE("Color_B", cvars.crosshair_color[2]);
+		INI_IMPORT_VARIABLE("Color_A", cvars.crosshair_color[3]);
+	INI_IMPORT_END_SECTION();
+
 	INI_IMPORT_BEGIN_SECTION("VISUAL");
 		INI_IMPORT_VARIABLE("NoShake", cvars.no_shake);
 		INI_IMPORT_VARIABLE("NoFade", cvars.no_fade);
 		INI_IMPORT_VARIABLE("Crosshair", cvars.draw_crosshair);
 		INI_IMPORT_VARIABLE("DrawEntities", cvars.draw_entities);
 		INI_IMPORT_VARIABLE("ShowSpeed", cvars.show_speed);
+		INI_IMPORT_VARIABLE("StoreVerticalSpeed", cvars.show_vertical_speed);
 		INI_IMPORT_VARIABLE("SpeedWidthFraction", cvars.speed_width_fraction);
 		INI_IMPORT_VARIABLE("SpeedHeightFraction", cvars.speed_height_fraction);
 		INI_IMPORT_VARIABLE("Speed_R", cvars.speed_color[0]);
@@ -329,6 +349,7 @@ bool CConfig::Load()
 	INI_IMPORT_END_SECTION();
 	
 	INI_IMPORT_BEGIN_SECTION("CHATCOLORS");
+		INI_IMPORT_VARIABLE("Enable", cvars.enable_chat_colors);
 		INI_IMPORT_VARIABLE("PlayerName_R", cvars.player_name_color[0]);
 		INI_IMPORT_VARIABLE("PlayerName_G", cvars.player_name_color[1]);
 		INI_IMPORT_VARIABLE("PlayerName_B", cvars.player_name_color[2]);
@@ -351,6 +372,9 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("ColorFive_R", cvars.chat_color_five[0]);
 		INI_IMPORT_VARIABLE("ColorFive_G", cvars.chat_color_five[1]);
 		INI_IMPORT_VARIABLE("ColorFive_B", cvars.chat_color_five[2]);
+		INI_IMPORT_VARIABLE("ColorSix_R", cvars.chat_color_six[0]);
+		INI_IMPORT_VARIABLE("ColorSix_G", cvars.chat_color_six[1]);
+		INI_IMPORT_VARIABLE("ColorSix_B", cvars.chat_color_six[2]);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("CAMHACK");
@@ -404,6 +428,7 @@ void CConfig::Save()
 		
 	INI_EXPORT_BEGIN_SECTION("ESP");
 		INI_EXPORT_VARIABLE("Enable", cvars.esp);
+		INI_EXPORT_VARIABLE("Distance", cvars.esp_distance);
 		INI_EXPORT_VARIABLE("Box", cvars.esp_box);
 		INI_EXPORT_VARIABLE("Outline", cvars.esp_box_outline);
 		INI_EXPORT_VARIABLE("Fill", cvars.esp_box_fill);
@@ -444,12 +469,30 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Wireframe_B", cvars.wh_wireframe_color[1]);
 	INI_EXPORT_END_SECTION();
 	
+	INI_EXPORT_BEGIN_SECTION("CROSSHAIR");
+		INI_EXPORT_VARIABLE("Enable", cvars.draw_crosshair);
+		INI_EXPORT_VARIABLE("EnableDot", cvars.draw_crosshair_dot);
+		INI_EXPORT_VARIABLE("EnableOutline", cvars.draw_crosshair_outline);
+		INI_EXPORT_VARIABLE("Size", cvars.crosshair_size);
+		INI_EXPORT_VARIABLE("Gap", cvars.crosshair_gap);
+		INI_EXPORT_VARIABLE("Thickness", cvars.crosshair_thickness);
+		INI_EXPORT_VARIABLE("OutlineThickness", cvars.crosshair_outline_thickness);
+		INI_EXPORT_VARIABLE("OutlineColor_R", cvars.crosshair_outline_color[0]);
+		INI_EXPORT_VARIABLE("OutlineColor_G", cvars.crosshair_outline_color[1]);
+		INI_EXPORT_VARIABLE("OutlineColor_B", cvars.crosshair_outline_color[2]);
+		INI_EXPORT_VARIABLE("OutlineColor_A", cvars.crosshair_outline_color[3]);
+		INI_EXPORT_VARIABLE("Color_R", cvars.crosshair_color[0]);
+		INI_EXPORT_VARIABLE("Color_G", cvars.crosshair_color[1]);
+		INI_EXPORT_VARIABLE("Color_B", cvars.crosshair_color[2]);
+		INI_EXPORT_VARIABLE("Color_A", cvars.crosshair_color[3]);
+	INI_EXPORT_END_SECTION();
+
 	INI_EXPORT_BEGIN_SECTION("VISUAL");
 		INI_EXPORT_VARIABLE("NoShake", cvars.no_shake);
 		INI_EXPORT_VARIABLE("NoFade", cvars.no_fade);
-		INI_EXPORT_VARIABLE("Crosshair", cvars.draw_crosshair);
 		INI_EXPORT_VARIABLE("DrawEntities", cvars.draw_entities);
 		INI_EXPORT_VARIABLE("ShowSpeed", cvars.show_speed);
+		INI_EXPORT_VARIABLE("StoreVerticalSpeed", cvars.show_vertical_speed);
 		INI_EXPORT_VARIABLE("SpeedWidthFraction", cvars.speed_width_fraction);
 		INI_EXPORT_VARIABLE("SpeedHeightFraction", cvars.speed_height_fraction);
 		INI_EXPORT_VARIABLE("Speed_R", cvars.speed_color[0]);
@@ -616,6 +659,7 @@ void CConfig::Save()
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("CHATCOLORS");
+		INI_EXPORT_VARIABLE("Enable", cvars.enable_chat_colors);
 		INI_EXPORT_VARIABLE("PlayerName_R", cvars.player_name_color[0]);
 		INI_EXPORT_VARIABLE("PlayerName_G", cvars.player_name_color[1]);
 		INI_EXPORT_VARIABLE("PlayerName_B", cvars.player_name_color[2]);
@@ -638,6 +682,9 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("ColorFive_R", cvars.chat_color_five[0]);
 		INI_EXPORT_VARIABLE("ColorFive_G", cvars.chat_color_five[1]);
 		INI_EXPORT_VARIABLE("ColorFive_B", cvars.chat_color_five[2]);
+		INI_EXPORT_VARIABLE("ColorSix_R", cvars.chat_color_six[0]);
+		INI_EXPORT_VARIABLE("ColorSix_G", cvars.chat_color_six[1]);
+		INI_EXPORT_VARIABLE("ColorSix_B", cvars.chat_color_six[2]);
 	INI_EXPORT_END_SECTION();
 
 	INI_EXPORT_BEGIN_SECTION("CAMHACK");

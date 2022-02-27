@@ -135,7 +135,7 @@ CON_COMMAND_FUNC(sc_chat_colors_load_players,
 
 float *GetClientColor_Hooked(int playerIndex)
 {
-	if (playerIndex > 0)
+	if (g_Config.cvars.enable_chat_colors && playerIndex > 0)
 	{
 		int nTeamNumber = g_pPlayerExtraInfo[playerIndex].teamnumber;
 		int *nUserColorNumber = g_ChatColors.FindPlayerInList(playerIndex);
@@ -161,6 +161,9 @@ float *GetClientColor_Hooked(int playerIndex)
 
 			case 5:
 				return g_Config.cvars.chat_color_five;
+
+			case 6:
+				return g_Config.cvars.chat_color_six;
 			}
 		}
 		else if (nTeamNumber < 1 || nTeamNumber > 4)

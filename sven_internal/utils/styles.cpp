@@ -1098,16 +1098,20 @@ void LoadTheme()
     }
 }
 
-//static ImGuiStyle s_Style;
-//
-//void SaveCurrentStyle() // call on initialization after StyleColorsDarkTheme
-//{
-//	memcpy(&s_Style, &ImGui::GetStyle(), sizeof(ImGuiStyle));
-//}
-//
-//void LoadSavedStyle()
-//{
-//	memcpy((unsigned char*)&ImGui::GetStyle() + sizeof(ImGuiStyle::Alpha), // Skip opacity
-//		(unsigned char*)&s_Style + sizeof(ImGuiStyle::Alpha),
-//		sizeof(ImGuiStyle) - sizeof(ImGuiStyle::Alpha));
-//}
+//-----------------------------------------------------------------------------
+// Save and load one initial style
+//-----------------------------------------------------------------------------
+
+static ImGuiStyle s_Style;
+
+void SaveCurrentStyle() // call on initialization after StyleColorsDarkTheme
+{
+	memcpy(&s_Style, &ImGui::GetStyle(), sizeof(ImGuiStyle));
+}
+
+void LoadSavedStyle()
+{
+	memcpy((unsigned char*)&ImGui::GetStyle() + sizeof(ImGuiStyle::Alpha), // Skip opacity
+		(unsigned char*)&s_Style + sizeof(ImGuiStyle::Alpha),
+		sizeof(ImGuiStyle) - sizeof(ImGuiStyle::Alpha));
+}
