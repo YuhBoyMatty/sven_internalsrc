@@ -19,6 +19,7 @@ const char *g_szClassName[] =
 	"Player",
 
 	// NPCs
+	"Gordon Freeman",
 	"Scientist",
 	"Barney",
 	"Otis",
@@ -40,6 +41,7 @@ const char *g_szClassName[] =
 	"G-Man",
 	"Female Assassin",
 	"Male Assassin",
+	"Male Sniper Assassin",
 	"Snark",
 	"Chumtoad",
 	"Piranha",
@@ -65,6 +67,8 @@ const char *g_szClassName[] =
 	"Shock Rifle",
 	"Heavy Grunt",
 	"Robot Grunt",
+	"Barnabus",
+	"Skeleton",
 
 	// Items
 	"Medkit",
@@ -151,18 +155,31 @@ class_info_t GetEntityClassInfo(const char *pszModelName)
 CClassTable::CClassTable()
 {
 	// NPCs
+	g_HashModelsTable.Insert("gordon_scientist.mdl", LINK_CLASS_INFO(CLASS_NPC_GORDON_FREEMAN, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("scientist.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("scientist2.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("cleansuit_scientist.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("scientist_rosenberg.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("wheelchair_sci.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
+	g_HashModelsTable.Insert("civ_scientist.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("civ_paper_scientist.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("console_civ_scientist.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("sc2sci.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("scigun.mdl", LINK_CLASS_INFO(CLASS_NPC_SCIENTIST, FL_CLASS_FRIEND));
 
+	g_HashModelsTable.Insert("hgruntf.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("sc2grunt.mdl", LINK_CLASS_INFO(CLASS_NPC_ALIEN_GRUNT, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("agruntf.mdl", LINK_CLASS_INFO(CLASS_NPC_ALIEN_GRUNT, FL_CLASS_FRIEND));
+
 	g_HashModelsTable.Insert("barney.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNEY, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
-	g_HashModelsTable.Insert("otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
+	g_HashModelsTable.Insert("intro_barney.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNEY, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("intro_otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND));
 
 	g_HashModelsTable.Insert("headcrab.mdl", LINK_CLASS_INFO(CLASS_NPC_HEADCRAB, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("baby_headcrab.mdl", LINK_CLASS_INFO(CLASS_NPC_BABY_HEADCRAB, FL_CLASS_ENEMY));
+
+	g_HashModelsTable.Insert("otisf.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("zombie.mdl", LINK_CLASS_INFO(CLASS_NPC_ZOMBIE, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("zombie_soldier.mdl", LINK_CLASS_INFO(CLASS_NPC_ZOMBIE_SOLDIER, FL_CLASS_ENEMY));
@@ -223,6 +240,7 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("hgrunt_medic.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 
 	g_HashModelsTable.Insert("massn.mdl", LINK_CLASS_INFO(CLASS_NPC_MALE_ASSASSIN, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("massnf.mdl", LINK_CLASS_INFO(CLASS_NPC_MALE_SNIPER_ASSASSIN, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("gonome.mdl", LINK_CLASS_INFO(CLASS_NPC_GONOME, FL_CLASS_ENEMY));
 
@@ -237,6 +255,8 @@ CClassTable::CClassTable()
 
 	g_HashModelsTable.Insert("hwgrunt.mdl", LINK_CLASS_INFO(CLASS_NPC_HEAVY_GRUNT, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("rgrunt.mdl", LINK_CLASS_INFO(CLASS_NPC_ROBOT_GRUNT, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("barnabus.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNABUS, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("skeleton.mdl", LINK_CLASS_INFO(CLASS_NPC_SKELETON, FL_CLASS_ENEMY));
 
 	// Items
 	g_HashModelsTable.Insert("w_medkit.mdl", LINK_CLASS_INFO(CLASS_ITEM_MEDKIT, FL_CLASS_ITEM));
@@ -289,4 +309,12 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("forklift.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
 	g_HashModelsTable.Insert("loader.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
 	g_HashModelsTable.Insert("construction.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("dead_barney.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("dead_scientist.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("ball.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("can.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("w_crossbow_clip.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("pit_drone_spike.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("crashed_osprey.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
+	g_HashModelsTable.Insert("baby_strooper.mdl", LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_WORLD_ENTITY));
 }
