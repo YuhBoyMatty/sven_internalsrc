@@ -1,6 +1,11 @@
-// Hash Table
+// Hash Map
 
+#ifndef HASHMAP_H
+#define HASHMAP_H
+
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +44,9 @@ public:
 	void Clear();
 
 	void IterateEntries( void (*pfnCallback)(Data &data) );
+
+	// Yes, it's idiotic
+	void *operator[]( int element );
 
 	unsigned int Count() const { return m_Size; }
 	unsigned int Size() const { return m_Size; }
@@ -194,6 +202,7 @@ inline void CHash<Data, C, H>::Purge()
 		}
 
 		free((void *)m_Buckets);
+		m_Buckets = NULL;
 	}
 }
 
@@ -238,3 +247,11 @@ inline void CHash<Data, C, H>::IterateEntries(void (*pfnCallback)(Data &data))
 		}
 	}
 }
+
+template <class Data, typename C, typename H>
+inline void *CHash<Data, C, H>::operator[](int element)
+{
+	return (void *)m_Buckets[element];
+}
+
+#endif // HASHMAP_H

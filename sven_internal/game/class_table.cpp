@@ -111,7 +111,7 @@ const char *g_szClassName[] =
 };
 
 CHashTable<uint32_t, class_info_t> g_HashClassTable(255);
-CHashDict<class_info_t> g_HashModelsTable(255);
+CHashDict<class_info_t, true, false> g_HashModelsTable(255);
 
 CClassTable g_ClassTable;
 
@@ -202,7 +202,7 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("miniturret.mdl", LINK_CLASS_INFO(CLASS_NPC_TURRET, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("leech.mdl", LINK_CLASS_INFO(CLASS_NPC_LEECH, FL_CLASS_ENEMY));
 
-	g_HashModelsTable.Insert("gman.mdl", LINK_CLASS_INFO(CLASS_NPC_GMAN, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("gman.mdl", LINK_CLASS_INFO(CLASS_NPC_GMAN, FL_CLASS_NEUTRAL));
 
 	g_HashModelsTable.Insert("hassassin.mdl", LINK_CLASS_INFO(CLASS_NPC_FEMALE_ASSASSIN, FL_CLASS_ENEMY));
 

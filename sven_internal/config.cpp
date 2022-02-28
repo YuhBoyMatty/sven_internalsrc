@@ -179,7 +179,6 @@ bool CConfig::Load()
 	INI_IMPORT_BEGIN_SECTION("VISUAL");
 		INI_IMPORT_VARIABLE("NoShake", cvars.no_shake);
 		INI_IMPORT_VARIABLE("NoFade", cvars.no_fade);
-		INI_IMPORT_VARIABLE("Crosshair", cvars.draw_crosshair);
 		INI_IMPORT_VARIABLE("DrawEntities", cvars.draw_entities);
 		INI_IMPORT_VARIABLE("ShowSpeed", cvars.show_speed);
 		INI_IMPORT_VARIABLE("StoreVerticalSpeed", cvars.show_vertical_speed);

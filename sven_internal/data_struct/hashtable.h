@@ -1,6 +1,11 @@
 // Hash Table
 
+#ifndef HASHTABLE_H
+#define HASHTABLE_H
+
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +42,9 @@ public:
 	void Clear();
 
 	void IterateEntries( void (*pfnCallback)(const KeyT key, ValueT &value) );
+
+	// Yes, it's idiotic
+	void *operator[]( int element );
 
 	unsigned int Count() const { return m_Size; }
 	unsigned int Size() const { return m_Size; }
@@ -193,6 +201,7 @@ inline void CHashTable<KeyT, ValueT>::Purge()
 		}
 
 		free((void *)m_Buckets);
+		m_Buckets = NULL;
 	}
 }
 
@@ -239,12 +248,18 @@ inline void CHashTable<KeyT, ValueT>::IterateEntries(void (*pfnCallback)(const K
 }
 
 template <typename KeyT, class ValueT>
+void *CHashTable<KeyT, ValueT>::operator[](int element)
+{
+	return (void *)m_Buckets[element];
+}
+
+template <typename KeyT, class ValueT>
 __forceinline unsigned int CHashTable<KeyT, ValueT>::HashKey(const KeyT key) const
 {
 	// Jenkins hash function
 	unsigned int i = 0;
 	unsigned int hash = 0;
-	unsigned char *pKey = (unsigned char *)& key;
+	unsigned char *pKey = (unsigned char *)&key;
 
 	while (i != sizeof(KeyT))
 	{
@@ -259,3 +274,5 @@ __forceinline unsigned int CHashTable<KeyT, ValueT>::HashKey(const KeyT key) con
 
 	return hash;
 }
+
+#endif // HASHTABLE_H

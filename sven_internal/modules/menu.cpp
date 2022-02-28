@@ -207,7 +207,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (12));
 						ImGui::Text("Render");
 
 						ImGui::Spacing();
@@ -217,13 +216,11 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (5));
 						ImGui::Text("Game");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (176));
 						ImGui::Checkbox("No Shake", &g_Config.cvars.no_shake); ImGui::SameLine();
 						ImGui::Checkbox("No Fade", &g_Config.cvars.no_fade); ImGui::SameLine();
 						ImGui::Checkbox("Remove FOV Cap", &g_Config.cvars.remove_fov_cap);
@@ -232,7 +229,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (38));
 						ImGui::Text("Draw Entities");
 
 						ImGui::Spacing();
@@ -247,54 +243,42 @@ void ShowMainMenu()
 							"4 - Draw Hulls",
 							"5 - Draw Players Bones"
 						};
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (67));
+
 						ImGui::Combo(" ", &g_Config.cvars.draw_entities, draw_entities_items, IM_ARRAYSIZE(draw_entities_items));
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (25));
 						ImGui::Text("Light Map");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (75));
 						ImGui::Checkbox("Override Lightmap", &g_Config.cvars.lightmap_override);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(159);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (143));
 						ImGui::SliderFloat("Lightmap Brightness", &g_Config.cvars.lightmap_brightness, 0.0f, 1.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (143));
 						ImGui::ColorEdit3("Lightmap Color", g_Config.cvars.lightmap_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (62));
 						ImGui::Text("No Weapon Animations");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
 						static const char* no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (67));
+
 						ImGui::Combo("   ", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
-						ImGui::PopItemWidth();
+
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -313,7 +297,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (3.5f));
 						ImGui::Text("ESP");
 
 						ImGui::Spacing();
@@ -323,13 +306,11 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (47.5f));
 						ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (225));
 						ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline); ImGui::SameLine();
 						ImGui::Checkbox("Show Items", &g_Config.cvars.esp_show_items); ImGui::SameLine();
 						ImGui::Checkbox("Ignore Unknown Entities", &g_Config.cvars.esp_ignore_unknown_ents);
@@ -337,28 +318,24 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::Checkbox("Draw Entity Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
 						ImGui::Text(" "); ImGui::SameLine();
 						ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health); ImGui::SameLine();
 						ImGui::Text(""); ImGui::SameLine();
 						ImGui::Checkbox("Draw Player Armor", &g_Config.cvars.esp_box_player_armor);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::Checkbox("Draw Entity Name", &g_Config.cvars.esp_box_entity_name); ImGui::SameLine();
 						ImGui::Text("  "); ImGui::SameLine();
 						ImGui::Checkbox("Draw Nicknames", &g_Config.cvars.esp_box_player_name);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::Checkbox("Draw Skeleton", &g_Config.cvars.esp_skeleton); ImGui::SameLine();
 						ImGui::Text("     "); ImGui::SameLine();
 						ImGui::Checkbox("Draw Bones Name", &g_Config.cvars.esp_bones_name);
@@ -366,65 +343,51 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (25));
 						ImGui::Text("ESP Colors");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(250);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::ColorEdit3("Friend Color", g_Config.cvars.esp_friend_color);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::ColorEdit3("Enemy Color", g_Config.cvars.esp_enemy_color);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::ColorEdit3("Neutral Color", g_Config.cvars.esp_neutral_color);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (175));
 						ImGui::ColorEdit3("Item Color", g_Config.cvars.esp_item_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
 						static const char* esp_process_items[] = { "0 - Everyone", "1 - Entities", "2 - Players" };
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
 						ImGui::Combo("ESP Targets", &g_Config.cvars.esp_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
 						ImGui::Combo("Draw Skeleton Type", &g_Config.cvars.esp_skeleton_type, esp_process_items, IM_ARRAYSIZE(esp_process_items));
 
 						ImGui::Spacing();
 
 						static const char* esp_box_items[] = { "0 - Off", "1 - Default", "2 - Coal", "3 - Corner" };
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
 						ImGui::Combo("Box Type", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
 						ImGui::SliderFloat("ESP Distance", &g_Config.cvars.esp_distance, 1.0f, 10000.0f);
 						
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (140));
 						ImGui::SliderInt("Box Alpha", &g_Config.cvars.esp_box_fill, 0, 255);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -443,7 +406,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (10));
 						ImGui::Text("Chams");
 
 						ImGui::Spacing();
@@ -453,114 +415,86 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (55));
 						ImGui::Checkbox("Enable Chams", &g_Config.cvars.chams);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (15));
 						ImGui::Text("Players");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
 						static const char* chams_items[] = { "0 - Disable", "1 - Flat", "2 - Texture", "3 - Material" };
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (99));
 						ImGui::Checkbox("Chams Players Behind Wall", &g_Config.cvars.chams_players_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::SliderInt("Chams Players", &g_Config.cvars.chams_players, 0, 3, chams_items[g_Config.cvars.chams_players]);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PopItemWidth();
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::ColorEdit3("Chams Players Color", g_Config.cvars.chams_players_color);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::ColorEdit3("Chams Players Wall Color", g_Config.cvars.chams_players_wall_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Entities");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (99));
 						ImGui::Checkbox("Chams Entities Behind Wall", &g_Config.cvars.chams_entities_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::SliderInt("Chams Entities", &g_Config.cvars.chams_entities, 0, 3, chams_items[g_Config.cvars.chams_entities]);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PopItemWidth();
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::ColorEdit3("Chams Entities Color", g_Config.cvars.chams_entities_color);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::ColorEdit3("Chams Entities Wall Color", g_Config.cvars.chams_entities_wall_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (10));
 						ImGui::Text("Items");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (99));
 						ImGui::Checkbox("Chams Items Behind Wall", &g_Config.cvars.chams_items_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::SliderInt("Chams Items", &g_Config.cvars.chams_items, 0, 3, chams_items[g_Config.cvars.chams_items]);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PopItemWidth();
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::ColorEdit3("Chams Items Color", g_Config.cvars.chams_items_color);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::ColorEdit3("Chams Items Wall Color", g_Config.cvars.chams_items_wall_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -579,7 +513,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (5));
 						ImGui::Text("Glow");
 
 						ImGui::Spacing();
@@ -589,13 +522,11 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						ImGui::Checkbox("Enable Glow", &g_Config.cvars.glow);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (100));
 						ImGui::Checkbox("Optimize Glow Behind Wall", &g_Config.cvars.glow_optimize);
 
 						ImGui::Spacing();
@@ -603,7 +534,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (15));
 						ImGui::Text("Players");
 
 						ImGui::Spacing();
@@ -611,96 +541,70 @@ void ShowMainMenu()
 						ImGui::Spacing();
 
 						static const char* glow_items[] = { "0 - Disable", "1 - Glow Outline", "2 - Glow Shell", "3 - Ghost" };
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (95));
 						ImGui::Checkbox("Glow Players Behind Wall", &g_Config.cvars.glow_players_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("Glow Players", &g_Config.cvars.glow_players, 0, 3, glow_items[g_Config.cvars.glow_players]);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("Glow Players Width", &g_Config.cvars.glow_players_width, 0, 30);
 
 						ImGui::Spacing();
-						ImGui::PopItemWidth();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::ColorEdit3("Glow Players Color", g_Config.cvars.glow_players_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Entities");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (95));
 						ImGui::Checkbox("Glow Entities Behind Wall", &g_Config.cvars.glow_entities_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("Glow Entities", &g_Config.cvars.glow_entities, 0, 3, glow_items[g_Config.cvars.glow_entities]);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("Glow Entities Width", &g_Config.cvars.glow_entities_width, 0, 30);
 
 						ImGui::Spacing();
-						ImGui::PopItemWidth();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::ColorEdit3("Glow Entities Color", g_Config.cvars.glow_entities_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (10));
 						ImGui::Text("Items");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (95));
 						ImGui::Checkbox("Glow Items Behind Wall", &g_Config.cvars.glow_entities_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("Glow Items", &g_Config.cvars.glow_entities, 0, 3, glow_items[g_Config.cvars.glow_entities]);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("Glow Items Width", &g_Config.cvars.glow_entities_width, 0, 30);
 
 						ImGui::Spacing();
-						ImGui::PopItemWidth();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::ColorEdit3("Glow Items Color", g_Config.cvars.glow_entities_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -719,7 +623,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (30));
 						ImGui::Text("Dynamic Glow");
 
 						ImGui::Spacing();
@@ -729,141 +632,107 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (105));
 						ImGui::Checkbox("Dyn. Glow Attach To Targets", &g_Config.cvars.dyn_glow_attach);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (8));
 						ImGui::Text("Self");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (65));
 						ImGui::Checkbox("Dyn. Glow Self", &g_Config.cvars.dyn_glow_self);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Self Radius", &g_Config.cvars.dyn_glow_self_radius, 0.f, 4096.f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Self Decay", &g_Config.cvars.dyn_glow_self_decay, 0.f, 4096.f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (172));
 						ImGui::ColorEdit3("Dyn. Glow Self Color", g_Config.cvars.dyn_glow_self_color);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (15));
 						ImGui::Text("Players");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (65));
 						ImGui::Checkbox("Dyn. Glow Players", &g_Config.cvars.dyn_glow_players);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Players Radius", &g_Config.cvars.dyn_glow_players_radius, 0.f, 4096.f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Players Decay", &g_Config.cvars.dyn_glow_players_decay, 0.f, 4096.f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (172));
 						ImGui::ColorEdit3("Dyn. Glow Players Color", g_Config.cvars.dyn_glow_players_color);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Entities");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (65));
 						ImGui::Checkbox("Dyn. Glow Entities", &g_Config.cvars.dyn_glow_entities);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Entities Radius", &g_Config.cvars.dyn_glow_entities_radius, 0.f, 4096.f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Entities Decay", &g_Config.cvars.dyn_glow_entities_decay, 0.f, 4096.f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (172));
 						ImGui::ColorEdit3("Dyn. Glow Entities Color", g_Config.cvars.dyn_glow_entities_color);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (10));
 						ImGui::Text("Items");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(150);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (65));
 						ImGui::Checkbox("Dyn. Glow Items", &g_Config.cvars.dyn_glow_items);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Items Radius", &g_Config.cvars.dyn_glow_items_radius, 0.f, 4096.f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Dyn. Glow Items Decay", &g_Config.cvars.dyn_glow_items_decay, 0.f, 4096.f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (172));
 						ImGui::ColorEdit3("Dyn. Glow Items Color", g_Config.cvars.dyn_glow_items_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -882,7 +751,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Wallhack");
 
 						ImGui::Spacing();
@@ -892,30 +760,22 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::Checkbox("Simple Wallhack", &g_Config.cvars.wallhack); ImGui::SameLine();
 						ImGui::Checkbox("Lambert Wallhack", &g_Config.cvars.wallhack_white_walls);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::Checkbox("Wireframe World", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
 						ImGui::Checkbox("Wireframe Models", &g_Config.cvars.wallhack_wireframe_models);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(159);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Wireframe Line Width", &g_Config.cvars.wh_wireframe_width, 0.0f, 10.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::ColorEdit3("Wireframe Color", g_Config.cvars.wh_wireframe_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -941,7 +801,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (40));
 						ImGui::Text("Skybox Changer");
 
 						ImGui::Spacing();
@@ -951,8 +810,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(160);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						if (ImGui::Combo("Skybox Name", &g_Config.cvars.skybox, g_szSkyboxes, g_iSkyboxesSize))
 						{
 							g_bMenuChangeSkybox = true;
@@ -965,7 +822,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (55));
 						if (ImGui::Button("Reset Skybox"))
 						{
 							ConCommand_ResetSkybox();
@@ -979,7 +835,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2.f) - (3.5f));
 						ImGui::Text("Fog");
 
 						ImGui::Spacing();
@@ -989,45 +844,33 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60));
 						ImGui::Checkbox("Enable Fog", &g_Config.cvars.fog);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60));
 						ImGui::Checkbox("Fog Skybox", &g_Config.cvars.fog_skybox);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60));
 						ImGui::Checkbox("Disable Water Fog", &g_Config.cvars.remove_water_fog);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(159);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::SliderFloat("Fog Start", &g_Config.cvars.fog_start, 0.0f, 10000.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::SliderFloat("Fog End", &g_Config.cvars.fog_end, 0.0f, 10000.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::SliderFloat("Density", &g_Config.cvars.fog_density, 0.0f, 10.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (120));
 						ImGui::ColorEdit3("Color", g_Config.cvars.fog_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1060,7 +903,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (27));
 						ImGui::Text("Speedometer");
 
 						ImGui::Spacing();
@@ -1070,34 +912,25 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(159);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (68));
 						ImGui::Checkbox("Show Speedometer", &g_Config.cvars.show_speed);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (68));
 						ImGui::Checkbox("Store Vertical Speed", &g_Config.cvars.show_vertical_speed);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::SliderFloat("Speed Width Fraction", &g_Config.cvars.speed_width_fraction, 0.0f, 1.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::SliderFloat("Speed Height Fraction", &g_Config.cvars.speed_height_fraction, 0.0f, 1.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit4("Speed Color", g_Config.cvars.speed_color);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1116,7 +949,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (32));
 						ImGui::Text("Crosshair");
 
 						ImGui::Spacing();
@@ -1126,49 +958,40 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (73));
 						ImGui::Checkbox("Draw Crosshair", &g_Config.cvars.draw_crosshair);
 
 						ImGui::Spacing();
 						
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (73));
 						ImGui::Checkbox("Draw Crosshair Dot", &g_Config.cvars.draw_crosshair_dot);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (73));
 						ImGui::Checkbox("Draw Crosshair Outline", &g_Config.cvars.draw_crosshair_outline);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
-						ImGui::SliderInt("Crosshair Size", &g_Config.cvars.crosshair_size, 1, 30);
+						ImGui::SliderInt("Crosshair Size", &g_Config.cvars.crosshair_size, 1, 50);
 						
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
-						ImGui::SliderInt("Crosshair Gap", &g_Config.cvars.crosshair_gap, 0, 30);
+						ImGui::SliderInt("Crosshair Gap", &g_Config.cvars.crosshair_gap, 0, 50);
 						
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
-						ImGui::SliderInt("Crosshair Thickness", &g_Config.cvars.crosshair_thickness, 1, 30);
+						ImGui::SliderInt("Crosshair Thickness", &g_Config.cvars.crosshair_thickness, 1, 50);
 						
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
-						ImGui::SliderInt("Crosshair Outline Thickness", &g_Config.cvars.crosshair_outline_thickness, 1, 30);
+						ImGui::SliderInt("Crosshair Outline Thickness", &g_Config.cvars.crosshair_outline_thickness, 1, 50);
 						
 						ImGui::Spacing();
 						ImGui::Spacing();
 						
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
 						ImGui::ColorEdit4("Crosshair Color", g_Config.cvars.crosshair_color);
 						
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
 						ImGui::ColorEdit4("Crosshair Outline Color", g_Config.cvars.crosshair_outline_color);
 						
 						ImGui::Spacing();
@@ -1190,7 +1013,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (30));
 						ImGui::Text("Chat Colors");
 
 						ImGui::Spacing();
@@ -1200,13 +1022,11 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (70));
 						ImGui::Checkbox("Enable Chat Colors", &g_Config.cvars.enable_chat_colors);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (57));
 						if (ImGui::Button("Load Players List"))
 						{
 							ConCommand_ChatColorsLoadPlayers();
@@ -1214,7 +1034,6 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 						
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (90));
 						if (ImGui::Button("Reset Default Player Color"))
 						{
 							g_Config.cvars.player_name_color[0] = 0.6f;
@@ -1225,77 +1044,59 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (170));
 						ImGui::ColorEdit3("Default Player Color", g_Config.cvars.player_name_color);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (38));
 						ImGui::Text("Rainbow Names");
 						
 						ImGui::Spacing();
 						ImGui::Spacing();
 						
-						ImGui::PushItemWidth(159);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::SliderFloat("Rainbow Update Delay", &g_Config.cvars.chat_rainbow_update_delay, 0.0f, 0.5f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::SliderFloat("Rainbow Hue Delta", &g_Config.cvars.chat_rainbow_hue_delta, 0.0f, 0.5f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::SliderFloat("Rainbow Saturation", &g_Config.cvars.chat_rainbow_saturation, 0.0f, 1.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::SliderFloat("Rainbow Lightness", &g_Config.cvars.chat_rainbow_lightness, 0.0f, 1.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (38));
 						ImGui::Text("Custom Colors");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #1", g_Config.cvars.chat_color_one);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #2", g_Config.cvars.chat_color_two);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #3", g_Config.cvars.chat_color_three);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #4", g_Config.cvars.chat_color_four);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #5", g_Config.cvars.chat_color_five);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (155));
 						ImGui::ColorEdit3("Custom Color #6", g_Config.cvars.chat_color_six);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1314,7 +1115,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						ImGui::Text("Custom Vote Popup");
 
 						ImGui::Spacing();
@@ -1324,43 +1124,34 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (97));
 						ImGui::Checkbox("Enable Custom Vote Popup", &g_Config.cvars.vote_popup);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(159);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("VP: Width Size", &g_Config.cvars.vote_popup_width_size, 0, 1000);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("VP: Height Size", &g_Config.cvars.vote_popup_height_size, 0, 1000);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("VP: Width Border Pixels", &g_Config.cvars.vote_popup_w_border_pix, 0, 100);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderInt("VP: Height Border Pixels", &g_Config.cvars.vote_popup_h_border_pix, 0, 100);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderFloat("VP: Width Fraction", &g_Config.cvars.vote_popup_width_frac, 0.0f, 1.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (165));
 						ImGui::SliderFloat("VP: Height Fraction", &g_Config.cvars.vote_popup_height_frac, 0.0f, 1.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1397,7 +1188,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (12));
 						ImGui::Text("Player");
 
 						ImGui::Spacing();
@@ -1407,32 +1197,27 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (24));
 						if (ImGui::Button("Selfsink"))
 							ConCommand_AutoSelfSink();
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (18));
 						if (ImGui::Button("Freeze"))
 							ConCommand_Freeze();
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (57));
 						if (ImGui::Button("Drop Empty Weapon"))
 							ConCommand_DropEmptyWeapon();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (40));
 						ImGui::Checkbox("Autojump", &g_Config.cvars.autojump);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (185));
 						ImGui::Checkbox("Enable Jumpbug", &g_Config.cvars.jumpbug); ImGui::SameLine();
 						ImGui::Checkbox("Doubleduck", &g_Config.cvars.doubleduck); ImGui::SameLine();
 						ImGui::Checkbox("Fastrun", &g_Config.cvars.fastrun);
@@ -1440,7 +1225,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (240));
 						ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns); ImGui::SameLine();
 						ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch); ImGui::SameLine();
 						ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
@@ -1465,7 +1249,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (14));
 						ImGui::Text("Strafer");
 
 						ImGui::Spacing();
@@ -1475,26 +1258,20 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60));
 						ImGui::Checkbox("Enable Strafer", &g_Config.cvars.strafe);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60));
 						ImGui::Checkbox("Ignore Ground", &g_Config.cvars.strafe_ignore_ground);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
-						ImGui::PushItemWidth(200);
 						ImGui::Combo("Strafe Direction", &g_Config.cvars.strafe_dir, strafe_dir_items, IM_ARRAYSIZE(strafe_dir_items));
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
 						ImGui::Combo("Strafe Type", &g_Config.cvars.strafe_type, strafe_type_items, IM_ARRAYSIZE(strafe_type_items));
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1516,7 +1293,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (40));
 						ImGui::Text("Color Pulsator");
 
 						ImGui::Spacing();
@@ -1526,37 +1302,29 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (80));
 						ImGui::Checkbox("Enable Pulsator", &g_Config.cvars.color_pulsator);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (80));
 						ImGui::Checkbox("Change Top Color", &g_Config.cvars.color_pulsator_top);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (80));
 						ImGui::Checkbox("Change Bottom Color", &g_Config.cvars.color_pulsator_bottom);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (55));
 						ImGui::Text("Change Color Delay");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (92));
 						ImGui::SliderFloat("   ", &g_Config.cvars.color_pulsator_delay, 0.1f, 2.5f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (98));
 						if (ImGui::Button("Reset Colors"))
 							ConCommand_ResetColors();
 
@@ -1585,7 +1353,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Fake Lag");
 
 						ImGui::Spacing();
@@ -1595,37 +1362,29 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (75));
 						ImGui::Checkbox("Enable Fake Lag", &g_Config.cvars.fakelag);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (75));
 						ImGui::Checkbox("Adaptive Ex Interp", &g_Config.cvars.fakelag_adaptive_ex_interp);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderInt("Limit", &g_Config.cvars.fakelag_limit, 0, 256);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::SliderFloat("Variance", &g_Config.cvars.fakelag_variance, 0.0f, 100.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::Combo("Fake Lag Type", &g_Config.cvars.fakelag_type, fakelag_type_items, IM_ARRAYSIZE(fakelag_type_items));
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (150));
 						ImGui::Combo("Fake Move Type", &g_Config.cvars.fakelag_move, fakelag_move_items, IM_ARRAYSIZE(fakelag_move_items));
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1654,7 +1413,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Anti-AFK");
 
 						ImGui::Spacing(); 
@@ -1664,39 +1422,29 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (105));
 						ImGui::Combo("Mode", &g_Config.cvars.antiafk, antiafk_items, IM_ARRAYSIZE(antiafk_items));
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (104));
 						ImGui::Checkbox("Anti-AFK Rotate Camera", &g_Config.cvars.antiafk_rotate_camera);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (104));
 						ImGui::Checkbox("Anti-AFK Stay Within Range", &g_Config.cvars.antiafk_stay_within_range);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (195));
 						ImGui::SliderFloat("Rotation Angle", &g_Config.cvars.antiafk_rotation_angle, -7.0f, 7.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (195));
 						ImGui::SliderFloat("Stay Within Radius", &g_Config.cvars.antiafk_stay_radius, 25.0f, 500.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (195));
 						ImGui::SliderFloat("Stay Within Offset Angle", &g_Config.cvars.antiafk_stay_radius_offset_angle, 0.0f, 89.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1718,7 +1466,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (30));
 						ImGui::Text("Key Spammer");
 
 						ImGui::Spacing();
@@ -1728,24 +1475,20 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (45));
 						ImGui::Checkbox("Hold Mode", &g_Config.cvars.keyspam_hold_mode);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (85));
 						ImGui::Checkbox("Spam E", &g_Config.cvars.keyspam_e); ImGui::SameLine();
 						ImGui::Checkbox("Spam Q", &g_Config.cvars.keyspam_q);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (85));
 						ImGui::Checkbox("Spam W", &g_Config.cvars.keyspam_w); ImGui::SameLine();
 						ImGui::Checkbox("Spam S", &g_Config.cvars.keyspam_s);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (47));
 						ImGui::Checkbox("Spam CTRL", &g_Config.cvars.keyspam_ctrl);
 
 						ImGui::Spacing();
@@ -1756,7 +1499,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (43));
 						ImGui::Text("Message Spammer");
 
 						ImGui::Spacing();
@@ -1766,13 +1508,11 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (53));
 						if (ImGui::Button("Show Spam Tasks"))
 							ConCommand_PrintSpamTasks();
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (63));
 						if (ImGui::Button("Show Spam Keywords"))
 							ConCommand_PrintSpamKeyWords();
 
@@ -1797,7 +1537,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (20));
 						ImGui::Text("Cam Hack");
 
 						ImGui::Spacing();
@@ -1807,40 +1546,32 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						if (ImGui::Button("Toggle Cam Hack"))
 							ConCommand_CamHack();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						if (ImGui::Button("Reset Roll Axis"))
 							ConCommand_CamHackResetRoll();
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (47));
 						if (ImGui::Button("Reset Cam Hack"))
 							ConCommand_CamHackReset();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 							
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (34));
 						ImGui::Text("Speed Factor"); 
 						
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (90));
 						ImGui::SliderFloat("   ", &g_Config.cvars.camhack_speed_factor, 0.0f, 15.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						ImGui::Checkbox("Show Model", &g_Config.cvars.camhack_show_model);
 
 						ImGui::Spacing();
@@ -1851,7 +1582,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (61));
 						ImGui::Text("First-Person Roaming");
 
 						ImGui::Spacing();
@@ -1861,32 +1591,25 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (107));
 						ImGui::Checkbox("Enable First-Person Roaming", &g_Config.cvars.fp_roaming);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (107));
 						ImGui::Checkbox("Draw Crosshair in Roaming", &g_Config.cvars.fp_roaming_draw_crosshair);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (107));
 						ImGui::Checkbox("Lerp First-Person View", &g_Config.cvars.fp_roaming_lerp);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (27));
 						ImGui::Text("Lerp Value");
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (90));
 						ImGui::SliderFloat("   ", &g_Config.cvars.fp_roaming_lerp_value, 0.001f, 1.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1905,7 +1628,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (15));
 						ImGui::Text("Spinner");
 
 						ImGui::Spacing();
@@ -1915,34 +1637,27 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (62));
 						ImGui::Checkbox("Enable Spinner", &g_Config.cvars.spinner);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (173));
 						ImGui::SliderFloat("Set Pitch Angle", &g_Config.cvars.spinner_pitch_angle, -180.0f, 180.0f);
 
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (173));
 						ImGui::SliderFloat("Yaw Angle Rotation", &g_Config.cvars.spinner_rotation_yaw_angle, -10.0f, 10.0f);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (62));
 						ImGui::Checkbox("Rotate Pitch Angle", &g_Config.cvars.spinner_rotate_pitch_angle);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (173));
 						ImGui::SliderFloat("Pitch Angle Rotation", &g_Config.cvars.spinner_rotation_pitch_angle, -10.0f, 10.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1952,7 +1667,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						ImGui::Text("Application Speed");
 
 						ImGui::Spacing();
@@ -1962,7 +1676,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (50));
 						if (ImGui::Button("Reset App Speed"))
 						{
 							g_Config.cvars.application_speed = 1.0f;
@@ -1970,10 +1683,7 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 
-						ImGui::PushItemWidth(200);
-						ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (160));
 						ImGui::SliderFloat("Application Speed", &g_Config.cvars.application_speed, 0.1f, 50.0f);
-						ImGui::PopItemWidth();
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -2007,20 +1717,17 @@ void ShowMainMenu()
 			ImGui::Spacing();
 			ImGui::Spacing();
 
-			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60));
 			if (ImGui::Button("Show Muted Players"))
 				ConCommand_ShowMutedPlayers();
 
 			ImGui::Spacing();
 
-			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (86));
 			if (ImGui::Button("Show Current Muted Players"))
 				ConCommand_ShowCurrentMutedPlayers();
 
 			ImGui::Spacing();
 			ImGui::Spacing();
 
-			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (65));
 			ImGui::Checkbox("Mute Everything", &g_Config.cvars.ams_mute_everything);
 
 			ImGui::Spacing();
@@ -2049,7 +1756,6 @@ void ShowMainMenu()
 		    }
 
 			{
-				ImGui::Spacing();
 				ImGui::Spacing();
 
 				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (110 / 2));

@@ -1,6 +1,11 @@
-// Hash Table
+// Hash Dictionary
 
+#ifndef HASHDICT_H
+#define HASHDICT_H
+
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +16,7 @@
 // Hash Dictionary: key (string) - value (any data)
 //-----------------------------------------------------------------------------
 
-template <class T, bool bDupeStrings = false>
+template <class T, bool bCaseInsensitive = true, bool bDupeStrings = true>
 class CHashDict
 {
 public:
@@ -38,6 +43,9 @@ public:
 
 	void IterateEntries( void (*pfnCallback)(const char *pszKey, T &value) );
 
+	// Yes, it's idiotic
+	void *operator[]( int element );
+
 	unsigned int Count() const { return m_Size; }
 	unsigned int Size() const { return m_Size; }
 
@@ -49,8 +57,8 @@ protected:
 	unsigned int m_Size = 0;
 };
 
-template <class T, bool bDupeStrings>
-CHashDict<T, bDupeStrings>::CHashDict(int iBucketsCount)
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+CHashDict<T, bCaseInsensitive, bDupeStrings>::CHashDict(int iBucketsCount)
 {
 	if ((iBucketsCount & (iBucketsCount - 1)) == 0) // power of two
 		m_Size = iBucketsCount - 1;
@@ -60,14 +68,14 @@ CHashDict<T, bDupeStrings>::CHashDict(int iBucketsCount)
 	m_Buckets = (HashPair_t **)calloc(m_Size, sizeof(HashPair_t *));
 }
 
-template <class T, bool bDupeStrings>
-CHashDict<T, bDupeStrings>::~CHashDict()
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+CHashDict<T, bCaseInsensitive, bDupeStrings>::~CHashDict()
 {
 	Purge();
 }
 
-template <class T, bool bDupeStrings>
-inline T *CHashDict<T, bDupeStrings>::Find(const char *pszKey) const
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline T *CHashDict<T, bCaseInsensitive, bDupeStrings>::Find(const char *pszKey) const
 {
 	unsigned int hash = HashKey(pszKey);
 	int index = hash % m_Size;
@@ -76,7 +84,7 @@ inline T *CHashDict<T, bDupeStrings>::Find(const char *pszKey) const
 	
 	while (pCurrent)
 	{
-		if ( !strcmp(pCurrent->key, pszKey) )
+		if ( bCaseInsensitive ? !stricmp(pCurrent->key, pszKey) : !strcmp(pCurrent->key, pszKey) )
 			return &pCurrent->value;
 	
 		pCurrent = pCurrent->next;
@@ -85,8 +93,8 @@ inline T *CHashDict<T, bDupeStrings>::Find(const char *pszKey) const
 	return NULL;
 }
 
-template <class T, bool bDupeStrings>
-inline bool CHashDict<T, bDupeStrings>::Insert(const char *pszKey, const T &value, void (*pfnOnInsertFailed)(T *pFoundValue, T *pInsertValue) /* = NULL */)
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline bool CHashDict<T, bCaseInsensitive, bDupeStrings>::Insert(const char *pszKey, const T &value, void (*pfnOnInsertFailed)(T *pFoundValue, T *pInsertValue) /* = NULL */)
 {
 	unsigned int hash = HashKey(pszKey);
 	int index = hash % m_Size;
@@ -96,7 +104,7 @@ inline bool CHashDict<T, bDupeStrings>::Insert(const char *pszKey, const T &valu
 	
 	while (pCurrent)
 	{
-		if ( !strcmp(pCurrent->key, pszKey) )
+		if ( bCaseInsensitive ? !stricmp(pCurrent->key, pszKey) : !strcmp(pCurrent->key, pszKey) )
 		{
 			if (pfnOnInsertFailed)
 				pfnOnInsertFailed(const_cast<T *>(&pCurrent->value), const_cast<T *>(&value));
@@ -126,8 +134,8 @@ inline bool CHashDict<T, bDupeStrings>::Insert(const char *pszKey, const T &valu
 	return true;
 }
 
-template <class T, bool bDupeStrings>
-inline bool CHashDict<T, bDupeStrings>::Remove(const char *pszKey, bool (*pfnOnRemove)(T *pRemoveValue, T *pUserValue) /* = NULL */, T *pUserValue /* = NULL */)
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline bool CHashDict<T, bCaseInsensitive, bDupeStrings>::Remove(const char *pszKey, bool (*pfnOnRemove)(T *pRemoveValue, T *pUserValue) /* = NULL */, T *pUserValue /* = NULL */)
 {
 	unsigned int hash = HashKey(pszKey);
 	int index = hash % m_Size;
@@ -137,7 +145,7 @@ inline bool CHashDict<T, bDupeStrings>::Remove(const char *pszKey, bool (*pfnOnR
 	
 	while (pCurrent)
 	{
-		if ( !strcmp(pCurrent->key, pszKey) )
+		if ( bCaseInsensitive ? !stricmp(pCurrent->key, pszKey) : !strcmp(pCurrent->key, pszKey) )
 		{
 			if (pfnOnRemove && !pfnOnRemove(&pCurrent->value, pUserValue))
 				return false;
@@ -172,14 +180,14 @@ inline bool CHashDict<T, bDupeStrings>::Remove(const char *pszKey, bool (*pfnOnR
 	return false;
 }
 
-template <class T, bool bDupeStrings>
-inline void CHashDict<T, bDupeStrings>::RemoveAll()
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline void CHashDict<T, bCaseInsensitive, bDupeStrings>::RemoveAll()
 {
 	Purge();
 }
 
-template <class T, bool bDupeStrings>
-inline void CHashDict<T, bDupeStrings>::Purge()
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline void CHashDict<T, bCaseInsensitive, bDupeStrings>::Purge()
 {
 	if (m_Buckets)
 	{
@@ -203,11 +211,12 @@ inline void CHashDict<T, bDupeStrings>::Purge()
 		}
 
 		free((void *)m_Buckets);
+		m_Buckets = NULL;
 	}
 }
 
-template <class T, bool bDupeStrings>
-inline void CHashDict<T, bDupeStrings>::Clear()
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline void CHashDict<T, bCaseInsensitive, bDupeStrings>::Clear()
 {
 	if (m_Buckets)
 	{
@@ -232,8 +241,8 @@ inline void CHashDict<T, bDupeStrings>::Clear()
 	}
 }
 
-template <class T, bool bDupeStrings>
-inline void CHashDict<T, bDupeStrings>::IterateEntries(void (*pfnCallback)(const char *pszKey, T &value))
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline void CHashDict<T, bCaseInsensitive, bDupeStrings>::IterateEntries(void (*pfnCallback)(const char *pszKey, T &value))
 {
 	if (m_Buckets)
 	{
@@ -251,19 +260,39 @@ inline void CHashDict<T, bDupeStrings>::IterateEntries(void (*pfnCallback)(const
 	}
 }
 
-template <class T, bool bDupeStrings>
-__forceinline unsigned int CHashDict<T, bDupeStrings>::HashKey(const char *pszKey) const
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+inline void *CHashDict<T, bCaseInsensitive, bDupeStrings>::operator[](int element)
+{
+	return (void *)m_Buckets[element];
+}
+
+template <class T, bool bCaseInsensitive, bool bDupeStrings>
+__forceinline unsigned int CHashDict<T, bCaseInsensitive, bDupeStrings>::HashKey(const char *pszKey) const
 {
 	// Jenkins hash function
 	unsigned int hash = 0;
 
-	while (*pszKey)
+	if (bCaseInsensitive)
 	{
-		hash += *pszKey;
-		hash += hash << 10;
-		hash ^= hash >> 6;
+		while (*pszKey)
+		{
+			hash += tolower(*pszKey);
+			hash += hash << 10;
+			hash ^= hash >> 6;
 
-		++pszKey;
+			++pszKey;
+		}
+	}
+	else
+	{
+		while (*pszKey)
+		{
+			hash += *pszKey;
+			hash += hash << 10;
+			hash ^= hash >> 6;
+
+			++pszKey;
+		}
 	}
 
 	hash += hash << 3;
@@ -272,3 +301,5 @@ __forceinline unsigned int CHashDict<T, bDupeStrings>::HashKey(const char *pszKe
 
 	return hash;
 }
+
+#endif // HASHDICT_H
