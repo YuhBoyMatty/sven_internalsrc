@@ -26,6 +26,7 @@ typedef void (*R_SetupFrameFn)(void);
 //-----------------------------------------------------------------------------
 
 extern playermove_s *g_pPlayerMove;
+extern ref_params_s * g_pRefParams;
 
 extern int g_iChamsType;
 extern bool g_bOverrideColor;
@@ -133,7 +134,7 @@ void R_SetupFrame_Hooked()
 {
 	R_SetupFrame_Original();
 
-	if (g_pPlayerMove && g_pPlayerMove->waterlevel == 3)
+	if (g_pRefParams && g_pRefParams->waterlevel == 3)
 	{
 		float rgColor[3] = { 0.f, 0.f, 0.f };
 

@@ -60,6 +60,7 @@ extern bool bSendPacket;
 
 local_player_s g_Local;
 playermove_s *g_pPlayerMove = NULL;
+ref_params_s *g_pRefParams = NULL;
 extra_player_info_t *g_pPlayerExtraInfo = NULL;
 
 //-----------------------------------------------------------------------------
@@ -200,6 +201,8 @@ void V_CalcRefdef_Hooked(struct ref_params_s *pparams)
 	//pparams->punchangle[0] = 0.f;
 	//pparams->punchangle[1] = 0.f;
 	//pparams->punchangle[2] = 0.f;
+
+	g_pRefParams = pparams;
 
 	V_CalcRefdef_Original(pparams);
 
