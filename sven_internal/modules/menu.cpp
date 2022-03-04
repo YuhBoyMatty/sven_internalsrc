@@ -84,7 +84,7 @@ void WindowStyle()
 
 ImVec4 FramerateColor(ImVec4)
 {
-	if (ImGui::GetIO().Framerate <= 30.f)
+	if (ImGui::GetIO().Framerate < 30.f)
 	{
 		return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
@@ -1183,6 +1183,7 @@ void ShowMainMenu()
 					{
 						extern void ConCommand_AutoSelfSink();
 						extern void ConCommand_Freeze();
+						extern void ConCommand_Freeze2();
 						extern void ConCommand_DropEmptyWeapon();
 
 						ImGui::Spacing();
@@ -1204,6 +1205,11 @@ void ShowMainMenu()
 
 						if (ImGui::Button("Freeze"))
 							ConCommand_Freeze();
+
+						ImGui::Spacing();
+						
+						if (ImGui::Button("Freeze #2"))
+							ConCommand_Freeze2();
 
 						ImGui::Spacing();
 

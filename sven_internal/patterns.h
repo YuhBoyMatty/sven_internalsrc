@@ -18,6 +18,7 @@ namespace Patterns
 		EXTERN_PATTERN(flNextCmdTime);
 
 		EXTERN_PATTERN(Netchan_CanPacket);
+		EXTERN_PATTERN(Netchan_Transmit);
 
 		EXTERN_PATTERN(V_RenderView);
 		EXTERN_PATTERN(V_SetupFrame);

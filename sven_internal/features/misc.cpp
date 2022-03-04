@@ -28,7 +28,8 @@
 //-----------------------------------------------------------------------------
 
 typedef BOOL (WINAPI *QueryPerformanceCounterFn)(LARGE_INTEGER *);
-typedef void (__thiscall *CHud__ThinkFn)(CHud *thisptr);
+typedef void (__thiscall *CHud__ThinkFn)(CHud *);
+typedef void (__cdecl *Netchan_TransmitFn)(netchan_t *, int, unsigned char *);
 
 //-----------------------------------------------------------------------------
 // Imports
@@ -43,6 +44,7 @@ extern bool bSendPacket;
 
 TRAMPOLINE_HOOK(QueryPerformanceCounter_Hook);
 TRAMPOLINE_HOOK(CHud__Think_Hook);
+TRAMPOLINE_HOOK(Netchan_Transmit_Hook);
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -52,13 +54,16 @@ CMisc g_Misc;
 
 QueryPerformanceCounterFn QueryPerformanceCounter_Original = NULL;
 CHud__ThinkFn CHud__Think_Original = NULL;
+Netchan_TransmitFn Netchan_Transmit_Original = NULL;
 
 cvar_s *ex_interp = NULL;
 cvar_s *default_fov = NULL;
 
 static int s_nSinkState = 0;
 static int s_iWeaponID = -1;
+
 static bool s_bFreeze = false;
+static bool s_bFreeze2 = false;
 
 static float s_flTopColorDelay = 0.0f;
 static float s_flBottomColorDelay = 0.0f;
@@ -263,6 +268,30 @@ static void ConCommand_DropEmptyWeapon_Iterator(WEAPON *pWeapon, bool bHasAmmo, 
 	}
 }
 
+static void freeze_toggle_key_down()
+{
+	Msg("Connection blocked\n");
+	s_bFreeze = true;
+}
+
+static void freeze_toggle_key_up()
+{
+	Msg("Connection restored\n");
+	s_bFreeze = false;
+}
+
+static void freeze2_toggle_key_down()
+{
+	Msg("Connection blocked\n");
+	s_bFreeze2 = true;
+}
+
+static void freeze2_toggle_key_up()
+{
+	Msg("Connection restored\n");
+	s_bFreeze2 = false;
+}
+
 CON_COMMAND_FUNC(drop_empty_weapon, ConCommand_DropEmptyWeapon, "drop_empty_weapon - Drop an empty weapon from your inventory")
 {
 	g_pWR->IterateWeapons(ConCommand_DropEmptyWeapon_Iterator);
@@ -273,6 +302,15 @@ CON_COMMAND_FUNC(freeze, ConCommand_Freeze, "freeze - Block connection with a se
 	Msg(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
 	s_bFreeze = !s_bFreeze;
 }
+
+CON_COMMAND_FUNC(freeze2, ConCommand_Freeze2, "freeze2 - Block connection with a server with 2nd method")
+{
+	Msg(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
+	s_bFreeze2 = !s_bFreeze2;
+}
+
+CON_TOGGLE_COMMAND(freeze_toggle, freeze_toggle_key_down, freeze_toggle_key_up, "+freeze_toggle / -freeze_toggle - Block connection with a server");
+CON_TOGGLE_COMMAND(freeze2_toggle, freeze2_toggle_key_down, freeze2_toggle_key_up, "+freeze2_toggle / -freeze2_toggle - Block connection with a server");
 
 CON_COMMAND(sc_print_server_address, "sc_print_server_address - Prints server address")
 {
@@ -344,6 +382,17 @@ void __fastcall CHud__Think_Hooked(CHud *pHud)
 	{
 		CHud__Think_Original(pHud);
 	}
+}
+
+void __cdecl Netchan_Transmit_Hooked(netchan_t *chan, int lengthInBytes, unsigned char *data)
+{
+	if (s_bFreeze2)
+	{
+		Netchan_Transmit_Original(chan, 0, NULL); // cancel size and data
+		return;
+	}
+
+	Netchan_Transmit_Original(chan, lengthInBytes, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -908,6 +957,7 @@ void CMisc::QuakeGuns_HUD_PostRunCmd(struct local_state_s *to)
 void CMisc::Init()
 {
 	HMODULE hClientDLL = GetModuleHandle(L"client.dll");
+	HMODULE hHardware = GetModuleHandle(L"hw.dll");
 
 	void *pCHud__Think = FindPattern(hClientDLL, Patterns::Client::CHud__Think);
 
@@ -917,8 +967,17 @@ void CMisc::Init()
 		return;
 	}
 
+	void *pNetchan_Transmit = FindPattern(hHardware, Patterns::Hardware::Netchan_Transmit);
+
+	if (!pNetchan_Transmit)
+	{
+		Sys_Error("'Netchan_Transmit' failed initialization");
+		return;
+	}
+
 	HOOK_FUNCTION(QueryPerformanceCounter_Hook, QueryPerformanceCounter, QueryPerformanceCounter_Hooked, QueryPerformanceCounter_Original, QueryPerformanceCounterFn);
 	HOOK_FUNCTION(CHud__Think_Hook, pCHud__Think, CHud__Think_Hooked, CHud__Think_Original, CHud__ThinkFn);
+	HOOK_FUNCTION(Netchan_Transmit_Hook, pNetchan_Transmit, Netchan_Transmit_Hooked, Netchan_Transmit_Original, Netchan_TransmitFn);
 
 	ex_interp = g_pEngineFuncs->pfnGetCvarPointer("ex_interp");
 	default_fov = g_pEngineFuncs->pfnGetCvarPointer("default_fov");
