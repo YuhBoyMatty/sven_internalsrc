@@ -89,7 +89,7 @@ void CFirstPersonRoaming::GetPlayerViewAngles(Vector &vOutput)
 	vOutput = m_pTarget->curstate.angles;
 
 	// Transform this weird Pitch range [-9.887 ... 9.887] to [-89.0 ... 89.0]
-	vOutput.x *= 10.0f * (89.0f / 98.876953f);
+	vOutput.x *= (89.0f / 9.8876953125f);
 }
 
 bool CFirstPersonRoaming::StudioRenderModel()

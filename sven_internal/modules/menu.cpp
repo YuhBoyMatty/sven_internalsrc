@@ -270,6 +270,24 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
+						ImGui::Checkbox("Show Player's Push Direction", &g_Config.cvars.show_players_push_direction);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Push Direction Length", &g_Config.cvars.push_direction_length, 0.0f, 256.0f);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Push Direction Width", &g_Config.cvars.push_direction_width, 0.01f, 100.0f);
+
+						ImGui::Spacing();
+
+						ImGui::ColorEdit3("Push Direction Color", g_Config.cvars.push_direction_color);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+						ImGui::Spacing();
+
 						ImGui::Text("No Weapon Animations");
 
 						ImGui::Spacing();
@@ -591,20 +609,20 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::Checkbox("Glow Items Behind Wall", &g_Config.cvars.glow_entities_wall);
+						ImGui::Checkbox("Glow Items Behind Wall", &g_Config.cvars.glow_items_wall);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SliderInt("Glow Items", &g_Config.cvars.glow_entities, 0, 3, glow_items[g_Config.cvars.glow_entities]);
+						ImGui::SliderInt("Glow Items", &g_Config.cvars.glow_items, 0, 3, glow_items[g_Config.cvars.glow_items]);
 
 						ImGui::Spacing();
 
-						ImGui::SliderInt("Glow Items Width", &g_Config.cvars.glow_entities_width, 0, 30);
+						ImGui::SliderInt("Glow Items Width", &g_Config.cvars.glow_items_width, 0, 30);
 
 						ImGui::Spacing();
 
-						ImGui::ColorEdit3("Glow Items Color", g_Config.cvars.glow_entities_color);
+						ImGui::ColorEdit3("Glow Items Color", g_Config.cvars.glow_items_color);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -767,6 +785,10 @@ void ShowMainMenu()
 
 						ImGui::Checkbox("Wireframe World", &g_Config.cvars.wallhack_wireframe); ImGui::SameLine();
 						ImGui::Checkbox("Wireframe Models", &g_Config.cvars.wallhack_wireframe_models);
+
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Negative", &g_Config.cvars.wallhack_negative);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1233,7 +1255,12 @@ void ShowMainMenu()
 
 						ImGui::Checkbox("Quake Guns", &g_Config.cvars.quake_guns); ImGui::SameLine();
 						ImGui::Checkbox("Tertiary Attack Glitch", &g_Config.cvars.tertiary_attack_glitch); ImGui::SameLine();
-						ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Rotate Dead Body", &g_Config.cvars.rotate_dead_body); ImGui::SameLine();
+						ImGui::Checkbox("Auto Ceil-Clipping", &g_Config.cvars.auto_ceil_clipping);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1438,6 +1465,10 @@ void ShowMainMenu()
 						ImGui::Spacing();
 
 						ImGui::Checkbox("Anti-AFK Stay Within Range", &g_Config.cvars.antiafk_stay_within_range);
+						
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Anti-AFK Reset Stay Position", &g_Config.cvars.antiafk_reset_stay_pos);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1450,7 +1481,7 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("Stay Within Offset Angle", &g_Config.cvars.antiafk_stay_radius_offset_angle, 0.0f, 89.0f);
+						ImGui::SliderFloat("Stay Within Spread Angle", &g_Config.cvars.antiafk_stay_radius_offset_angle, 0.0f, 89.0f);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1634,7 +1665,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::Text("Spinner");
+						ImGui::Text("Lock View Angles");
 
 						ImGui::Spacing();
 
@@ -1643,27 +1674,53 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::Checkbox("Enable Spinner", &g_Config.cvars.spinner);
+						ImGui::Checkbox("Lock Pitch", &g_Config.cvars.lock_pitch);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Lock Pitch: Angle", &g_Config.cvars.lock_pitch_angle, -179.999f, 180.0f);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("Set Pitch Angle", &g_Config.cvars.spinner_pitch_angle, -180.0f, 180.0f);
+						ImGui::Checkbox("Lock Yaw", &g_Config.cvars.lock_yaw);
 
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("Yaw Angle Rotation", &g_Config.cvars.spinner_rotation_yaw_angle, -10.0f, 10.0f);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::Checkbox("Rotate Pitch Angle", &g_Config.cvars.spinner_rotate_pitch_angle);
+						ImGui::SliderFloat("Lock Yaw: Angle", &g_Config.cvars.lock_yaw_angle, 0.0f, 360.0f);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("Pitch Angle Rotation", &g_Config.cvars.spinner_rotation_pitch_angle, -10.0f, 10.0f);
+						ImGui::Separator();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Text("Spinner");
+
+						ImGui::Spacing();
+
+						ImGui::Separator();
+						
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Inclined Rotation", &g_Config.cvars.spin_pitch_angle);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Inclined Rotation: Angle", &g_Config.cvars.spin_pitch_rotation_angle, -10.0f, 10.0f);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Spin Yaw", &g_Config.cvars.spin_yaw_angle);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Spin Yaw: Angle", &g_Config.cvars.spin_yaw_rotation_angle, -10.0f, 10.0f);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1771,10 +1828,13 @@ void ShowMainMenu()
 				ImGui::Spacing();
 
 				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (85 / 2));
+
 				if (ImGui::Button("Load"))
+				{
 					g_Config.Load();
-				    LoadTheme();
+					LoadTheme();
 					WindowStyle();
+				}
 
 				ImGui::SameLine();
 

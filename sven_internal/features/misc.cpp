@@ -206,21 +206,27 @@ CON_COMMAND_FUNC(sc_fastrun, ConCommand_FastRun, "sc_fakelag - Toggle fast run")
 	g_Config.cvars.fastrun = !g_Config.cvars.fastrun;
 }
 
+CON_COMMAND_FUNC(sc_auto_ceil_clipping, ConCommand_AutoCeilClipping, "sc_auto_ceil_clipping - Automatically suicide when you touch a ceil to perform clipping")
+{
+	Msg(g_Config.cvars.auto_ceil_clipping ? "Auto Ceil-Clipping disabled\n" : "Auto Ceil-Clipping enabled\n");
+	g_Config.cvars.auto_ceil_clipping = !g_Config.cvars.auto_ceil_clipping;
+}
+
 CON_COMMAND_FUNC(sc_selfsink, ConCommand_AutoSelfSink, "sc_selfsink - Perform self sink")
 {
-	if (g_pPlayerMove->iuser1 != 0)
+	if ( !IsLocalPlayerAlive() )
 		return;
 
-	if (g_pPlayerMove->view_ofs.z == 12.0f)
+	if (g_pPlayerMove->view_ofs.z == VEC_DUCK_VIEW.z)
 	{
 		g_pEngineFuncs->SetViewAngles(Vector(-0.1f, -90.0f, 0.0f));
-		g_pEngineFuncs->pfnClientCmd("+jump");
+		g_pEngineFuncs->pfnClientCmd("+jump\n");
 
 		s_nSinkState = 1;
 	}
 	else
 	{
-		g_pEngineFuncs->pfnClientCmd("+duck");
+		g_pEngineFuncs->pfnClientCmd("+duck\n");
 
 		s_nSinkState = 2;
 	}
@@ -261,9 +267,9 @@ static void ConCommand_DropEmptyWeapon_Iterator(WEAPON *pWeapon, bool bHasAmmo, 
 
 	static char command_buffer[140] = { 0 };
 
-	if (!bHasAmmo)
+	if ( !bHasAmmo )
 	{
-		sprintf_s(command_buffer, sizeof(command_buffer), "drop %s", pWeapon->szName);
+		sprintf_s(command_buffer, sizeof(command_buffer), "drop %s\n", pWeapon->szName);
 		g_pEngineFuncs->pfnClientCmd(command_buffer);
 	}
 }
@@ -427,9 +433,10 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	if (g_pPlayerMove->iuser1 < 1)
 	{
 		AutoSelfSink();
+		AutoCeilClipping(cmd);
 		AutoJump(cmd);
 		DoubleDuck(cmd);
-		Helicopter(cmd);
+		Spinner(cmd);
 		FastRun(cmd);
 		JumpBug(frametime, cmd);
 	}
@@ -441,12 +448,87 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 void CMisc::V_CalcRefdef(struct ref_params_s *pparams)
 {
 	QuakeGuns_V_CalcRefdef();
+
+	if (g_Config.cvars.lock_pitch || g_Config.cvars.spin_pitch_angle)
+	{
+		cl_entity_t *pLocal = g_pEngineFuncs->GetLocalPlayer();
+
+		pLocal->angles.x = m_flSpinPitchAngle;
+		pLocal->curstate.angles.x = m_flSpinPitchAngle;
+		pLocal->prevstate.angles.x = m_flSpinPitchAngle;
+		pLocal->latched.prevangles.x = m_flSpinPitchAngle;
+	}
 }
 
 void CMisc::HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed)
 {
 	QuakeGuns_HUD_PostRunCmd(to);
 	NoWeaponAnim_HUD_PostRunCmd(to);
+}
+
+static int line_beamindex = 0;
+
+void CMisc::OnAddEntityPost(int is_visible, int type, struct cl_entity_s *ent, const char *modelname)
+{
+	if (g_Config.cvars.show_players_push_direction)
+	{
+		if (is_visible && type == ET_PLAYER && ent->index != g_pPlayerMove->player_index + 1)
+		{
+			Vector vecEnd;
+			Vector vecEnd2;
+
+			Vector vecBegin = ent->origin;
+
+			Vector vecPushDir(1.f, 0.f, 0.f);
+			Vector vecPushDir2(0.f, 1.f, 0.f);
+
+			if (ent->curstate.usehull)
+				vecBegin[2] += VEC_DUCK_HULL_MIN.z + 1.5f;
+			else
+				vecBegin[2] += VEC_HULL_MIN.z + 1.5f;
+
+			vecEnd = vecBegin + vecPushDir * g_Config.cvars.push_direction_length;
+			vecEnd2 = vecBegin + vecPushDir2 * g_Config.cvars.push_direction_length * (1.f / 3.f);
+
+			if (!line_beamindex)
+				line_beamindex = g_pEngineFuncs->pEventAPI->EV_FindModelIndex("sprites/laserbeam.spr");
+
+			// Opposite direction
+			g_pEngineFuncs->pEfxAPI->R_BeamPoints(vecBegin,
+												  vecEnd,
+												  line_beamindex,
+												  0.001f, // life time
+												  g_Config.cvars.push_direction_width,
+												  0.f, // amplitude
+												  32.f, // brightness
+												  2.f, // speed
+												  0, // startFrame
+												  0.f, // framerate
+												  g_Config.cvars.push_direction_color[0],
+												  g_Config.cvars.push_direction_color[1],
+												  g_Config.cvars.push_direction_color[2]);
+
+			// 90 deg. opposite direction that also lets you to push a player
+			g_pEngineFuncs->pEfxAPI->R_BeamPoints(vecBegin,
+												  vecEnd2,
+												  line_beamindex,
+												  0.001f, // life time
+												  g_Config.cvars.push_direction_width,
+												  0.f, // amplitude
+												  32.f, // brightness
+												  2.f, // speed
+												  0, // startFrame
+												  0.f, // framerate
+												  g_Config.cvars.push_direction_color[0],
+												  g_Config.cvars.push_direction_color[1],
+												  g_Config.cvars.push_direction_color[2]);
+		}
+	}
+}
+
+void CMisc::OnVideoInit()
+{
+	line_beamindex = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -480,8 +562,9 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 	static int nJumpBugState = 0;
 
 	if (g_Config.cvars.jumpbug &&
+		g_pPlayerMove->flFallVelocity >= 500.0f &&
 		g_Local.flGroundNormalAngle <= acosf(0.7f) * 180.0f / static_cast<float>(M_PI) &&
-		g_pPlayerMove->flFallVelocity >= 500.0f)
+		g_pPlayerMove->waterlevel == 0)
 	{
 		float flPlayerHeight = g_Local.flHeight; // = 0.0f
 		float flFrameZDist = fabsf((g_pPlayerMove->flFallVelocity + (800.0f * frametime)) * frametime);
@@ -635,30 +718,107 @@ void CMisc::FastRun(struct usercmd_s *cmd)
 }
 
 //-----------------------------------------------------------------------------
-// Helicopter
+// Spinner
 //-----------------------------------------------------------------------------
 
-void CMisc::Helicopter(struct usercmd_s *cmd)
+void CMisc::Spinner(struct usercmd_s *cmd)
 {
 	static Vector vSpinAngles(0.f, 0.f, 0.f);
 
-	if (g_Config.cvars.spinner) // not seen for client
-	{
-		vSpinAngles.y += g_Config.cvars.spinner_rotation_yaw_angle;
+	bool bAnglesChanged = false;
 
-		if (g_Config.cvars.spinner_rotate_pitch_angle)
+	if (g_Config.cvars.spin_yaw_angle)
+	{
+		if ( !g_Config.cvars.lock_pitch && !g_Config.cvars.spin_pitch_angle )
+			vSpinAngles.x = cmd->viewangles.x;
+
+		vSpinAngles.y += g_Config.cvars.spin_yaw_rotation_angle;
+		vSpinAngles.y = NormalizeAngle(vSpinAngles.y);
+
+		bAnglesChanged = true;
+	}
+	else if (g_Config.cvars.lock_yaw)
+	{
+		if ( !g_Config.cvars.lock_pitch && !g_Config.cvars.spin_pitch_angle )
+			vSpinAngles.x = cmd->viewangles.x;
+
+		vSpinAngles.y = g_Config.cvars.lock_yaw_angle;
+		bAnglesChanged = true;
+	}
+
+	if (g_Config.cvars.spin_pitch_angle)
+	{
+		if ( !g_Config.cvars.lock_yaw && !g_Config.cvars.spin_yaw_angle )
+			vSpinAngles.y = cmd->viewangles.y;
+
+		vSpinAngles.x += g_Config.cvars.spin_pitch_rotation_angle;
+		vSpinAngles.x = NormalizeAngle(vSpinAngles.x);
+
+		bAnglesChanged = true;
+	}
+	else if (g_Config.cvars.lock_pitch)
+	{
+		if ( !g_Config.cvars.lock_yaw && !g_Config.cvars.spin_yaw_angle )
+			vSpinAngles.y = cmd->viewangles.y;
+
+		vSpinAngles.x = g_Config.cvars.lock_pitch_angle;
+		bAnglesChanged = true;
+	}
+
+	if (bAnglesChanged)
+	{
+		m_flSpinPitchAngle = vSpinAngles.x / -3.0f;
+		SetAnglesSilent(vSpinAngles, cmd);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Auto Ceil Clipping
+//-----------------------------------------------------------------------------
+
+void CMisc::AutoCeilClipping(struct usercmd_s *cmd)
+{
+	static bool jumped = false;
+
+	if ( g_Config.cvars.auto_ceil_clipping && IsLocalPlayerAlive() )
+	{
+		if (jumped)
 		{
-			vSpinAngles.x += g_Config.cvars.spinner_rotation_pitch_angle;
+			if (g_pPlayerMove->onground == -1)
+			{
+				cmd->buttons |= IN_DUCK;
+
+				// Suicide only if we got apex or started falling
+				if (g_pPlayerMove->velocity.z <= 0.f)
+				{
+					Vector vecStart = g_pPlayerMove->origin;
+					Vector vecEnd = vecStart + Vector(0.f, 0.f, VEC_DUCK_HULL_MAX.z);
+
+					pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(vecStart, vecEnd, PM_NORMAL, (g_pPlayerMove->flags & FL_DUCKING) ? 1 : 0, -1);
+
+					if (pTrace->fraction < 1.0f)
+					{
+						g_pEngineFuncs->pfnClientCmd("kill\n");
+						jumped = false;
+					}
+				}
+			}
+			else
+			{
+				jumped = false;
+			}
 		}
 		else
 		{
-			vSpinAngles.x = g_Config.cvars.spinner_pitch_angle;
+			if (g_pPlayerMove->onground == -1 && g_pPlayerMove->velocity.z > 0.f)
+				jumped = true;
+			else
+				jumped = false;
 		}
-
-		vSpinAngles.x = NormalizeAngle(vSpinAngles.x);
-		vSpinAngles.y = NormalizeAngle(vSpinAngles.y);
-
-		SetAnglesSilent(vSpinAngles, cmd);
+	}
+	else
+	{
+		jumped = false;
 	}
 }
 
@@ -784,15 +944,15 @@ void CMisc::FakeLag(float frametime)
 // Auto Selfsink
 //-----------------------------------------------------------------------------
 
-void CMisc::AutoSelfSink()
+void CMisc::AutoSelfSink() // improve it tf
 {
 	if (s_nSinkState == 1)
 	{
-		g_pEngineFuncs->pfnClientCmd("kill;-jump;-duck");
+		g_pEngineFuncs->pfnClientCmd("kill;-jump;-duck\n");
 
 		s_nSinkState = 0;
 	}
-	else if (s_nSinkState == 2 && g_pPlayerMove->view_ofs.z == 12.0f)
+	else if (s_nSinkState == 2 && g_pPlayerMove->view_ofs.z == VEC_DUCK_VIEW.z)
 	{
 		ConCommand_AutoSelfSink();
 	}
@@ -849,7 +1009,7 @@ void CMisc::ColorPulsator()
 			
 			s_flTopColorDelay = g_pEngineFuncs->Sys_FloatTime() + g_Config.cvars.color_pulsator_delay;
 
-			sprintf_s(command_buffer, sizeof(command_buffer), "topcolor %d", s_iTopColorOffset * 20);
+			sprintf_s(command_buffer, sizeof(command_buffer), "topcolor %d\n", s_iTopColorOffset * 20);
 			g_pEngineFuncs->pfnClientCmd(command_buffer);
 
 			++s_iTopColorOffset;
@@ -862,7 +1022,7 @@ void CMisc::ColorPulsator()
 
 			s_flBottomColorDelay = g_pEngineFuncs->Sys_FloatTime() + g_Config.cvars.color_pulsator_delay;
 
-			sprintf_s(command_buffer, sizeof(command_buffer), "bottomcolor %d", s_iBottomColorOffset * 20);
+			sprintf_s(command_buffer, sizeof(command_buffer), "bottomcolor %d\n", s_iBottomColorOffset * 20);
 			g_pEngineFuncs->pfnClientCmd(command_buffer);
 
 			++s_iBottomColorOffset;
@@ -981,4 +1141,6 @@ void CMisc::Init()
 
 	ex_interp = g_pEngineFuncs->pfnGetCvarPointer("ex_interp");
 	default_fov = g_pEngineFuncs->pfnGetCvarPointer("default_fov");
+
+	m_flSpinPitchAngle = 0.f;
 }

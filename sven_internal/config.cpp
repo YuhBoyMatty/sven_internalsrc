@@ -149,6 +149,7 @@ bool CConfig::Load()
 		
 	INI_IMPORT_BEGIN_SECTION("WALLHACK");
 		INI_IMPORT_VARIABLE("Wallhack", cvars.wallhack);
+		INI_IMPORT_VARIABLE("Negative", cvars.wallhack_negative);
 		INI_IMPORT_VARIABLE("WhiteWalls", cvars.wallhack_white_walls);
 		INI_IMPORT_VARIABLE("Wireframe", cvars.wallhack_wireframe);
 		INI_IMPORT_VARIABLE("WireframeModels", cvars.wallhack_wireframe_models);
@@ -193,6 +194,12 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("LightmapOverride_R", cvars.lightmap_color[0]);
 		INI_IMPORT_VARIABLE("LightmapOverride_G", cvars.lightmap_color[1]);
 		INI_IMPORT_VARIABLE("LightmapOverride_B", cvars.lightmap_color[2]);
+		INI_IMPORT_VARIABLE("ShowPlayersPushDirection", cvars.show_players_push_direction);
+		INI_IMPORT_VARIABLE("PushDirectionLength", cvars.push_direction_length);
+		INI_IMPORT_VARIABLE("PushDirectionWidth", cvars.push_direction_width);
+		INI_IMPORT_VARIABLE("PushDirectionColor_R", cvars.push_direction_color[0]);
+		INI_IMPORT_VARIABLE("PushDirectionColor_G", cvars.push_direction_color[1]);
+		INI_IMPORT_VARIABLE("PushDirectionColor_B", cvars.push_direction_color[2]);
 	INI_IMPORT_END_SECTION();
 
 	INI_IMPORT_BEGIN_SECTION("CHAMS");
@@ -294,6 +301,7 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("Type", cvars.antiafk);
 		INI_IMPORT_VARIABLE("RotateCamera", cvars.antiafk_rotate_camera);
 		INI_IMPORT_VARIABLE("StayWithinRange", cvars.antiafk_stay_within_range);
+		INI_IMPORT_VARIABLE("ResetStayPos", cvars.antiafk_reset_stay_pos);
 		INI_IMPORT_VARIABLE("RotationAngle", cvars.antiafk_rotation_angle);
 		INI_IMPORT_VARIABLE("StayRadius", cvars.antiafk_stay_radius);
 		INI_IMPORT_VARIABLE("StayRadiusOffsetAngle", cvars.antiafk_stay_radius_offset_angle);
@@ -314,11 +322,14 @@ bool CConfig::Load()
 		INI_IMPORT_VARIABLE("ColorPulsatorTop", cvars.color_pulsator_top);
 		INI_IMPORT_VARIABLE("ColorPulsatorBottom", cvars.color_pulsator_bottom);
 		INI_IMPORT_VARIABLE("ColorPulsatorDelay", cvars.color_pulsator_delay);
-		INI_IMPORT_VARIABLE("Spinner", cvars.spinner);
-		INI_IMPORT_VARIABLE("SpinnerRotatePitchAngle", cvars.spinner_rotate_pitch_angle);
-		INI_IMPORT_VARIABLE("SpinnerPitchAngle", cvars.spinner_pitch_angle);
-		INI_IMPORT_VARIABLE("SpinnerRotationPitchAngle", cvars.spinner_rotation_pitch_angle);
-		INI_IMPORT_VARIABLE("SpinnerRotationYawAngle", cvars.spinner_rotation_yaw_angle);
+		INI_IMPORT_VARIABLE("LockPitch", cvars.lock_pitch);
+		INI_IMPORT_VARIABLE("LockYaw", cvars.lock_yaw);
+		INI_IMPORT_VARIABLE("LockPitchAngle", cvars.lock_pitch_angle);
+		INI_IMPORT_VARIABLE("LockYawAngle", cvars.lock_yaw_angle);
+		INI_IMPORT_VARIABLE("SpinYaw", cvars.spin_yaw_angle);
+		INI_IMPORT_VARIABLE("SpinPitch", cvars.spin_pitch_angle);
+		INI_IMPORT_VARIABLE("SpinYawAngle", cvars.spin_yaw_rotation_angle);
+		INI_IMPORT_VARIABLE("SpinPitchAngle", cvars.spin_pitch_rotation_angle);
 		INI_IMPORT_VARIABLE("ApplicationSpeed", cvars.application_speed);
 	INI_IMPORT_END_SECTION();
 
@@ -459,6 +470,7 @@ void CConfig::Save()
 		
 	INI_EXPORT_BEGIN_SECTION("WALLHACK");
 		INI_EXPORT_VARIABLE("Wallhack", cvars.wallhack);
+		INI_EXPORT_VARIABLE("Negative", cvars.wallhack_negative);
 		INI_EXPORT_VARIABLE("WhiteWalls", cvars.wallhack_white_walls);
 		INI_EXPORT_VARIABLE("Wireframe", cvars.wallhack_wireframe);
 		INI_EXPORT_VARIABLE("WireframeModels", cvars.wallhack_wireframe_models);
@@ -503,6 +515,12 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("LightmapOverride_R", cvars.lightmap_color[0]);
 		INI_EXPORT_VARIABLE("LightmapOverride_G", cvars.lightmap_color[1]);
 		INI_EXPORT_VARIABLE("LightmapOverride_B", cvars.lightmap_color[2]);
+		INI_EXPORT_VARIABLE("ShowPlayersPushDirection", cvars.show_players_push_direction);
+		INI_EXPORT_VARIABLE("PushDirectionLength", cvars.push_direction_length);
+		INI_EXPORT_VARIABLE("PushDirectionWidth", cvars.push_direction_width);
+		INI_EXPORT_VARIABLE("PushDirectionColor_R", cvars.push_direction_color[0]);
+		INI_EXPORT_VARIABLE("PushDirectionColor_G", cvars.push_direction_color[1]);
+		INI_EXPORT_VARIABLE("PushDirectionColor_B", cvars.push_direction_color[2]);
 	INI_EXPORT_END_SECTION();
 	
 	INI_EXPORT_BEGIN_SECTION("CHAMS");
@@ -604,6 +622,7 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("Type", cvars.antiafk);
 		INI_EXPORT_VARIABLE("RotateCamera", cvars.antiafk_rotate_camera);
 		INI_EXPORT_VARIABLE("StayWithinRange", cvars.antiafk_stay_within_range);
+		INI_EXPORT_VARIABLE("ResetStayPos", cvars.antiafk_reset_stay_pos);
 		INI_EXPORT_VARIABLE("RotationAngle", cvars.antiafk_rotation_angle);
 		INI_EXPORT_VARIABLE("StayRadius", cvars.antiafk_stay_radius);
 		INI_EXPORT_VARIABLE("StayRadiusOffsetAngle", cvars.antiafk_stay_radius_offset_angle);
@@ -624,11 +643,14 @@ void CConfig::Save()
 		INI_EXPORT_VARIABLE("ColorPulsatorTop", cvars.color_pulsator_top);
 		INI_EXPORT_VARIABLE("ColorPulsatorBottom", cvars.color_pulsator_bottom);
 		INI_EXPORT_VARIABLE("ColorPulsatorDelay", cvars.color_pulsator_delay);
-		INI_EXPORT_VARIABLE("Spinner", cvars.spinner);
-		INI_EXPORT_VARIABLE("SpinnerRotatePitchAngle", cvars.spinner_rotate_pitch_angle);
-		INI_EXPORT_VARIABLE("SpinnerPitchAngle", cvars.spinner_pitch_angle);
-		INI_EXPORT_VARIABLE("SpinnerRotationPitchAngle", cvars.spinner_rotation_pitch_angle);
-		INI_EXPORT_VARIABLE("SpinnerRotationYawAngle", cvars.spinner_rotation_yaw_angle);
+		INI_EXPORT_VARIABLE("LockPitch", cvars.lock_pitch);
+		INI_EXPORT_VARIABLE("LockYaw", cvars.lock_yaw);
+		INI_EXPORT_VARIABLE("LockPitchAngle", cvars.lock_pitch_angle);
+		INI_EXPORT_VARIABLE("LockYawAngle", cvars.lock_yaw_angle);
+		INI_EXPORT_VARIABLE("SpinYaw", cvars.spin_yaw_angle);
+		INI_EXPORT_VARIABLE("SpinPitch", cvars.spin_pitch_angle);
+		INI_EXPORT_VARIABLE("SpinYawAngle", cvars.spin_yaw_rotation_angle);
+		INI_EXPORT_VARIABLE("SpinPitchAngle", cvars.spin_pitch_rotation_angle);
 		INI_EXPORT_VARIABLE("ApplicationSpeed", cvars.application_speed);
 	INI_EXPORT_END_SECTION();
 

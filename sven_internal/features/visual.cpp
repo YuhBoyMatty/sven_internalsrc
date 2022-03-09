@@ -83,9 +83,15 @@ CON_COMMAND_FUNC(sc_wallhack, ConCommand_Wallhack, "sc_wallhack - Simple OpenGL 
 	g_Config.cvars.wallhack = !g_Config.cvars.wallhack;
 }
 
-CON_COMMAND_FUNC(sc_wallhack_white_walls, ConCommand_WhiteWalls, "sc_wallhack_white_walls - Lambert wallhack")
+CON_COMMAND_FUNC(sc_wallhack_negative, ConCommand_NegativeMode, "sc_wallhack_negative - Night Mode wallhack")
 {
-	Msg(g_Config.cvars.wallhack_white_walls ? "White Walls disabled\n" : "White Walls enabled\n");
+	Msg(g_Config.cvars.wallhack_negative ? "Negative mode disabled\n" : "Negative mode enabled\n");
+	g_Config.cvars.wallhack_negative = !g_Config.cvars.wallhack_negative;
+}
+
+CON_COMMAND_FUNC(sc_wallhack_lambert, ConCommand_WhiteWalls, "sc_wallhack_white_walls - Lambert wallhack")
+{
+	Msg(g_Config.cvars.wallhack_white_walls ? "Lambert wallhack disabled\n" : "Lambert wallhack enabled\n");
 	g_Config.cvars.wallhack_white_walls = !g_Config.cvars.wallhack_white_walls;
 }
 
@@ -359,6 +365,12 @@ void CVisual::ESP()
 
 		vecTop.z += pEntity->curstate.maxs.z;
 
+		if (bPlayer && pEntity->curstate.usehull)
+		{
+			vecTop.z = pEntity->origin.z + VEC_DUCK_HULL_MAX.z;
+			vecBottom.z = pEntity->origin.z + VEC_DUCK_HULL_MIN.z;
+		}
+
 		bool bScreenBottom = WorldToScreen(vecBottom, vecScreenBottom);
 		bool bScreenTop = WorldToScreen(vecTop, vecScreenTop);
 
@@ -375,8 +387,8 @@ void CVisual::ESP()
 
 			if (bPlayer)
 			{
-				if (pEntity->curstate.usehull)
-					boxHeight *= 0.9986f;
+				//if (pEntity->curstate.usehull)
+				//	boxHeight *= 0.9986f;
 			}
 			else if (bItem)
 			{

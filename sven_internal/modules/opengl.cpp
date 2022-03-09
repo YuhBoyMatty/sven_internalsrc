@@ -67,6 +67,14 @@ void APIENTRY glBegin_Hooked(GLenum mode) // wh
 			glDepthRange(0.5, 1);
 	}
 
+	if (g_Config.cvars.wallhack_negative)
+	{
+		if (mode == GL_POLYGON)
+		{
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+		}
+	}
+
 	if (g_Config.cvars.wallhack_white_walls)
 	{
 		if (mode == GL_POLYGON)

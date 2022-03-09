@@ -47,6 +47,11 @@ public:
 		bool no_shake = false;
 		bool no_fade = false;
 
+		bool show_players_push_direction = false;
+		float push_direction_length = 16.0f;
+		float push_direction_width = 1.0f;
+		float push_direction_color[3] = { 1.0f, 0.f, 0.f };
+
 		bool draw_crosshair = true;
 		bool draw_crosshair_dot = false;
 		bool draw_crosshair_outline = true;
@@ -66,6 +71,7 @@ public:
 		float speed_color[4] = { 1.0f, 0.75f, 0.0f, 0.882f };
 
 		bool wallhack = false;
+		bool wallhack_negative = false;
 		bool wallhack_white_walls = false;
 		bool wallhack_wireframe = false;
 		bool wallhack_wireframe_models = false;
@@ -151,6 +157,7 @@ public:
 		int antiafk = 0; // enum
 		bool antiafk_rotate_camera = true;
 		bool antiafk_stay_within_range = true;
+		bool antiafk_reset_stay_pos = true;
 		float antiafk_stay_radius = 200.0f;
 		float antiafk_stay_radius_offset_angle = 30.0f;
 		float antiafk_rotation_angle = -0.7f;
@@ -165,6 +172,7 @@ public:
 		bool save_soundcache = false;
 		bool rotate_dead_body = false;
 		bool remove_fov_cap = false;
+		bool auto_ceil_clipping = false;
 		int no_weapon_anim = 0; // enum
 
 		bool color_pulsator = false;
@@ -172,11 +180,15 @@ public:
 		bool color_pulsator_bottom = true;
 		float color_pulsator_delay = 0.5f;
 		
-		bool spinner = false;
-		bool spinner_rotate_pitch_angle = false;
-		float spinner_pitch_angle = 0.0f;
-		float spinner_rotation_pitch_angle = 0.0f;
-		float spinner_rotation_yaw_angle = 0.5f;
+		bool lock_pitch = false;
+		bool lock_yaw = false;	
+		float lock_pitch_angle = 0.0f;
+		float lock_yaw_angle = 0.0f;
+
+		bool spin_yaw_angle = false;
+		bool spin_pitch_angle = false;
+		float spin_yaw_rotation_angle = 0.5f;
+		float spin_pitch_rotation_angle = 0.5f;
 
 		float application_speed = 1.0f;
 

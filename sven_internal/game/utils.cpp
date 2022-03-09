@@ -311,12 +311,20 @@ static void FixMoveEnd(struct usercmd_s *cmd)
 
 void SetAnglesSilent(float *angles, struct usercmd_s *cmd)
 {
-	if (g_pPlayerMove && g_pPlayerMove->movetype == MOVETYPE_FLY)
+	if ((g_pPlayerMove && g_pPlayerMove->movetype != MOVETYPE_WALK) || (cmd->buttons & IN_ATTACK || cmd->buttons & IN_ATTACK2 || cmd->buttons & IN_USE))
 		return;
 
 	FixMoveStart(cmd);
 
-	cmd->viewangles[0] = angles[0];
+	if (g_pPlayerMove && g_pPlayerMove->waterlevel != 0)
+	{
+		cmd->viewangles[0] = 0.f;
+	}
+	else
+	{
+		cmd->viewangles[0] = angles[0];
+	}
+
 	cmd->viewangles[1] = angles[1];
 	cmd->viewangles[2] = angles[2];
 

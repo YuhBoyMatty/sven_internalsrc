@@ -128,6 +128,7 @@ int HUD_VidInit_Hooked(void)
 	g_ChatColors.OnVideoInit();
 	g_CamHack.OnVideoInit();
 	g_AntiAFK.OnVideoInit();
+	g_Misc.OnVideoInit();
 
 	return HUD_VidInit_Original();
 }
@@ -206,8 +207,8 @@ void V_CalcRefdef_Hooked(struct ref_params_s *pparams)
 
 	V_CalcRefdef_Original(pparams);
 
-	g_Misc.V_CalcRefdef(pparams);
 	g_CamHack.V_CalcRefdef(pparams);
+	g_Misc.V_CalcRefdef(pparams);
 	g_FirstPersonRoaming.V_CalcRefdef(pparams);
 }
 
@@ -216,6 +217,7 @@ int HUD_AddEntity_Hooked(int type, struct cl_entity_s *ent, const char *modelnam
 	int is_visible = HUD_AddEntity_Original(type, ent, modelname);
 
 	g_DynamicGlow.OnAddEntityPost(is_visible, type, ent, modelname);
+	g_Misc.OnAddEntityPost(is_visible, type, ent, modelname);
 
 	return is_visible;
 }

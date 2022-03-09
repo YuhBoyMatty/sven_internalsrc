@@ -154,66 +154,76 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 
 		if (m_bComingBackToAFKPoint || flDistanceToAFKPointSqr > M_SQR(g_Config.cvars.antiafk_stay_radius)) // moved out of range
 		{
-			if (m_flComingBackStartTime == -1.0f)
-				m_flComingBackStartTime = g_pEngineFuncs->GetClientTime();
-			// Coming to the AFK point too long, reset current state
-			else if (g_pEngineFuncs->GetClientTime() - m_flComingBackStartTime >= 10.f)
-				Reset();
+			bool bReset = false;
 
-			if (m_bComingBackToAFKPoint && flDistanceToAFKPointSqr <= M_SQR(25.0f))
+			if (m_flComingBackStartTime == -1.0f)
 			{
-				m_bComingBackToAFKPoint = false;
-				m_flComingBackStartTime = -1.0f;
+				m_flComingBackStartTime = g_pEngineFuncs->GetClientTime();
+			}
+			else if (g_Config.cvars.antiafk_reset_stay_pos && g_pEngineFuncs->GetClientTime() - m_flComingBackStartTime >= 10.f)
+			{
+				// Coming to the AFK point too long, reset current state
+				Reset();
+				bReset = true;
+			}
+			
+			if ( !bReset )
+			{
+				if (m_bComingBackToAFKPoint && flDistanceToAFKPointSqr <= M_SQR(25.0f))
+				{
+					m_bComingBackToAFKPoint = false;
+					m_flComingBackStartTime = -1.0f;
+					return;
+				}
+
+				Vector2D vecForward;
+				Vector2D vecRight;
+
+				Vector2D vecDir = (m_vecAFKPoint - vecOrigin).Normalize();
+
+				m_bComingBackToAFKPoint = true;
+
+				// Rotate the wish vector by a random direction, must help if we stuck somewhere
+				int nRandom = g_pEngineFuncs->pfnRandomLong(0, 1);
+
+				float flTheta = g_Config.cvars.antiafk_stay_radius_offset_angle * static_cast<float>(M_PI) / 180.0f;
+
+				float ct = cosf(flTheta);
+				float st = sinf(flTheta);
+
+				if (nRandom % 2) // counter clockwise
+				{
+					vecDir.x = vecDir.x * ct - vecDir.y * st;
+					vecDir.y = vecDir.x * st + vecDir.y * ct;
+				}
+				else // clockwise
+				{
+					vecDir.x = vecDir.x * ct + vecDir.y * st;
+					vecDir.y = -vecDir.x * st + vecDir.y * ct;
+				}
+
+				// Forward angles
+				vecForward.x = cosf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
+				vecForward.y = sinf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
+
+				// Make a right vector of angles. Rotate forward vector as a complex number by 90 deg.
+				vecRight.x = vecForward.y;
+				vecRight.y = -vecForward.x;
+
+				// Multiply by max movement speed
+				vecForward = vecForward * g_pPlayerMove->clientmaxspeed;
+				vecRight = vecRight * g_pPlayerMove->clientmaxspeed;
+
+				// Project onto direction vector
+				float forwardmove = DotProduct(vecForward, vecDir);
+				float sidemove = DotProduct(vecRight, vecDir);
+
+				// Apply moves
+				cmd->forwardmove = forwardmove;
+				cmd->sidemove = sidemove;
+
 				return;
 			}
-
-			Vector2D vecForward;
-			Vector2D vecRight;
-
-			Vector2D vecDir = (m_vecAFKPoint - vecOrigin).Normalize();
-
-			m_bComingBackToAFKPoint = true;
-
-			// Rotate the wish vector by a random direction, must help if we stuck somewhere
-			int nRandom = g_pEngineFuncs->pfnRandomLong(0, 1);
-
-			float flTheta = g_Config.cvars.antiafk_stay_radius_offset_angle * static_cast<float>(M_PI) / 180.0f;
-
-			float ct = cosf(flTheta);
-			float st = sinf(flTheta);
-
-			if (nRandom % 2) // counter clockwise
-			{
-				vecDir.x = vecDir.x * ct - vecDir.y * st;
-				vecDir.y = vecDir.x * st + vecDir.y * ct;
-			}
-			else // clockwise
-			{
-				vecDir.x = vecDir.x * ct + vecDir.y * st;
-				vecDir.y = -vecDir.x * st + vecDir.y * ct;
-			}
-
-			// Forward angles
-			vecForward.x = cosf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
-			vecForward.y = sinf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
-
-			// Make a right vector of angles. Rotate forward vector as a complex number by 90 deg.
-			vecRight.x = vecForward.y;
-			vecRight.y = -vecForward.x;
-
-			// Multiply by max movement speed
-			vecForward = vecForward * g_pPlayerMove->clientmaxspeed;
-			vecRight = vecRight * g_pPlayerMove->clientmaxspeed;
-
-			// Project onto direction vector
-			float forwardmove = DotProduct(vecForward, vecDir);
-			float sidemove = DotProduct(vecRight, vecDir);
-
-			// Apply moves
-			cmd->forwardmove = forwardmove;
-			cmd->sidemove = sidemove;
-
-			return;
 		}
 	}
 	else
@@ -299,6 +309,11 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 		cmd->sidemove = g_pPlayerMove->clientmaxspeed;
 
 		RotateCamera();
+	}
+
+	if (g_pPlayerMove->waterlevel == 3)
+	{
+		cmd->upmove = g_pPlayerMove->clientmaxspeed;
 	}
 }
 

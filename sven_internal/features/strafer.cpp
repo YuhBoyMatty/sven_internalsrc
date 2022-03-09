@@ -67,6 +67,40 @@ CON_COMMAND_FUNC(sc_strafe, ConCommand_VectorialStrafe, "sc_strafe - Toggle Vect
 	g_Config.cvars.strafe = !g_Config.cvars.strafe;
 }
 
+CON_COMMAND(sc_strafe_dir, "sc_strafe_dir [dir] - Set strafing direction")
+{
+	if (CMD_ARGC() > 1)
+	{
+		int dir = atoi(CMD_ARGV(1));
+
+		if (dir >= 0 && dir <= 3)
+		{
+			g_Config.cvars.strafe_dir = dir;
+		}
+	}
+	else
+	{
+		sc_strafe_dir.PrintUsage();
+	}
+}
+
+CON_COMMAND(sc_strafe_type, "sc_strafe_type [type] - Set strafing type")
+{
+	if (CMD_ARGC() > 1)
+	{
+		int type = atoi(CMD_ARGV(1));
+
+		if (type >= 0 && type <= 3)
+		{
+			g_Config.cvars.strafe_type = type;
+		}
+	}
+	else
+	{
+		sc_strafe_type.PrintUsage();
+	}
+}
+
 //-----------------------------------------------------------------------------
 // CStrafer implementations
 //-----------------------------------------------------------------------------
