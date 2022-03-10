@@ -34,6 +34,7 @@ private:
 
 private:
 	float m_flSpinPitchAngle;
+	bool m_bSpinCanChangePitch;
 };
 
 extern CMisc g_Misc;

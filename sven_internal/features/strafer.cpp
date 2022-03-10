@@ -67,7 +67,7 @@ CON_COMMAND_FUNC(sc_strafe, ConCommand_VectorialStrafe, "sc_strafe - Toggle Vect
 	g_Config.cvars.strafe = !g_Config.cvars.strafe;
 }
 
-CON_COMMAND(sc_strafe_dir, "sc_strafe_dir [dir] - Set strafing direction")
+CON_COMMAND(sc_strafe_dir, "sc_strafe_dir [dir] - Set strafing direction. Directions:\n\t0 - to the left\n\t1 - to the right\n\t2 - best strafe\n\t3 - to view angles")
 {
 	if (CMD_ARGC() > 1)
 	{
@@ -84,7 +84,7 @@ CON_COMMAND(sc_strafe_dir, "sc_strafe_dir [dir] - Set strafing direction")
 	}
 }
 
-CON_COMMAND(sc_strafe_type, "sc_strafe_type [type] - Set strafing type")
+CON_COMMAND(sc_strafe_type, "sc_strafe_type [type] - Set strafing type. Types:\n\t0 - Max acceleration strafing\n\t1 - Max angle strafing\n\t2 - Max deceleration strafing\n\t3 - Const speed strafing")
 {
 	if (CMD_ARGC() > 1)
 	{

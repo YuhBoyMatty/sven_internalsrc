@@ -449,7 +449,7 @@ void CMisc::V_CalcRefdef(struct ref_params_s *pparams)
 {
 	QuakeGuns_V_CalcRefdef();
 
-	if (g_Config.cvars.lock_pitch || g_Config.cvars.spin_pitch_angle)
+	if (m_bSpinCanChangePitch)
 	{
 		cl_entity_t *pLocal = g_pEngineFuncs->GetLocalPlayer();
 
@@ -726,6 +726,7 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 	static Vector vSpinAngles(0.f, 0.f, 0.f);
 
 	bool bAnglesChanged = false;
+	m_bSpinCanChangePitch = false;
 
 	if (g_Config.cvars.spin_yaw_angle)
 	{
@@ -754,6 +755,7 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 		vSpinAngles.x += g_Config.cvars.spin_pitch_rotation_angle;
 		vSpinAngles.x = NormalizeAngle(vSpinAngles.x);
 
+		m_bSpinCanChangePitch = true;
 		bAnglesChanged = true;
 	}
 	else if (g_Config.cvars.lock_pitch)
@@ -762,13 +764,23 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 			vSpinAngles.y = cmd->viewangles.y;
 
 		vSpinAngles.x = g_Config.cvars.lock_pitch_angle;
+
+		m_bSpinCanChangePitch = true;
 		bAnglesChanged = true;
 	}
 
 	if (bAnglesChanged)
 	{
-		m_flSpinPitchAngle = vSpinAngles.x / -3.0f;
-		SetAnglesSilent(vSpinAngles, cmd);
+		if ((g_pPlayerMove && g_pPlayerMove->movetype == MOVETYPE_WALK && g_pPlayerMove->waterlevel <= 1) &&
+			!(cmd->buttons & IN_ATTACK || cmd->buttons & IN_ATTACK2 || cmd->buttons & IN_USE || cmd->buttons & IN_ALT1))
+		{
+			m_flSpinPitchAngle = vSpinAngles.x / -3.0f;
+			SetAnglesSilent(vSpinAngles, cmd);
+		}
+		else
+		{
+			m_bSpinCanChangePitch = false;
+		}
 	}
 }
 
@@ -784,7 +796,7 @@ void CMisc::AutoCeilClipping(struct usercmd_s *cmd)
 	{
 		if (jumped)
 		{
-			if (g_pPlayerMove->onground == -1)
+			if (g_pPlayerMove->onground == -1 && g_pPlayerMove->waterlevel <= 1)
 			{
 				cmd->buttons |= IN_DUCK;
 
@@ -1143,4 +1155,5 @@ void CMisc::Init()
 	default_fov = g_pEngineFuncs->pfnGetCvarPointer("default_fov");
 
 	m_flSpinPitchAngle = 0.f;
+	m_bSpinCanChangePitch = false;
 }
