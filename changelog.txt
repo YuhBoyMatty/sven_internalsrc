@@ -1,0 +1,4 @@
+Changelog for Sven Internal
+
+19/03/2022 - Version 2.0.0:
+- Reworked as a plugin for SvenMod

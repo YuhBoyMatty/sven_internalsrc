@@ -5,5 +5,8 @@
 	path = sven_internal/ini-parser
 	url = https://github.com/sw1ft747/ini-parser.git
 [submodule "imgui"]
-	path = sven_internal/imgui
+	path = imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "SvenMod"]
+	path = SvenMod
+	url = https://github.com/sw1ft747/SvenMod.git

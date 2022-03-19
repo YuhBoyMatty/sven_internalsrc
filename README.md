@@ -1,9 +1,10 @@
 # Sven Internal
+Sven Internal is a C++ plugin for [SvenMod](https://github.com/sw1ft747/SvenMod) that provides to you various cheats and gameplay enhances
+
 Imagine cheating in a co-op game =)
 
-Don't forget to get more hax at kekma !!
-
-The code is a bit mess, basically didn't plan to publish it.
+# How to install
+First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/SvenMod)), then download the plugins's `.DLL` file and place it in the folder `Sven Co-op/svenmod/plugins/`, next add the plugin to file `plugins.txt` (see the header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/SvenMod)). 
 
 # Features
 - Menu (key **INSERT** as default)
@@ -21,25 +22,22 @@ The code is a bit mess, basically didn't plan to publish it.
 - Cam Hack
 - Key Spammer
 - First-Person Roaming
-- [Advanced Mute System](https://github.com/sw1ft747/AdvancedMuteSystem "Advanced Mute System")
 - Various Visual Hacks (Velometer, Crosshair, etc.)
 - Message Spammer
 - Skybox Replacement
 - Custom Vote Popup
 - Custom Chat Colors
 
-# Files of cheat
-The cheat uses subfolder `sven_internal` in root directory of the game.
+# Files of plugin
+The plugin uses subfolder `sven_internal` in root directory of the game.
 
 How it looks: `../Sven Co-op/sven_internal/`.
 
 Note: some files/folders may not appear, you need to create them.
 
-This folder is used to save the config, save list of muted players, load list of players (their SteamID64) for **Chat Colors** and load spam tasks for **Message Spammer**.
+This folder is used to save the config, save list of muted players, load list of players (their Steam64 ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
 File `sven_internal.ini` is the config file (you can save it via menu or console command `sc_save_config`).
-
-File `muted_players.db` automatically saved by the cheat when you exit from the game.
 
 File `chat_colors_players.txt` allows to change chat color for a specific player, will be automatically loaded.
 
@@ -48,16 +46,16 @@ Folder `message_spammer` is used by **Message Spammer** to load spam tasks.
 Also, when cheat loaded it will execute `sven_internal.cfg` file from folder `../Sven Co-op/svencoop/`.
 
 # Console Variables/Commands
-Type in the console the following command: `sc_help`.
+Type in the console the following command: `sm printcvars all ? sc_`.
 
-The command above will print information about each CVar/ConCommand that belongs to the cheat.
+The command above will print information about each CVar/ConCommand that belongs to the plugin.
 
 # Chat Colors
 Lets you change the color of players when they write something in chat.
 
-File `chat_colors_players.txt` used for adding the players in such format: `STEAMID64 : COLOR_NUMBER`.
+File `chat_colors_players.txt` used for adding the players in such format: `STEAM64ID : COLOR_NUMBER`.
 
-To convert traditional SteamID to SteamID64 faster, you can use the following console command: `steamid_to_steamid64 [SteamID]`.
+To convert traditional SteamID to SteamID64 faster, you can use the following console command: `sc_steamid_to_steamid64 [SteamID]`.
 
 There're currently 5 color numbers (slots) plus rainbow color, thus you can use 6 unique and customizable colors (can be changed in Menu).
 
