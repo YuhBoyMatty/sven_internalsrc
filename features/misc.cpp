@@ -4,6 +4,8 @@
 #include <IMemoryUtils.h>
 #include <ISvenModAPI.h>
 #include <IInventory.h>
+#include <IClient.h>
+#include <IClientWeapon.h>
 
 #include <convar.h>
 #include <dbg.h>
@@ -165,6 +167,45 @@ static float GetWeaponOffset(cl_entity_s *pViewModel, int iWeaponID)
 //-----------------------------------------------------------------------------
 // Commands, CVars..
 //-----------------------------------------------------------------------------
+
+CON_COMMAND(sc_test, "Retrieve entity's info")
+{
+	if (args.ArgC() > 1)
+	{
+		int index = atoi(args[1]);
+
+		cl_entity_s *pEntity = g_pEngineFuncs->GetEntityByIndex(index);
+
+		if (pEntity)
+		{
+			Msg("Entity Pointer: %X\n", pEntity);
+
+			if (pEntity->player)
+			{
+				Msg("Player Info Pointer: %X\n", g_pEngineStudio->PlayerInfo(index - 1));
+
+				hud_player_info_t playerInfo;
+				ZeroMemory(&playerInfo, sizeof(hud_player_info_s));
+
+				g_pEngineFuncs->GetPlayerInfo(index, &playerInfo);
+
+				if (playerInfo.name && playerInfo.model && *playerInfo.model)
+					Msg("Model: %s\n", playerInfo.model);
+
+				Msg("Top Color: %d\n", playerInfo.topcolor);
+				Msg("Bottom Color: %d\n", playerInfo.bottomcolor);
+			}
+			else if (pEntity->model && pEntity->model->name)
+			{
+				Msg("Model: %s\n", pEntity->model->name);
+			}
+		}
+	}
+	else
+	{
+		ConMsg("Usage:  sc_test <entindex>\n");
+	}
+}
 
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_autojump, ConCommand_AutoJump, "Toggle autojump")
 {
@@ -699,6 +740,85 @@ void CMisc::FastRun(struct usercmd_s *cmd)
 // Spinner
 //-----------------------------------------------------------------------------
 
+static bool IsFiring(usercmd_t *cmd)
+{
+	static float last_displacer_state = 0.f;
+	static int throw_nade_state = 0;
+
+	if ( Client()->GetCurrentWeaponID() > WEAPON_NONE )
+	{
+		switch ( Client()->GetCurrentWeaponID() )
+		{
+		case WEAPON_RPG:
+			if ( ClientWeapon()->GetWeaponData()->iuser4 && ClientWeapon()->GetWeaponData()->fuser1 != 0.f )
+				return true;
+
+			if ( cmd->buttons & IN_ATTACK2 )
+				return false;
+
+			break;
+
+		case WEAPON_GAUSS:
+			if ( ClientWeapon()->GetWeaponData()->fuser4 > 0.f )
+			{
+				if ( Client()->ButtonLast() & IN_ATTACK2 && !(cmd->buttons & IN_ATTACK2) )
+					return true;
+
+				return false;
+			}
+
+			break;
+
+		case WEAPON_HANDGRENADE:
+			if ( ClientWeapon()->GetWeaponData()->fuser1 < 0.f && throw_nade_state != 2 )
+			{
+				throw_nade_state = 1;
+
+				if ( Client()->ButtonLast() & (IN_ATTACK | IN_ATTACK2) )
+				{
+					if ( !(cmd->buttons & (IN_ATTACK | IN_ATTACK2)) )
+						return true;
+				}
+				else
+				{
+					if ( !(cmd->buttons & (IN_ATTACK | IN_ATTACK2)) )
+						throw_nade_state = 2;
+				}
+			}
+
+			if ( ClientWeapon()->GetWeaponData()->fuser2 < 0.f && throw_nade_state == 2 )
+				return true;
+
+			throw_nade_state = 0;
+			return false;
+
+		case WEAPON_DISPLACER:
+			last_displacer_state = ClientWeapon()->GetWeaponData()->fuser1;
+
+			if ( last_displacer_state == 1.f )
+				return true;
+
+			return false;
+		}
+
+		if ( cmd->buttons & (IN_ATTACK | IN_ATTACK2) && Client()->CanAttack() && !ClientWeapon()->IsReloading() )
+		{
+			if (cmd->buttons & IN_ATTACK)
+			{
+				if ( ClientWeapon()->CanPrimaryAttack() )
+					return true;
+			}
+			else
+			{
+				if ( ClientWeapon()->CanSecondaryAttack() )
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void CMisc::Spinner(struct usercmd_s *cmd)
 {
 	static Vector vSpinAngles(0.f, 0.f, 0.f);
@@ -749,11 +869,17 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 
 	if (bAnglesChanged)
 	{
-		if ((g_pPlayerMove && g_pPlayerMove->movetype == MOVETYPE_WALK && g_pPlayerMove->waterlevel <= WL_FEET) &&
-			!(cmd->buttons & IN_ATTACK || cmd->buttons & IN_ATTACK2 || cmd->buttons & IN_USE || cmd->buttons & IN_ALT1))
+		if (g_pPlayerMove->movetype == MOVETYPE_WALK && g_pPlayerMove->waterlevel <= WL_FEET)
 		{
-			m_flSpinPitchAngle = vSpinAngles.x / -3.0f;
-			UTIL_SetAnglesSilent(vSpinAngles, cmd);
+			if ( !(cmd->buttons & IN_USE || IsFiring(cmd)) )
+			{
+				m_flSpinPitchAngle = vSpinAngles.x / -3.0f;
+				UTIL_SetAnglesSilent(vSpinAngles, cmd);
+			}
+			else
+			{
+				m_bSpinCanChangePitch = false;
+			}
 		}
 		else
 		{

@@ -1,4 +1,9 @@
 Changelog for Sven Internal
 
-19/03/2022 - Version 2.0.0:
+20/03/2022 - Version 2.0.0:
 - Reworked as a plugin for SvenMod
+
+21/03/2022 - Version 2.0.1:
+- Added missing console command "sc_test"
+- Added check in Spinner if player wants to fire the weapon
+- Added Assert macro in visual.h > ProcessBones

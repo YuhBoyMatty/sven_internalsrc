@@ -12,6 +12,7 @@
 #include <hl_sdk/engine/studio.h>
 #include <hl_sdk/cl_dll/cl_dll.h>
 #include <hl_sdk/cl_dll/StudioModelRenderer.h>
+#include <hl_sdk/common/cl_entity.h>
 #include <hl_sdk/common/com_model.h>
 #include <hl_sdk/common/r_studioint.h>
 
@@ -590,13 +591,17 @@ void CVisual::ProcessBones()
 
 	if (bScreenBottom && bScreenTop)
 	{
+		memset(g_Bones[index].nParent, -1, sizeof(int) * MAXSTUDIOBONES);
+
 		//mstudiobbox_t *pHitbox = (mstudiobbox_t *)((byte *)pStudioHeader + pStudioHeader->hitboxindex);
 		mstudiobone_t *pBone = (mstudiobone_t *)((byte *)pStudioHeader + pStudioHeader->boneindex);
 		Vector vecFrameVelocity = pEntity->curstate.velocity * (pEntity->curstate.animtime - pEntity->prevstate.animtime);
 
+		Assert( pStudioHeader->numbones < MAXSTUDIOBONES );
+
 		for (int i = 0; i < pStudioHeader->numbones; ++i)
 		{
-			Vector vecBone = Vector((*g_pBoneTransform)[i][0][3], (*g_pBoneTransform)[i][1][3], (*g_pBoneTransform)[i][2][3]) + vecFrameVelocity;
+			Vector vecBone = Vector( (*g_pBoneTransform)[i][0][3], (*g_pBoneTransform)[i][1][3], (*g_pBoneTransform)[i][2][3] ) + vecFrameVelocity;
 
 			g_Bones[index].vecPoint[i] = vecBone;
 			g_Bones[index].nParent[i] = pBone[i].parent;
@@ -687,7 +692,7 @@ void CVisual::PostLoad()
 {
 	g_Drawing.SetupFonts();
 
-	g_pBoneTransform = (bone_matrix3x4_t *)g_pEngineStudio->StudioGetLightTransform();
+	g_pBoneTransform = (bone_matrix3x4_t *)g_pEngineStudio->StudioGetBoneTransform();
 
 	m_hUserMsgHook_ScreenShake = Hooks()->HookUserMessage( "ScreenShake", UserMsgHook_ScreenShake, &ORIG_UserMsgHook_ScreenShake );
 	m_hUserMsgHook_ScreenFade = Hooks()->HookUserMessage( "ScreenFade", UserMsgHook_ScreenFade, &ORIG_UserMsgHook_ScreenFade );

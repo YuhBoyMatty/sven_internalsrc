@@ -1,3 +1,4 @@
+#include <ISvenModAPI.h>
 #include <IClientPlugin.h>
 #include <IVideoMode.h>
 
@@ -193,7 +194,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.0";
+	return "2.0.1";
 }
 
 const char *CSvenInternal::GetDescription(void)
