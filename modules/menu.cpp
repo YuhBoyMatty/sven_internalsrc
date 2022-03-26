@@ -239,7 +239,8 @@ void ShowMainMenu()
 							"2 - Draw Hitboxes",
 							"3 - Draw Model & Hitboxes",
 							"4 - Draw Hulls",
-							"5 - Draw Players Bones"
+							"5 - Draw Players Bones",
+							"6 - Draw Players Hitboxes"
 						};
 
 						ImGui::Combo(" ", &g_Config.cvars.draw_entities, draw_entities_items, IM_ARRAYSIZE(draw_entities_items));

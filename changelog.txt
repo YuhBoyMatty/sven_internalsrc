@@ -7,3 +7,10 @@ Changelog for Sven Internal
 - Added missing console command "sc_test"
 - Added check in Spinner if player wants to fire the weapon
 - Added Assert macro in visual.h > ProcessBones
+
+26/03/2022 - Version 2.0.2:
+- Added new mode to draw entities: draw players hitboxes only
+- Updated CamHack, now it doesn't depend on user's command inputs
+- Updated method to disable mouse inputs when the menu is opened
+- Used PM's member "maxspeed" instead of "clientmaxspeed"
+- Removed pointless conversion from radians to degrees when processing jumpbug

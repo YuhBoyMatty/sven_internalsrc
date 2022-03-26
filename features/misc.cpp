@@ -576,9 +576,9 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 		pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, /* g_pPlayerMove->usehull */ (g_pPlayerMove->flags & FL_DUCKING) ? 1 : 0, -1);
 
 		float flHeight = fabsf(pTrace->endpos.z - g_pPlayerMove->origin.z);
-		float flGroundNormalAngle = static_cast<float>(acos(pTrace->plane.normal[2]) * 180.0 / M_PI);
+		float flGroundNormalAngle = acos(pTrace->plane.normal.z);
 
-		if (flGroundNormalAngle <= acosf(0.7f) * 180.0f / static_cast<float>(M_PI) && g_pPlayerMove->waterlevel == WL_NOT_IN_WATER)
+		if (flGroundNormalAngle <= acosf(0.7f) && g_pPlayerMove->waterlevel == WL_NOT_IN_WATER)
 		{
 			float flPlayerHeight = flHeight; // = 0.0f
 			float flFrameZDist = fabsf((g_pPlayerMove->flFallVelocity + (800.0f * frametime)) * frametime);
@@ -670,7 +670,7 @@ void CMisc::FastRun(struct usercmd_s *cmd)
 	if (g_Config.cvars.fastrun && g_pPlayerMove->onground != -1)
 	{
 		static bool bFastRun = false;
-		float flMaxSpeed = g_pPlayerMove->clientmaxspeed;
+		float flMaxSpeed = g_pPlayerMove->maxspeed;
 
 		if ((cmd->buttons & IN_FORWARD && cmd->buttons & IN_MOVELEFT) || (cmd->buttons & IN_BACK && cmd->buttons & IN_MOVERIGHT))
 		{
@@ -711,7 +711,6 @@ void CMisc::FastRun(struct usercmd_s *cmd)
 			if (bFastRun)
 			{
 				cmd->sidemove -= flMaxSpeed;
-
 				bFastRun = false;
 			}
 			else

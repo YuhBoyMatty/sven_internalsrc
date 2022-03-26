@@ -6,17 +6,33 @@
 #include <client_state.h>
 #include <convar.h>
 #include <dbg.h>
+#include <keydefs.h>
 
 #include "camhack.h"
 
 #include "../game/utils.h"
 #include "../config.h"
 
+extern Vector g_oldviewangles;
+extern Vector g_newviewangles;
+
 //-----------------------------------------------------------------------------
 // Vars
 //-----------------------------------------------------------------------------
 
 CCamHack g_CamHack;
+
+static usercmd_t dummy_cmd;
+
+static bool keydown_w = false;
+static bool keydown_s = false;
+static bool keydown_a = false;
+static bool keydown_d = false;
+static bool keydown_space = false;
+static bool keydown_ctrl = false;
+static bool keydown_shift = false;
+static bool keydown_mouse1 = false;
+static bool keydown_mouse2 = false;
 
 //-----------------------------------------------------------------------------
 // Utils
@@ -55,11 +71,11 @@ static void ClampViewAngles(Vector &viewangles)
 	if (viewangles[0] < -89.0f)
 		viewangles[0] = -89.0f;
 
-	if (viewangles[2] > 50.0f)
-		viewangles[2] = 50.0f;
+	if (viewangles[2] > 89.0f)
+		viewangles[2] = 89.0f;
 
-	if (viewangles[2] < -50.0f)
-		viewangles[2] = -50.0f;
+	if (viewangles[2] < -89.0f)
+		viewangles[2] = -89.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -119,41 +135,105 @@ void CCamHack::OnVideoInit()
 	}
 }
 
+bool CCamHack::OnKeyPress(int down, int keynum)
+{
+	bool bKeyDown = (down != 0);
+	
+	switch (keynum)
+	{
+	case K_SPACE:
+		keydown_space = bKeyDown;
+		break;
+
+	case 'w':
+		keydown_w = bKeyDown;
+		break;
+		
+	case 's':
+		keydown_s = bKeyDown;
+		break;
+		
+	case 'a':
+		keydown_a = bKeyDown;
+		break;
+		
+	case 'd':
+		keydown_d = bKeyDown;
+		break;
+		
+	case K_CTRL:
+		keydown_ctrl = bKeyDown;
+		break;
+
+	case K_SHIFT:
+		keydown_shift = bKeyDown;
+		break;
+
+	case K_MOUSE1:
+		keydown_mouse1 = bKeyDown;
+		break;
+
+	case K_MOUSE2:
+		keydown_mouse2 = bKeyDown;
+		break;
+
+	default:
+		return false;
+	}
+
+	return true;
+}
+
 void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
 	if (g_CamHack.IsEnabled())
 	{
-		if (cmd->buttons & IN_JUMP)
-			cmd->upmove += g_pPlayerMove->clientmaxspeed;
+		float flMaxSpeed = g_pPlayerMove->maxspeed;
 
-		if (cmd->buttons & IN_DUCK)
-			cmd->upmove -= g_pPlayerMove->clientmaxspeed;
+		dummy_cmd.forwardmove = 0.f;
+		dummy_cmd.sidemove = 0.f;
+		dummy_cmd.upmove = 0.f;
 
-		cmd->upmove *= 0.75f;
+		if (keydown_shift)
+			flMaxSpeed /= 2;
 
-		g_CamHack.m_vecCameraAngles = g_CamHack.m_vecCameraAngles + (cmd->viewangles - g_CamHack.m_vecVirtualVA);
-		g_CamHack.m_vecVirtualVA = cmd->viewangles;
+		if (keydown_w)
+			dummy_cmd.forwardmove += flMaxSpeed;
+		
+		if (keydown_s)
+			dummy_cmd.forwardmove -= flMaxSpeed;
+		
+		if (keydown_d)
+			dummy_cmd.sidemove += flMaxSpeed;
+		
+		if (keydown_a)
+			dummy_cmd.sidemove -= flMaxSpeed;
 
-		if (cmd->buttons & IN_ATTACK)
-			g_CamHack.m_vecCameraAngles.z -= 0.3f;
+		if (keydown_space)
+			dummy_cmd.upmove += flMaxSpeed;
+		
+		if (keydown_ctrl)
+			dummy_cmd.upmove -= flMaxSpeed;
 
-		if (cmd->buttons & IN_ATTACK2)
-			g_CamHack.m_vecCameraAngles.z += 0.3f;
+		if (keydown_mouse1)
+			g_CamHack.m_vecCameraAngles.z -= 0.2f;
+
+		if (keydown_mouse2)
+			g_CamHack.m_vecCameraAngles.z += 0.2f;
+
+		dummy_cmd.upmove *= 0.75f;
+
+		Vector va_delta = g_newviewangles - g_oldviewangles;
+
+		// ToDo: use quaternions for better rotation
+		g_CamHack.m_vecCameraAngles += va_delta;
 
 		NormalizeAngles(g_CamHack.m_vecCameraAngles);
-
 		ClampViewAngles(g_CamHack.m_vecCameraAngles);
 
-		user_PM_NoClip(g_CamHack.m_vecCameraOrigin, g_CamHack.m_vecCameraAngles, g_pPlayerMove->frametime, cmd);
+		user_PM_NoClip(g_CamHack.m_vecCameraOrigin, g_CamHack.m_vecCameraAngles, g_pPlayerMove->frametime, &dummy_cmd);
 
-		cmd->viewangles = g_CamHack.m_vecViewAngles;
-
-		cmd->forwardmove = 0.0f;
-		cmd->sidemove = 0.0f;
-		cmd->upmove = 0.0f;
-
-		cmd->impulse = 0;
-		cmd->buttons = 0;
+		cmd->viewangles = m_vecViewAngles;
 	}
 }
 
@@ -198,11 +278,23 @@ CCamHack::CCamHack()
 
 	m_vecViewAngles = { 0.0f, 0.0f, 0.0f };
 	m_vecVirtualVA = { 0.0f, 0.0f, 0.0f };
+
+	memset(&dummy_cmd, 0, sizeof(usercmd_t));
 }
 
 void CCamHack::Enable()
 {
 	m_bEnabled = true;
+
+	keydown_w = false;
+	keydown_s = false;
+	keydown_a = false;
+	keydown_d = false;
+	keydown_space = false;
+	keydown_ctrl = false;
+	keydown_shift = false;
+	keydown_mouse1 = false;
+	keydown_mouse2 = false;
 
 	g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
 
@@ -238,11 +330,25 @@ void CCamHack::Disable()
 {
 	m_bEnabled = false;
 
+	keydown_w = false;
+	keydown_s = false;
+	keydown_a = false;
+	keydown_d = false;
+	keydown_space = false;
+	keydown_ctrl = false;
+	keydown_shift = false;
+	keydown_mouse1 = false;
+	keydown_mouse2 = false;
+
 	if (m_bEnableFirstPerson && g_pClientFuncs->CL_IsThirdPerson())
 		g_pEngineFuncs->ClientCmd("firstperson\n");
 
 	if (m_bEnableThirdPerson && !g_pClientFuncs->CL_IsThirdPerson())
 		g_pEngineFuncs->ClientCmd("thirdperson\n");
+
+	g_pEngineFuncs->SetViewAngles(m_vecViewAngles);
+
+	m_bEnableFirstPerson = m_bEnableThirdPerson = false;
 }
 
 void CCamHack::ResetRollAxis()
@@ -252,8 +358,5 @@ void CCamHack::ResetRollAxis()
 
 void CCamHack::ResetOrientation()
 {
-	g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
-
 	m_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-	m_vecCameraAngles = m_vecViewAngles;
 }

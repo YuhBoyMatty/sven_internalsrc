@@ -624,6 +624,15 @@ bool CVisual::StudioRenderModel()
 		else
 			r_drawentities->value = 1.0f;
 	}
+	else if (flDrawEntitiesMode == 7.0f)
+	{
+		cl_entity_s *pEntity = g_pEngineStudio->GetCurrentEntity();
+
+		if ( pEntity->player )
+			r_drawentities->value = 3.0f;
+		else
+			r_drawentities->value = 1.0f;
+	}
 	else
 	{
 		r_drawentities->value = flDrawEntitiesMode;
@@ -692,7 +701,9 @@ void CVisual::PostLoad()
 {
 	g_Drawing.SetupFonts();
 
-	g_pBoneTransform = (bone_matrix3x4_t *)g_pEngineStudio->StudioGetBoneTransform();
+	g_pBoneTransform = (bone_matrix3x4_t *)g_pEngineStudio->StudioGetLightTransform();
+
+	auto t = (*g_pBoneTransform)[1];
 
 	m_hUserMsgHook_ScreenShake = Hooks()->HookUserMessage( "ScreenShake", UserMsgHook_ScreenShake, &ORIG_UserMsgHook_ScreenShake );
 	m_hUserMsgHook_ScreenFade = Hooks()->HookUserMessage( "ScreenFade", UserMsgHook_ScreenFade, &ORIG_UserMsgHook_ScreenFade );

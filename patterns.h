@@ -23,6 +23,8 @@ namespace Patterns
 
 	namespace Client
 	{
+		EXTERN_PATTERN(IN_Move);
+
 		EXTERN_PATTERN(CVotePopup__MsgFunc_VoteMenu);
 		EXTERN_PATTERN(READ_BYTE);
 		EXTERN_PATTERN(READ_STRING);

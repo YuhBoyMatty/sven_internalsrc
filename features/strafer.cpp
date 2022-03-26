@@ -37,7 +37,7 @@ static void UpdateStrafeData(float flYaw)
 	g_strafeData.vars.OnGround = g_pPlayerMove->onground != -1;
 	g_strafeData.vars.EntFriction = g_pPlayerMove->friction;
 	g_strafeData.vars.ReduceWishspeed = g_strafeData.vars.OnGround && (g_pPlayerMove->flags & FL_DUCKING);
-	g_strafeData.vars.Maxspeed = g_pPlayerMove->clientmaxspeed;
+	g_strafeData.vars.Maxspeed = g_pPlayerMove->maxspeed;
 	g_strafeData.vars.Stopspeed = sv_stopspeed->value;
 	g_strafeData.vars.Friction = sv_friction->value;
 	g_strafeData.vars.Accelerate = sv_accelerate->value;

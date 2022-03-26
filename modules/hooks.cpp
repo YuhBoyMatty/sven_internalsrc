@@ -33,6 +33,7 @@
 // Declare hooks
 //-----------------------------------------------------------------------------
 
+DECLARE_HOOK(void, __cdecl, IN_Move, float, usercmd_t *);
 DECLARE_HOOK(qboolean, __cdecl, Netchan_CanPacket, netchan_t *);
 
 DECLARE_HOOK(void, APIENTRY, glBegin, GLenum);
@@ -63,6 +64,9 @@ extern float g_flOverrideColor_B;
 
 bool bSendPacket = true;
 
+Vector g_oldviewangles(0.f, 0.f, 0.f);
+Vector g_newviewangles(0.f, 0.f, 0.f);
+
 static int s_iWaterLevel = 0;
 
 //-----------------------------------------------------------------------------
@@ -80,12 +84,14 @@ public:
 	virtual void Unload();
 
 private:
+	void *m_pfnIN_Move;
 	void *m_pfnNetchan_CanPacket;
 	void *m_pfnglBegin;
 	void *m_pfnglColor4f;
 	void *m_pfnV_RenderView;
 	void *m_pfnR_SetupFrame;
 
+	DetourHandle_t m_hIN_Move;
 	DetourHandle_t m_hNetchan_CanPacket;
 	DetourHandle_t m_hglBegin;
 	DetourHandle_t m_hglColor4f;
@@ -203,6 +209,22 @@ DECLARE_FUNC(void, APIENTRY, HOOKED_glColor4f, GLfloat red, GLfloat green, GLflo
 	}
 
 	ORIG_glColor4f(red, green, blue, alpha);
+}
+
+//-----------------------------------------------------------------------------
+// Client hooks
+//-----------------------------------------------------------------------------
+
+DECLARE_FUNC(void, __cdecl, HOOKED_IN_Move, float frametime, usercmd_t *cmd)
+{
+	if ( g_bMenuEnabled || g_bMenuClosed )
+		return;
+
+	g_pEngineFuncs->GetViewAngles( g_oldviewangles );
+
+	ORIG_IN_Move(frametime, cmd);
+
+	g_pEngineFuncs->GetViewAngles( g_newviewangles );
 }
 
 //-----------------------------------------------------------------------------
@@ -353,32 +375,19 @@ HOOK_RESULT CClientHooks::CL_CreateMove(float frametime, usercmd_t *cmd, int act
 
 	bSendPacket = true;
 
-	if (g_bMenuEnabled)
+	if ( g_bMenuEnabled )
 	{
 		cmd->viewangles = s_lastViewAngles;
-
-		RunClientMoveHooks(frametime, cmd, active);
-		return HOOK_STOP;
 	}
 
-	if (g_bMenuClosed)
+	if ( g_bMenuClosed )
 	{
-		if (++s_nWaitFrames > 5)
-		{
-			g_bMenuClosed = false;
-		}
-		else
-		{
-			cmd->viewangles = s_lastViewAngles;
-			g_pClientFuncs->IN_ClearStates();
+		g_bMenuClosed = false;
 
-			RunClientMoveHooks(frametime, cmd, active);
-			return HOOK_STOP;
-		}
-	}
-	else
-	{
-		s_nWaitFrames = 0;
+		cmd->viewangles = s_lastViewAngles;
+		g_pClientFuncs->IN_ClearStates();
+
+		SetCursorPos(g_pUtils->GetScreenWidth() / 2, g_pUtils->GetScreenHeight() / 2);
 	}
 
 	return HOOK_CONTINUE;
@@ -473,13 +482,19 @@ HOOK_RESULT CClientHooks::HUD_Frame(double time)
 
 HOOK_RESULT HOOK_RETURN_VALUE CClientHooks::HUD_Key_Event(int *process_key, int down, int keynum, const char *pszCurrentBinding)
 {
-	if (g_bMenuEnabled)
+	if ( g_bMenuEnabled && keynum != '`' ) // tilde
 	{
 		*process_key = 0;
 		return HOOK_STOP;
 	}
 
 	g_VotePopup.OnKeyPress(down, keynum);
+
+	if ( g_CamHack.IsEnabled() && g_CamHack.OnKeyPress(down, keynum) )
+	{
+		*process_key = 0;
+		return HOOK_STOP;
+	}
 
 	return HOOK_CONTINUE;
 }
@@ -732,6 +747,14 @@ bool CHooksModule::Load()
 		return false;
 	}
 
+	m_pfnIN_Move = MemoryUtils()->FindPattern( g_pModules->Client, Patterns::Client::IN_Move );
+
+	if ( !m_pfnIN_Move )
+	{
+		Warning("Couldn't find function \"IN_Move\"\n");
+		return false;
+	}
+	
 	m_pfnNetchan_CanPacket = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::Netchan_CanPacket );
 
 	if ( !m_pfnNetchan_CanPacket )
@@ -761,6 +784,7 @@ bool CHooksModule::Load()
 
 void CHooksModule::PostLoad()
 {
+	m_hIN_Move = DetoursAPI()->DetourFunction( m_pfnIN_Move, HOOKED_IN_Move, GET_FUNC_PTR(ORIG_IN_Move) );
 	m_hNetchan_CanPacket = DetoursAPI()->DetourFunction( m_pfnNetchan_CanPacket, HOOKED_Netchan_CanPacket, GET_FUNC_PTR(ORIG_Netchan_CanPacket) );
 	m_hglBegin = DetoursAPI()->DetourFunction( m_pfnglBegin, HOOKED_glBegin, GET_FUNC_PTR(ORIG_glBegin) );
 	m_hglColor4f = DetoursAPI()->DetourFunction( m_pfnglColor4f, HOOKED_glColor4f, GET_FUNC_PTR(ORIG_glColor4f) );
@@ -775,6 +799,7 @@ void CHooksModule::PostLoad()
 
 void CHooksModule::Unload()
 {
+	DetoursAPI()->RemoveDetour( m_hIN_Move );
 	DetoursAPI()->RemoveDetour( m_hNetchan_CanPacket );
 	DetoursAPI()->RemoveDetour( m_hglBegin );
 	DetoursAPI()->RemoveDetour( m_hglColor4f );
