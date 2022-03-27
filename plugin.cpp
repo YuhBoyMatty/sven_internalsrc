@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "game/utils.h"
+#include "game/drawing.h"
 #include "modules/patches.h"
 
 // Features
@@ -16,6 +17,7 @@
 #include "features/skybox.h"
 #include "features/visual.h"
 #include "features/chat_colors.h"
+#include "features/camhack.h"
 
 static void SaveSoundcache();
 
@@ -87,6 +89,9 @@ bool CSvenInternal::Load(CreateInterfaceFn pfnSvenModFactory, ISvenModAPI *pSven
 
 	g_Config.Load();
 
+	g_Drawing.Init();
+	g_Visual.ResetJumpSpeed();
+
 	g_pEngineFuncs->ClientCmd("cl_timeout 999999;unbind F1;unbind F2;exec sven_internal.cfg");
 
 	ConColorMsg({ 40, 255, 40, 255 }, "[Sven Internal] Successfully loaded\n");
@@ -105,6 +110,8 @@ void CSvenInternal::PostLoad(bool bGlobalLoad)
 	}
 
 	PostLoadFeatures();
+
+	g_CamHack.Init();
 }
 
 void CSvenInternal::Unload(void)
@@ -179,6 +186,8 @@ PLUGIN_RESULT CSvenInternal::Draw(void)
 
 PLUGIN_RESULT CSvenInternal::DrawHUD(float time, int intermission)
 {
+	g_Visual.OnHUDRedraw(time);
+
 	return PLUGIN_CONTINUE;
 }
 
@@ -194,7 +203,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.2";
+	return "2.0.3";
 }
 
 const char *CSvenInternal::GetDescription(void)

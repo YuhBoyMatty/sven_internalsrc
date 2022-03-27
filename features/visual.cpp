@@ -7,6 +7,7 @@
 
 #include <dbg.h>
 #include <convar.h>
+#include <IClient.h>
 #include <IPlayerUtils.h>
 
 #include <hl_sdk/engine/studio.h>
@@ -17,6 +18,7 @@
 #include <hl_sdk/common/r_studioint.h>
 
 #include "visual.h"
+#include "camhack.h"
 #include "firstperson_roaming.h"
 
 #include "../game/utils.h"
@@ -115,6 +117,20 @@ static bool IsWorldModelItem(const char *pszModelName)
 // Visual Hack
 //-----------------------------------------------------------------------------
 
+void CVisual::OnVideoInit()
+{
+	m_flTime = 0.f;
+
+	ResetJumpSpeed();
+}
+
+void CVisual::OnHUDRedraw(float flTime)
+{
+	m_flTime = flTime;
+
+	ShowSpeed();
+}
+
 void CVisual::Process()
 {
 	m_iScreenWidth = g_ScreenInfo.width;
@@ -125,31 +141,134 @@ void CVisual::Process()
 	ESP();
 
 	DrawCrosshair();
-	ShowSpeed();
+}
+
+void CVisual::ResetJumpSpeed()
+{
+	m_flPrevTime = m_flTime;
+	m_flFadeTime = g_Config.cvars.jumpspeed_fade_duration;
+	m_flJumpSpeed = 0.f;
+
+	m_clFadeFrom[0] = int(255.f * g_Config.cvars.speed_color[0]);
+	m_clFadeFrom[1] = int(255.f * g_Config.cvars.speed_color[1]);
+	m_clFadeFrom[2] = int(255.f * g_Config.cvars.speed_color[2]);
+
+	m_bOnGround = true;
 }
 
 void CVisual::ShowSpeed()
 {
-	if (!g_Config.cvars.show_speed || g_pPlayerMove->iuser1 != 0)
-		return;
+	if ( !g_pClient->IsSpectating() && !(g_CamHack.IsEnabled() && g_Config.cvars.camhack_hide_hud) )
+	{
+		float flSpeed;
 
-	float flSpeed;
+		if (g_Config.cvars.show_speed)
+		{
+			if ( g_Config.cvars.show_vertical_speed )
+				flSpeed = g_pPlayerMove->velocity.Length();
+			else
+				flSpeed = g_pPlayerMove->velocity.Length2D();
 
-	if (g_Config.cvars.show_vertical_speed)
-		flSpeed = g_pPlayerMove->velocity.Length();
-	else
-		flSpeed = g_pPlayerMove->velocity.Length2D();
+			g_Drawing.DrawNumber(flSpeed > 0.f ? int(floor(flSpeed)) : int(ceil(flSpeed)),
+								 int(m_iScreenWidth * g_Config.cvars.speed_width_fraction),
+								 int(m_iScreenHeight * g_Config.cvars.speed_height_fraction),
+								 int(255.f * g_Config.cvars.speed_color[0]),
+								 int(255.f * g_Config.cvars.speed_color[1]),
+								 int(255.f * g_Config.cvars.speed_color[2]),
+								 FONT_ALIGN_CENTER);
 
-	g_Drawing.DrawStringF(g_hESP2,
-						 int(m_iScreenWidth * g_Config.cvars.speed_width_fraction),
-						 int(m_iScreenHeight * g_Config.cvars.speed_height_fraction),
-						 int(255.f * g_Config.cvars.speed_color[0]),
-						 int(255.f * g_Config.cvars.speed_color[1]),
-						 int(255.f * g_Config.cvars.speed_color[2]),
-						 int(255.f * g_Config.cvars.speed_color[3]),
-						 FONT_ALIGN_CENTER,
-						 "%.1f",
-						 flSpeed);
+			if (g_Config.cvars.show_jumpspeed)
+			{
+				int r = int(255.f * g_Config.cvars.speed_color[0]);
+				int g = int(255.f * g_Config.cvars.speed_color[1]);
+				int b = int(255.f * g_Config.cvars.speed_color[2]);
+
+				float flFadeDuration = g_Config.cvars.jumpspeed_fade_duration;
+				int iSpriteHeight = g_Drawing.GetNumberSpriteHeight();
+
+				if (flFadeDuration > 0.0f)
+				{
+					if ( !g_pClient->IsOnGround() )
+					{
+						if ( m_bOnGround && g_pClient->Buttons() & IN_JUMP )
+						{
+							float flDifference = flSpeed - m_flJumpSpeed;
+
+							if (flDifference != 0.0f)
+							{
+								if (flDifference > 0.0f)
+								{
+									m_clFadeFrom[0] = 0;
+									m_clFadeFrom[1] = 255;
+									m_clFadeFrom[2] = 0;
+								}
+								else
+								{
+									m_clFadeFrom[0] = 255;
+									m_clFadeFrom[1] = 0;
+									m_clFadeFrom[2] = 0;
+								}
+
+								m_flFadeTime = 0.0f;
+								m_flJumpSpeed = flSpeed;
+							}
+						}
+
+						m_bOnGround = false;
+					}
+					else
+					{
+						m_bOnGround = true;
+					}
+
+					float flDelta = V_max(m_flTime - m_flPrevTime, 0.0f);
+
+					m_flFadeTime += flDelta;
+
+					if (m_flFadeTime > flFadeDuration || !IsFloatFinite(m_flFadeTime) )
+						m_flFadeTime = flFadeDuration;
+
+					float flFadeFrom_R = int(255.f * g_Config.cvars.speed_color[0]) - m_clFadeFrom[0] / flFadeDuration;
+					float flFadeFrom_G = int(255.f * g_Config.cvars.speed_color[1]) - m_clFadeFrom[1] / flFadeDuration;
+					float flFadeFrom_B = int(255.f * g_Config.cvars.speed_color[2]) - m_clFadeFrom[2] / flFadeDuration;
+
+					r = int(int(255.f * g_Config.cvars.speed_color[0]) - flFadeFrom_R * (flFadeDuration - m_flFadeTime));
+					g = int(int(255.f * g_Config.cvars.speed_color[1]) - flFadeFrom_G * (flFadeDuration - m_flFadeTime));
+					b = int(int(255.f * g_Config.cvars.speed_color[2]) - flFadeFrom_B * (flFadeDuration - m_flFadeTime));
+
+					m_flPrevTime = m_flTime;
+				}
+
+				g_Drawing.DrawNumber(m_flJumpSpeed > 0.f ? int(floor(m_flJumpSpeed)) : int(ceil(m_flJumpSpeed)),
+									 int(m_iScreenWidth * g_Config.cvars.speed_width_fraction),
+									 int(m_iScreenHeight * g_Config.cvars.speed_height_fraction) - (iSpriteHeight + iSpriteHeight / 4),
+									 r,
+									 g,
+									 b,
+									 FONT_ALIGN_CENTER);
+			}
+		}
+		else if (g_Config.cvars.show_speed_legacy)
+		{
+			float flSpeed;
+
+			if ( g_Config.cvars.show_vertical_speed_legacy )
+				flSpeed = g_pPlayerMove->velocity.Length();
+			else
+				flSpeed = g_pPlayerMove->velocity.Length2D();
+
+			g_Drawing.DrawStringF(g_hESP2,
+								  int(m_iScreenWidth * g_Config.cvars.speed_width_fraction_legacy),
+								  int(m_iScreenHeight * g_Config.cvars.speed_height_fraction_legacy),
+								  int(255.f * g_Config.cvars.speed_color_legacy[0]),
+								  int(255.f * g_Config.cvars.speed_color_legacy[1]),
+								  int(255.f * g_Config.cvars.speed_color_legacy[2]),
+								  int(255.f * g_Config.cvars.speed_color_legacy[3]),
+								  FONT_ALIGN_CENTER,
+								  "%.1f",
+								  flSpeed);
+		}
+	}
 }
 
 void CVisual::Lightmap()
@@ -181,7 +300,7 @@ void CVisual::Lightmap()
 
 void CVisual::DrawCrosshair()
 {
-	if (!g_Config.cvars.draw_crosshair)
+	if ( !g_Config.cvars.draw_crosshair || (g_CamHack.IsEnabled() && g_Config.cvars.camhack_hide_hud) )
 		return;
 
 	if (g_pPlayerMove->iuser1 == 0 || g_Config.cvars.fp_roaming_draw_crosshair && g_FirstPersonRoaming.GetTargetPlayer())
@@ -677,6 +796,18 @@ int UserMsgHook_ScreenFade(const char *pszUserMsg, int iSize, void *pBuffer)
 
 CVisual::CVisual()
 {
+	m_flTime = 0.f;
+
+	m_flPrevTime = 0.f;
+	m_flFadeTime = g_Config.cvars.jumpspeed_fade_duration;
+	m_flJumpSpeed = 0.f;
+
+	m_clFadeFrom[0] = int(255.f * g_Config.cvars.speed_color[0]);
+	m_clFadeFrom[1] = int(255.f * g_Config.cvars.speed_color[1]);
+	m_clFadeFrom[2] = int(255.f * g_Config.cvars.speed_color[2]);
+
+	m_bOnGround = true;
+
 	m_hUserMsgHook_ScreenShake = 0;
 	m_hUserMsgHook_ScreenFade = 0;
 

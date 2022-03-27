@@ -125,6 +125,7 @@
     <ClCompile Include="patterns.cpp" />
     <ClCompile Include="plugin.cpp" />
     <ClCompile Include="strafe\strafe.cpp" />
+    <ClCompile Include="SvenMod\public\hl_sdk\cl_dll\interpolation.cpp" />
     <ClCompile Include="SvenMod\shared\mathlib.cpp" />
     <ClCompile Include="utils\menu_styles.cpp" />
     <ClCompile Include="utils\patcher.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="patterns.h" />
     <ClInclude Include="strafe\strafe.h" />
     <ClInclude Include="strafe\strafe_utils.h" />
+    <ClInclude Include="SvenMod\public\hl_sdk\cl_dll\interpolation.h" />
     <ClInclude Include="utils\menu_styles.h" />
     <ClInclude Include="utils\patcher.h" />
   </ItemGroup>

@@ -7,7 +7,10 @@
 #include <gl/GL.h>
 
 #include <math/mathlib.h>
+
 #include <IVGUI.h>
+#include <IUtils.h>
+#include <ISvenModAPI.h>
 
 #include "utils.h"
 #include "drawing.h"
@@ -38,12 +41,173 @@ static int s_swap_buffer = 0;
 // CDrawing implementations
 //-----------------------------------------------------------------------------
 
+CDrawing::CDrawing()
+{
+	m_iNumberWidth = 0;
+	m_iNumberHeight = 0;
+
+	m_iSpriteCount = 0;
+	m_pSpriteList = NULL;
+
+	memset(m_NumberSprites, 0, sizeof(VHSPRITE) * 10);
+	memset(m_NumberSpriteRects, 0, sizeof(Rect) * 10);
+	memset(m_NumberSpritePointers, 0, sizeof(client_sprite_t *) * 10);
+}
+
+void CDrawing::Init()
+{
+	if (SvenModAPI()->GetClientState() == CLS_ACTIVE)
+	{
+		InitSprites();
+	}
+}
+
 void CDrawing::SetupFonts()
 {
 	g_pVGUI->Surface()->AddGlyphSetToFont(g_hESP = g_pVGUI->Surface()->CreateFont(), "Choktoff", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
 	g_pVGUI->Surface()->AddGlyphSetToFont(g_hESP2 = g_pVGUI->Surface()->CreateFont(), "Choktoff", 38, FW_MEDIUM, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
 	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontVotePopup = g_pVGUI->Surface()->CreateFont(), "Lucida-Console", 20, FW_EXTRABOLD, NULL, NULL, vgui::ISurface::FONTFLAG_NONE, 0, 0);
 	//g_pSurface->AddGlyphSetToFont(MENU = g_pSurface->CreateFont(), "Arial", 14, FW_BOLD, NULL, NULL, FONTFLAG_NONE, 0, 0); //Main font
+}
+
+void CDrawing::InitSprites()
+{
+	static char szSpritePath[MAX_PATH];
+
+	int iSpriteResolution = (g_pUtils->GetScreenWidth() < 640) ? 320 : 640;
+
+	if ( !m_pSpriteList )
+	{
+		m_pSpriteList = g_pEngineFuncs->SPR_GetList( (char *)("sprites/hud.txt"), &m_iSpriteCount );
+
+		if ( m_pSpriteList )
+		{
+			for (int i = 0; i < m_iSpriteCount; i++)
+			{
+				client_sprite_t *pSprite = m_pSpriteList + i;
+
+				char num = *(pSprite->szName + 7);
+
+				if (pSprite->iRes == iSpriteResolution && strstr(pSprite->szName, "number_") == pSprite->szName && *(pSprite->szName + 8) == '\0' && num >= '0' && num <= '9')
+				{
+					int digit = int(num - '0');
+
+					m_NumberSpritePointers[digit] = pSprite;
+					m_NumberSpriteRects[digit] = pSprite->rc;
+
+					_snprintf(szSpritePath, sizeof(szSpritePath), "sprites/%s.spr", pSprite->szSprite);
+					m_NumberSprites[digit] = g_pEngineFuncs->SPR_Load( szSpritePath );
+
+					if ( !digit )
+					{
+						m_iNumberWidth = pSprite->rc.right - pSprite->rc.left;
+						m_iNumberHeight = pSprite->rc.bottom - pSprite->rc.top;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			client_sprite_t *pSprite = m_NumberSpritePointers[i];
+
+			_snprintf(szSpritePath, sizeof(szSpritePath), "sprites/%s.spr", pSprite->szSprite);
+			m_NumberSprites[i] = g_pEngineFuncs->SPR_Load( szSpritePath );
+		}
+	}
+}
+
+void CDrawing::OnVideoInit()
+{
+	InitSprites();
+}
+
+//-----------------------------------------------------------------------------
+// Sprite handlers
+//-----------------------------------------------------------------------------
+
+void CDrawing::DrawDigit(int digit, int x, int y, int r, int g, int b)
+{
+	if (digit >= 0 && digit <= 9)
+	{
+		g_pEngineFuncs->SPR_Set( m_NumberSprites[digit], r, g, b );
+		g_pEngineFuncs->SPR_DrawAdditive( 0, x, y, &m_NumberSpriteRects[digit] );
+	}
+}
+
+void CDrawing::DrawDigit(int digit, int x, int y, int r, int g, int b, FontAlignFlags_t alignment)
+{
+	ApplyTextAlignment(alignment, x, y, m_iNumberWidth, m_iNumberHeight);
+	DrawDigit(digit, x, y, r, g, b);
+}
+
+int CDrawing::DrawNumber(int number, int x, int y, int r, int g, int b, FontAlignFlags_t alignment, int fieldMinWidth /* = 1 */)
+{
+	bool bNegative = false;
+
+	if (number < 0)
+	{
+		if (number == -2147483648)
+		{
+			number = 0;
+		}
+		else
+		{
+			number = abs(number);
+			bNegative = true;
+		}
+	}
+
+	int i;
+	int c = 0;
+	int digits[10] = { 0 };
+
+	for (i = 0; i < 10; ++i)
+	{
+		if ( !number )
+			break;
+
+		digits[i] = number % 10;
+		number /= 10;
+
+		c++;
+	}
+
+	ApplyTextAlignment(alignment, x, y, (fieldMinWidth >= c ? fieldMinWidth : c) * m_iNumberWidth, m_iNumberHeight);
+
+	if (bNegative)
+	{
+		DrawLine(x - m_iNumberWidth, y + m_iNumberHeight / 2, x, y + m_iNumberHeight / 2, r, g, b, 255);
+	}
+
+	for (; fieldMinWidth > 10; --fieldMinWidth)
+	{
+		DrawDigit(0, x, y, r, g, b);
+		x += m_iNumberWidth;
+	}
+
+	if (fieldMinWidth > i)
+		i = fieldMinWidth;
+
+	for (int j = i; j > 0; --j)
+	{
+		DrawDigit(digits[j - 1], x, y, r, g, b);
+		x += m_iNumberWidth;
+	}
+
+	return x;
+}
+
+int CDrawing::GetNumberSpriteWidth()
+{
+	return m_iNumberWidth;
+}
+
+int CDrawing::GetNumberSpriteHeight()
+{
+	return m_iNumberHeight;
 }
 
 //-----------------------------------------------------------------------------

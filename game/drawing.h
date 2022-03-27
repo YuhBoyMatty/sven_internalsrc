@@ -7,6 +7,8 @@
 #pragma once
 #endif
 
+#include <hl_sdk/engine/APIProxy.h>
+
 #include <math/vector.h>
 
 #include <vgui2/IPanel.h>
@@ -31,7 +33,14 @@ enum FontAlignFlags_t
 class CDrawing
 {
 public:
+	CDrawing();
+
+public:
+	void Init();
 	void SetupFonts();
+
+	void InitSprites();
+	void OnVideoInit();
 
 	void FillArea(int x, int y, int w, int h, int r, int g, int b, int a);
 
@@ -52,6 +61,10 @@ public:
 	void BoxOutline(float x, float y, float w, float h, float lw, BYTE r, BYTE g, BYTE b, BYTE a);
 	void Box(int x, int y, int w, int h, int lw, int r, int g, int b, int a);
 
+	void DrawDigit(int digit, int x, int y, int r, int g, int b);
+	void DrawDigit(int digit, int x, int y, int r, int g, int b, FontAlignFlags_t alignment);
+	int DrawNumber(int number, int x, int y, int r, int g, int b, FontAlignFlags_t alignment, int fieldMinWidth = 1);
+
 	void DrawTexture(int id, int x0, int y0, int x1, int y1, int r = 255, int g = 255, int b = 255, int a = 255);
 
 	void DrawStringF(vgui::HFont font, int x, int y, int r, int g, int b, int a, FontAlignFlags_t alignment, const char *pszString, ...);
@@ -67,8 +80,23 @@ public:
 	void DrawCrosshairShadow(int x, int y, int r, int g, int b, int a, int iSize = 10, int Giap = 4, int iThickness = 2, int iShadowThickness = 1);
 	void DrawDotShadow(int x, int y, int r, int g, int b, int a, int iThickness = 2, int iShadowThickness = 1);
 
+public:
+	int GetNumberSpriteWidth();
+	int GetNumberSpriteHeight();
+
 private:
 	void ApplyTextAlignment(FontAlignFlags_t alignment, int &x, int &y, int textWidth, int textHeight);
+
+private:
+	int m_iNumberWidth;
+	int m_iNumberHeight;
+
+	int m_iSpriteCount;
+	client_sprite_t *m_pSpriteList;
+
+	VHSPRITE m_NumberSprites[10];
+	Rect m_NumberSpriteRects[10];
+	client_sprite_t *m_NumberSpritePointers[10];
 };
 
 inline void CDrawing::ApplyTextAlignment(FontAlignFlags_t alignment, int &x, int &y, int textWidth, int textHeight)

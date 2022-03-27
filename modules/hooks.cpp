@@ -11,8 +11,11 @@
 #include <gl/GL.h>
 
 #include "hooks.h"
+
 #include "../patterns.h"
 #include "../config.h"
+
+#include "../game/drawing.h"
 
 // Features
 #include "../features/misc.h"
@@ -34,7 +37,9 @@
 //-----------------------------------------------------------------------------
 
 DECLARE_HOOK(void, __cdecl, IN_Move, float, usercmd_t *);
+
 DECLARE_HOOK(qboolean, __cdecl, Netchan_CanPacket, netchan_t *);
+DECLARE_HOOK(void, __cdecl, SPR_Set, VHSPRITE hPic, int r, int g, int b);
 
 DECLARE_HOOK(void, APIENTRY, glBegin, GLenum);
 DECLARE_HOOK(void, APIENTRY, glColor4f, GLfloat, GLfloat, GLfloat, GLfloat);
@@ -86,6 +91,7 @@ public:
 private:
 	void *m_pfnIN_Move;
 	void *m_pfnNetchan_CanPacket;
+	void *m_pfnSPR_Set;
 	void *m_pfnglBegin;
 	void *m_pfnglColor4f;
 	void *m_pfnV_RenderView;
@@ -93,6 +99,7 @@ private:
 
 	DetourHandle_t m_hIN_Move;
 	DetourHandle_t m_hNetchan_CanPacket;
+	DetourHandle_t m_hSPR_Set;
 	DetourHandle_t m_hglBegin;
 	DetourHandle_t m_hglColor4f;
 	DetourHandle_t m_hV_RenderView;
@@ -239,6 +246,26 @@ DECLARE_FUNC(qboolean, __cdecl, HOOKED_Netchan_CanPacket, netchan_t *netchan)
 	return ORIG_Netchan_CanPacket(netchan);
 }
 
+int SpriteArray[] =
+{
+	0, 2, 1, 0, 0, 1, 1, 0, 1, 2,
+	2, 0, 0, 0, 2, 1, 0, 0, 0, 0,
+	0, 0, 2, 1, 0, 0, 0, 2, 0, 1,
+	0, 0, 0, 2, 0, 2, 1, 0, 0, 0,
+};
+
+DECLARE_FUNC(void, __cdecl, HOOKED_SPR_Set, VHSPRITE hPic, int r, int g, int b)
+{
+	if ( g_Config.cvars.remap_hud_color )
+	{
+		r = int(g_Config.cvars.hud_color[0] * 255.f);
+		g = int(g_Config.cvars.hud_color[1] * 255.f);
+		b = int(g_Config.cvars.hud_color[2] * 255.f);
+	}
+
+	ORIG_SPR_Set(hPic, r, g, b);
+}
+
 DECLARE_FUNC(void, __cdecl, HOOKED_R_SetupFrame)
 {
 	ORIG_R_SetupFrame();
@@ -317,6 +344,8 @@ DECLARE_CLASS_FUNC(void, HOOKED_StudioRenderModel, CStudioModelRenderer *thisptr
 
 HOOK_RESULT CClientHooks::HUD_VidInit(void)
 {
+	g_Visual.OnVideoInit();
+	g_Drawing.OnVideoInit();
 	g_Skybox.OnVideoInit();
 	g_VotePopup.OnVideoInit();
 	g_ChatColors.OnVideoInit();
@@ -779,6 +808,8 @@ bool CHooksModule::Load()
 		return false;
 	}
 
+	m_pfnSPR_Set = g_pEngineFuncs->SPR_Set;
+
 	return true;
 }
 
@@ -786,6 +817,7 @@ void CHooksModule::PostLoad()
 {
 	m_hIN_Move = DetoursAPI()->DetourFunction( m_pfnIN_Move, HOOKED_IN_Move, GET_FUNC_PTR(ORIG_IN_Move) );
 	m_hNetchan_CanPacket = DetoursAPI()->DetourFunction( m_pfnNetchan_CanPacket, HOOKED_Netchan_CanPacket, GET_FUNC_PTR(ORIG_Netchan_CanPacket) );
+	m_hSPR_Set = DetoursAPI()->DetourFunction( m_pfnSPR_Set, HOOKED_SPR_Set, GET_FUNC_PTR(ORIG_SPR_Set) );
 	m_hglBegin = DetoursAPI()->DetourFunction( m_pfnglBegin, HOOKED_glBegin, GET_FUNC_PTR(ORIG_glBegin) );
 	m_hglColor4f = DetoursAPI()->DetourFunction( m_pfnglColor4f, HOOKED_glColor4f, GET_FUNC_PTR(ORIG_glColor4f) );
 	m_hV_RenderView = DetoursAPI()->DetourFunction( m_pfnV_RenderView, HOOKED_V_RenderView, GET_FUNC_PTR(ORIG_V_RenderView) );
@@ -801,6 +833,7 @@ void CHooksModule::Unload()
 {
 	DetoursAPI()->RemoveDetour( m_hIN_Move );
 	DetoursAPI()->RemoveDetour( m_hNetchan_CanPacket );
+	DetoursAPI()->RemoveDetour( m_hSPR_Set );
 	DetoursAPI()->RemoveDetour( m_hglBegin );
 	DetoursAPI()->RemoveDetour( m_hglColor4f );
 	DetoursAPI()->RemoveDetour( m_hV_RenderView );

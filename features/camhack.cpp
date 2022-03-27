@@ -22,6 +22,8 @@ extern Vector g_newviewangles;
 
 CCamHack g_CamHack;
 
+cvar_t *hud_draw = NULL;
+
 static usercmd_t dummy_cmd;
 
 static bool keydown_w = false;
@@ -268,10 +270,10 @@ CCamHack::CCamHack()
 {
 	m_bEnabled = false;
 
-	m_bEnableFirstPerson = false;
-	m_bEnableThirdPerson = false;
-
 	m_flSavedPitchAngle = 0.0f;
+
+	m_bChangeCameraState = false;
+	m_bChangeToThirdPerson = false;
 
 	m_vecCameraOrigin = { 0.0f, 0.0f, 0.0f };
 	m_vecCameraAngles = { 0.0f, 0.0f, 0.0f };
@@ -280,6 +282,14 @@ CCamHack::CCamHack()
 	m_vecVirtualVA = { 0.0f, 0.0f, 0.0f };
 
 	memset(&dummy_cmd, 0, sizeof(usercmd_t));
+}
+
+void CCamHack::Init()
+{
+	hud_draw = CVar()->FindCvar("hud_draw");
+
+	if ( !hud_draw )
+		Sys_Error("[Sven Internal] Can't find cvar hud_draw");
 }
 
 void CCamHack::Enable()
@@ -302,27 +312,31 @@ void CCamHack::Enable()
 	m_vecCameraAngles = m_vecVirtualVA = m_vecViewAngles;
 	m_flSavedPitchAngle = NormalizeAngle(m_vecViewAngles.x) / -3.0f;
 
+	if (g_Config.cvars.camhack_hide_hud)
+	{
+		CVar()->SetValue(hud_draw, 0);
+	}
+
 	if (g_Config.cvars.camhack_show_model)
 	{
-		if (!g_pClientFuncs->CL_IsThirdPerson())
+		if ( !g_pClientFuncs->CL_IsThirdPerson() )
 		{
-			g_pEngineFuncs->ClientCmd("sc_chasecam\n");
-
-			m_bEnableFirstPerson = true;
-			m_bEnableThirdPerson = false;
+			g_pEngineFuncs->ClientCmd("thirdperson\n");
+			m_bChangeToThirdPerson = false;
 		}
 		else
 		{
-			m_bEnableFirstPerson = false;
-			m_bEnableThirdPerson = true;
+			m_bChangeToThirdPerson = true;
 		}
+
+		m_bChangeCameraState = true;
 	}
 	else
 	{
-		if (g_pClientFuncs->CL_IsThirdPerson())
-			g_pEngineFuncs->ClientCmd("sc_chasecam\n");
+		if ( g_pClientFuncs->CL_IsThirdPerson() )
+			g_pEngineFuncs->ClientCmd("firstperson\n");
 
-		m_bEnableFirstPerson = m_bEnableThirdPerson = false;
+		m_bChangeCameraState = false;
 	}
 }
 
@@ -340,15 +354,26 @@ void CCamHack::Disable()
 	keydown_mouse1 = false;
 	keydown_mouse2 = false;
 
-	if (m_bEnableFirstPerson && g_pClientFuncs->CL_IsThirdPerson())
-		g_pEngineFuncs->ClientCmd("firstperson\n");
+	if (g_Config.cvars.camhack_hide_hud)
+	{
+		CVar()->SetValue(hud_draw, 1);
+	}
 
-	if (m_bEnableThirdPerson && !g_pClientFuncs->CL_IsThirdPerson())
-		g_pEngineFuncs->ClientCmd("thirdperson\n");
+	if (m_bChangeCameraState)
+	{
+		if (m_bChangeToThirdPerson)
+		{
+			g_pEngineFuncs->ClientCmd("thirdperson\n");
+		}
+		else
+		{
+			g_pEngineFuncs->ClientCmd("firstperson\n");
+		}
+	}
 
 	g_pEngineFuncs->SetViewAngles(m_vecViewAngles);
 
-	m_bEnableFirstPerson = m_bEnableThirdPerson = false;
+	m_bChangeCameraState = false;
 }
 
 void CCamHack::ResetRollAxis()

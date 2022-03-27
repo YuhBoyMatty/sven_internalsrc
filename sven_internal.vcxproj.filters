@@ -125,6 +125,9 @@
     <ClCompile Include="features\misc.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
+    <ClCompile Include="SvenMod\public\hl_sdk\cl_dll\interpolation.cpp">
+      <Filter>Sven Internal\Game Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
@@ -219,6 +222,9 @@
     </ClInclude>
     <ClInclude Include="features\misc.h">
       <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="SvenMod\public\hl_sdk\cl_dll\interpolation.h">
+      <Filter>Sven Internal\Game Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

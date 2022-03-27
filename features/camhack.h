@@ -12,11 +12,15 @@ class CCamHack
 public:
 	CCamHack();
 
+	void Init();
+
+public:
 	void Enable();
 	void Disable();
 
 	bool IsEnabled() const;
 
+public:
 	void SetFirstPersonState(bool bEnable);
 	void SetThirdPersonState(bool bEnable);
 
@@ -48,17 +52,11 @@ public:
 private:
 	bool m_bEnabled;
 
-	bool m_bEnableFirstPerson;
-	bool m_bEnableThirdPerson;
+	bool m_bChangeCameraState;
+	bool m_bChangeToThirdPerson;
 };
 
 inline bool CCamHack::IsEnabled() const { return m_bEnabled; }
-
-inline void CCamHack::SetThirdPersonState(bool bEnable) { m_bEnableFirstPerson = bEnable; }
-inline void CCamHack::SetFirstPersonState(bool bEnable) { m_bEnableThirdPerson = bEnable; }
-
-inline bool CCamHack::MustEnableFirstPerson() const { return m_bEnableFirstPerson; }
-inline bool CCamHack::MustEnableThirdPerson() const { return m_bEnableThirdPerson; }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

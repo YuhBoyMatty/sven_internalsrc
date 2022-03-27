@@ -14,3 +14,8 @@ Changelog for Sven Internal
 - Updated method to disable mouse inputs when the menu is opened
 - Used PM's member "maxspeed" instead of "clientmaxspeed"
 - Removed pointless conversion from radians to degrees when processing jumpbug
+
+27/03/2022 - Version 2.0.3:
+- Added BunnymodXT-like speedometer
+- Added feature to automatically hide HUD when use CamHack
+- Added feature to change the colors of HUD (experimental)

@@ -108,14 +108,26 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("NoShake", cvars.no_shake);
 			ConfigManager()->ImportParam("NoFade", cvars.no_fade);
 			ConfigManager()->ImportParam("DrawEntities", cvars.draw_entities);
+
 			ConfigManager()->ImportParam("ShowSpeed", cvars.show_speed);
+			ConfigManager()->ImportParam("ShowJumpSpeed", cvars.show_jumpspeed);
 			ConfigManager()->ImportParam("StoreVerticalSpeed", cvars.show_vertical_speed);
+			ConfigManager()->ImportParam("JumpSpeedFadeDuration", cvars.jumpspeed_fade_duration);
 			ConfigManager()->ImportParam("SpeedWidthFraction", cvars.speed_width_fraction);
 			ConfigManager()->ImportParam("SpeedHeightFraction", cvars.speed_height_fraction);
-			ConfigManager()->ImportParam("Speed_R", cvars.speed_color[0]);
-			ConfigManager()->ImportParam("Speed_G", cvars.speed_color[1]);
-			ConfigManager()->ImportParam("Speed_B", cvars.speed_color[2]);
-			ConfigManager()->ImportParam("Speed_A", cvars.speed_color[3]);
+			ConfigManager()->ImportParam("SpeedColor_R", cvars.speed_color[0]);
+			ConfigManager()->ImportParam("SpeedColor_G", cvars.speed_color[1]);
+			ConfigManager()->ImportParam("SpeedColor_B", cvars.speed_color[2]);
+			
+			ConfigManager()->ImportParam("ShowSpeed_Legacy", cvars.show_speed_legacy);
+			ConfigManager()->ImportParam("StoreVerticalSpeed_Legacy", cvars.show_vertical_speed_legacy);
+			ConfigManager()->ImportParam("SpeedWidthFraction_Legacy", cvars.speed_width_fraction_legacy);
+			ConfigManager()->ImportParam("SpeedHeightFraction_Legacy", cvars.speed_height_fraction_legacy);
+			ConfigManager()->ImportParam("SpeedColor_Legacy_R", cvars.speed_color_legacy[0]);
+			ConfigManager()->ImportParam("SpeedColor_Legacy_G", cvars.speed_color_legacy[1]);
+			ConfigManager()->ImportParam("SpeedColor_Legacy_B", cvars.speed_color_legacy[2]);
+			ConfigManager()->ImportParam("SpeedColor_Legacy_A", cvars.speed_color_legacy[3]);
+
 			ConfigManager()->ImportParam("LightmapOverride", cvars.lightmap_override);
 			ConfigManager()->ImportParam("LightmapOverrideBrightness", cvars.lightmap_brightness);
 			ConfigManager()->ImportParam("LightmapOverride_R", cvars.lightmap_color[0]);
@@ -127,6 +139,10 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("PushDirectionColor_R", cvars.push_direction_color[0]);
 			ConfigManager()->ImportParam("PushDirectionColor_G", cvars.push_direction_color[1]);
 			ConfigManager()->ImportParam("PushDirectionColor_B", cvars.push_direction_color[2]);
+			ConfigManager()->ImportParam("RemapHUDColor", cvars.remap_hud_color);
+			ConfigManager()->ImportParam("HUDColor_R", cvars.hud_color[0]);
+			ConfigManager()->ImportParam("HUDColor_G", cvars.hud_color[1]);
+			ConfigManager()->ImportParam("HUDColor_B", cvars.hud_color[2]);
 
 			ConfigManager()->EndSectionImport();
 		}
@@ -352,6 +368,7 @@ bool CConfig::Load()
 		if (ConfigManager()->BeginSectionImport("CAMHACK"))
 		{
 			ConfigManager()->ImportParam("SpeedFactor", cvars.camhack_speed_factor);
+			ConfigManager()->ImportParam("HideHUD", cvars.camhack_hide_hud);
 			ConfigManager()->ImportParam("ShowModel", cvars.camhack_show_model);
 
 			ConfigManager()->EndSectionImport();
@@ -497,14 +514,26 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("NoShake", cvars.no_shake);
 			ConfigManager()->ExportParam("NoFade", cvars.no_fade);
 			ConfigManager()->ExportParam("DrawEntities", cvars.draw_entities);
+
 			ConfigManager()->ExportParam("ShowSpeed", cvars.show_speed);
+			ConfigManager()->ExportParam("ShowJumpSpeed", cvars.show_jumpspeed);
 			ConfigManager()->ExportParam("StoreVerticalSpeed", cvars.show_vertical_speed);
+			ConfigManager()->ExportParam("JumpSpeedFadeDuration", cvars.jumpspeed_fade_duration);
 			ConfigManager()->ExportParam("SpeedWidthFraction", cvars.speed_width_fraction);
 			ConfigManager()->ExportParam("SpeedHeightFraction", cvars.speed_height_fraction);
-			ConfigManager()->ExportParam("Speed_R", cvars.speed_color[0]);
-			ConfigManager()->ExportParam("Speed_G", cvars.speed_color[1]);
-			ConfigManager()->ExportParam("Speed_B", cvars.speed_color[2]);
-			ConfigManager()->ExportParam("Speed_A", cvars.speed_color[3]);
+			ConfigManager()->ExportParam("SpeedColor_R", cvars.speed_color[0]);
+			ConfigManager()->ExportParam("SpeedColor_G", cvars.speed_color[1]);
+			ConfigManager()->ExportParam("SpeedColor_B", cvars.speed_color[2]);
+
+			ConfigManager()->ExportParam("ShowSpeed_Legacy", cvars.show_speed_legacy);
+			ConfigManager()->ExportParam("StoreVerticalSpeed_Legacy", cvars.show_vertical_speed_legacy);
+			ConfigManager()->ExportParam("SpeedWidthFraction_Legacy", cvars.speed_width_fraction_legacy);
+			ConfigManager()->ExportParam("SpeedHeightFraction_Legacy", cvars.speed_height_fraction_legacy);
+			ConfigManager()->ExportParam("SpeedColor_Legacy_R", cvars.speed_color_legacy[0]);
+			ConfigManager()->ExportParam("SpeedColor_Legacy_G", cvars.speed_color_legacy[1]);
+			ConfigManager()->ExportParam("SpeedColor_Legacy_B", cvars.speed_color_legacy[2]);
+			ConfigManager()->ExportParam("SpeedColor_Legacy_A", cvars.speed_color_legacy[3]);
+
 			ConfigManager()->ExportParam("LightmapOverride", cvars.lightmap_override);
 			ConfigManager()->ExportParam("LightmapOverrideBrightness", cvars.lightmap_brightness);
 			ConfigManager()->ExportParam("LightmapOverride_R", cvars.lightmap_color[0]);
@@ -516,6 +545,10 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("PushDirectionColor_R", cvars.push_direction_color[0]);
 			ConfigManager()->ExportParam("PushDirectionColor_G", cvars.push_direction_color[1]);
 			ConfigManager()->ExportParam("PushDirectionColor_B", cvars.push_direction_color[2]);
+			ConfigManager()->ExportParam("RemapHUDColor", cvars.remap_hud_color);
+			ConfigManager()->ExportParam("HUDColor_R", cvars.hud_color[0]);
+			ConfigManager()->ExportParam("HUDColor_G", cvars.hud_color[1]);
+			ConfigManager()->ExportParam("HUDColor_B", cvars.hud_color[2]);
 
 			ConfigManager()->EndSectionExport();
 		}
@@ -741,6 +774,7 @@ void CConfig::Save()
 		if (ConfigManager()->BeginSectionExport("CAMHACK"))
 		{
 			ConfigManager()->ExportParam("SpeedFactor", cvars.camhack_speed_factor);
+			ConfigManager()->ExportParam("HideHUD", cvars.camhack_hide_hud);
 			ConfigManager()->ExportParam("ShowModel", cvars.camhack_show_model);
 
 			ConfigManager()->EndSectionExport();

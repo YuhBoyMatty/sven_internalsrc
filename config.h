@@ -78,13 +78,24 @@ public:
 		float push_direction_width = 1.0f;
 		float push_direction_color[3] = { 1.0f, 0.f, 0.f };
 
+		bool remap_hud_color = false;
+		float hud_color[3] = { 1.0f, 0.78f, 0.f };
+
 		int draw_entities = 0; // enum
 
 		bool show_speed = false;
 		bool show_vertical_speed = false;
+		bool show_jumpspeed = false;
+		float jumpspeed_fade_duration = 0.7f;
 		float speed_width_fraction = 0.5f;
 		float speed_height_fraction = 0.88f;
-		float speed_color[4] = { 1.0f, 0.75f, 0.0f, 0.882f };
+		float speed_color[3] = { 100.f / 255.f, 130.f / 255.f, 200.f / 255.f };
+		
+		bool show_speed_legacy = false;
+		bool show_vertical_speed_legacy = false;
+		float speed_width_fraction_legacy = 0.5f;
+		float speed_height_fraction_legacy = 0.88f;
+		float speed_color_legacy[4] = { 1.0f, 0.75f, 0.0f, 0.882f };
 
 		bool wallhack = false;
 		bool wallhack_negative = false;
@@ -294,6 +305,7 @@ public:
 		//-----------------------------------------------------------------------------
 
 		bool camhack_show_model = true;
+		bool camhack_hide_hud = true;
 		float camhack_speed_factor = 1.0f;
 
 		//-----------------------------------------------------------------------------

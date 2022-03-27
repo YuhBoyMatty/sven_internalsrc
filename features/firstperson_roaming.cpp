@@ -2,16 +2,19 @@
 
 #include <hl_sdk/engine/APIProxy.h>
 #include <hl_sdk/cl_dll/StudioModelRenderer.h>
+#include <hl_sdk/cl_dll/interpolation.h>
 
 #include "firstperson_roaming.h"
 
 #include "../config.h"
 
 //-----------------------------------------------------------------------------
-// Global Vars
+// Vars
 //-----------------------------------------------------------------------------
 
 CFirstPersonRoaming g_FirstPersonRoaming;
+
+static CInterpolation s_Interp;
 
 //-----------------------------------------------------------------------------
 // Helper
@@ -70,9 +73,14 @@ void CFirstPersonRoaming::V_CalcRefdef(struct ref_params_s *pparams)
 		if (g_Config.cvars.fp_roaming_lerp)
 		{
 			Vector from, to;
-			from = m_vPrevAngles;
+			Vector wth_is_that_arg_pass;
 
+			from = m_vPrevAngles;
 			GetPlayerViewAngles(to);
+
+			//s_Interp.SetViewAngles(from, to);
+			//s_Interp.Interpolate(g_Config.cvars.fp_roaming_lerp_value, wth_is_that_arg_pass, m_vPrevAngles, NULL);
+
 			HLP_LerpAngles(from, to, g_Config.cvars.fp_roaming_lerp_value, m_vPrevAngles);
 		}
 		else

@@ -269,24 +269,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::Checkbox("Show Player's Push Direction", &g_Config.cvars.show_players_push_direction);
-
-						ImGui::Spacing();
-
-						ImGui::SliderFloat("Push Direction Length", &g_Config.cvars.push_direction_length, 0.0f, 256.0f);
-
-						ImGui::Spacing();
-
-						ImGui::SliderFloat("Push Direction Width", &g_Config.cvars.push_direction_width, 0.01f, 100.0f);
-
-						ImGui::Spacing();
-
-						ImGui::ColorEdit3("Push Direction Color", g_Config.cvars.push_direction_color);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-						ImGui::Spacing();
-
 						ImGui::Text("No Weapon Animations");
 
 						ImGui::Spacing();
@@ -294,7 +276,7 @@ void ShowMainMenu()
 
 						static const char* no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
 
-						ImGui::Combo("   ", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
+						ImGui::Combo(" ", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
 
 
 						ImGui::Spacing();
@@ -851,7 +833,46 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
+						ImGui::Text("Player's Push Direction");
+
+						ImGui::Spacing();
+
 						ImGui::Separator();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+						
+						ImGui::Checkbox("Show Player's Push Direction", &g_Config.cvars.show_players_push_direction);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Push Direction Length", &g_Config.cvars.push_direction_length, 0.0f, 256.0f);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Push Direction Width", &g_Config.cvars.push_direction_width, 0.01f, 100.0f);
+
+						ImGui::Spacing();
+
+						ImGui::ColorEdit3("Push Direction Color", g_Config.cvars.push_direction_color);
+						
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Text("Custom HUD Color");
+
+						ImGui::Spacing();
+
+						ImGui::Separator();
+						
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Remap HUD Color", &g_Config.cvars.remap_hud_color);
+
+						ImGui::Spacing();
+
+						ImGui::ColorEdit3("HUD Color", g_Config.cvars.hud_color);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -933,12 +954,31 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
+						if (ImGui::Button("Reset Color of Speedometer"))
+						{
+							g_Config.cvars.speed_color[0] = 100.f / 255.f;
+							g_Config.cvars.speed_color[1] = 130.f / 255.f;
+							g_Config.cvars.speed_color[2] = 200.f / 255.f;
+						}
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+						
 						ImGui::Checkbox("Show Speedometer", &g_Config.cvars.show_speed);
+
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Show Jump's Speed", &g_Config.cvars.show_jumpspeed);
 
 						ImGui::Spacing();
 
 						ImGui::Checkbox("Store Vertical Speed", &g_Config.cvars.show_vertical_speed);
 
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Jump's Speed: Fade Duration", &g_Config.cvars.jumpspeed_fade_duration, 0.1f, 2.0f);
+						
 						ImGui::Spacing();
 						ImGui::Spacing();
 
@@ -951,7 +991,35 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::ColorEdit4("Speed Color", g_Config.cvars.speed_color);
+						ImGui::ColorEdit3("Speed Color", g_Config.cvars.speed_color);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+						
+						ImGui::Text("Legacy Speedometer");
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Show Speedometer (Legacy)", &g_Config.cvars.show_speed_legacy);
+
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Store Vertical Speed (Legacy)", &g_Config.cvars.show_vertical_speed_legacy);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Speed Width Fraction (Legacy)", &g_Config.cvars.speed_width_fraction_legacy, 0.0f, 1.0f);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Speed Height Fraction (Legacy)", &g_Config.cvars.speed_height_fraction_legacy, 0.0f, 1.0f);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::ColorEdit4("Speed Color (Legacy)", g_Config.cvars.speed_color_legacy);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
@@ -1353,7 +1421,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("   ", &g_Config.cvars.color_pulsator_delay, 0.1f, 2.5f);
+						ImGui::SliderFloat("  ", &g_Config.cvars.color_pulsator_delay, 0.1f, 2.5f);
 
 						ImGui::Spacing();
 
@@ -1603,9 +1671,13 @@ void ShowMainMenu()
 						
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("   ", &g_Config.cvars.camhack_speed_factor, 0.0f, 15.0f);
+						ImGui::SliderFloat("CamHack: Speed Factor", &g_Config.cvars.camhack_speed_factor, 0.0f, 15.0f);
 
 						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Hide HUD", &g_Config.cvars.camhack_hide_hud);
+						
 						ImGui::Spacing();
 
 						ImGui::Checkbox("Show Model", &g_Config.cvars.camhack_show_model);
@@ -1645,7 +1717,7 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("   ", &g_Config.cvars.fp_roaming_lerp_value, 0.001f, 1.0f);
+						ImGui::SliderFloat("FP Roaming: Lerp Value", &g_Config.cvars.fp_roaming_lerp_value, 0.001f, 1.0f);
 
 						ImGui::Spacing();
 						ImGui::Spacing();
