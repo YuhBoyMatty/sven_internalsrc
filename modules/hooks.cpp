@@ -68,6 +68,7 @@ extern float g_flOverrideColor_B;
 //-----------------------------------------------------------------------------
 
 bool bSendPacket = true;
+float g_flClientDataLastUpdate = -1.f;
 
 Vector g_oldviewangles(0.f, 0.f, 0.f);
 Vector g_newviewangles(0.f, 0.f, 0.f);
@@ -569,6 +570,9 @@ HOOK_RESULT CClientPostHooks::HUD_Redraw(float time, int intermission)
 
 HOOK_RESULT HOOK_RETURN_VALUE CClientPostHooks::HUD_UpdateClientData(int *changed, client_data_t *pcldata, float flTime)
 {
+	if (*changed)
+		g_flClientDataLastUpdate = flTime;
+
 	return HOOK_CONTINUE;
 }
 

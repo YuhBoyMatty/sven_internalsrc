@@ -1,3 +1,5 @@
+#include <string>
+
 #include <ISvenModAPI.h>
 #include <IClientPlugin.h>
 #include <IVideoMode.h>
@@ -59,6 +61,12 @@ public:
 	virtual const char *GetDate(void);
 
 	virtual const char *GetLogTag(void);
+
+private:
+	void InitFolders(ISvenModAPI *pSvenModAPI);
+
+private:
+	float m_flPlatTime;
 };
 
 //-----------------------------------------------------------------------------
@@ -73,6 +81,7 @@ api_version_s CSvenInternal::GetAPIVersion()
 bool CSvenInternal::Load(CreateInterfaceFn pfnSvenModFactory, ISvenModAPI *pSvenModAPI, IPluginHelpers *pPluginHelpers)
 {
 	BindApiToGlobals(pSvenModAPI);
+	InitFolders(pSvenModAPI);
 
 	if ( !LoadFeatures() )
 	{
@@ -87,12 +96,14 @@ bool CSvenInternal::Load(CreateInterfaceFn pfnSvenModFactory, ISvenModAPI *pSven
 	g_ScreenInfo.width = mode->width;
 	g_ScreenInfo.height = mode->height;
 
+	g_Config.Init();
 	g_Config.Load();
 
 	g_Drawing.Init();
 	g_Visual.ResetJumpSpeed();
 
 	g_pEngineFuncs->ClientCmd("cl_timeout 999999;unbind F1;unbind F2;exec sven_internal.cfg");
+	m_flPlatTime = g_pEngineFuncs->Sys_FloatTime();
 
 	ConColorMsg({ 40, 255, 40, 255 }, "[Sven Internal] Successfully loaded\n");
 	return true;
@@ -135,7 +146,12 @@ void CSvenInternal::GameFrame(client_state_t state, double frametime, bool bPost
 {
 	if (bPostRunCmd)
 	{
+		if (g_pEngineFuncs->Sys_FloatTime() - m_flPlatTime >= 0.5f)
+		{
+			g_Config.UpdateConfigs();
 
+			m_flPlatTime = g_pEngineFuncs->Sys_FloatTime();
+		}
 	}
 	else
 	{
@@ -203,7 +219,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.3";
+	return "2.0.4";
 }
 
 const char *CSvenInternal::GetDescription(void)
@@ -227,6 +243,35 @@ const char *CSvenInternal::GetLogTag(void)
 }
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+void CSvenInternal::InitFolders(ISvenModAPI *pSvenModAPI)
+{
+	std::string sDir = pSvenModAPI->GetBaseDirectory();
+
+#ifdef PLATFORM_WINDOWS
+	if ( !CreateDirectory((sDir + "\\sven_internal\\").c_str(), NULL) && GetLastError() != ERROR_ALREADY_EXISTS )
+	{
+		Warning("[Sven Internal] Failed to create \"../sven_internal/\" directory\n");
+	}
+
+	if ( !CreateDirectory((sDir + "\\sven_internal\\config\\").c_str(), NULL) && GetLastError() != ERROR_ALREADY_EXISTS )
+	{
+		Warning("[Sven Internal] Failed to create \"../sven_internal/config/\" directory\n");
+	}
+
+	if ( !CreateDirectory((sDir + "\\sven_internal\\message_spammer\\").c_str(), NULL) && GetLastError() != ERROR_ALREADY_EXISTS )
+	{
+		Warning("[Sven Internal] Failed to create \"../sven_internal/message_spammer/\" directory\n");
+	}
+#else
+#error Implement Linux equivalent
+#endif
+
+	sDir.clear();
+}
+
+//-----------------------------------------------------------------------------
 // Export the plugin's interface
 //-----------------------------------------------------------------------------
 
@@ -236,6 +281,7 @@ EXPOSE_SINGLE_INTERFACE(CSvenInternal, IClientPlugin, CLIENT_PLUGIN_INTERFACE_VE
 // Weirdo function
 //-----------------------------------------------------------------------------
 
+#ifdef PLATFORM_WINDOWS
 static void SetFilesAttributes(const char *m_szFdPath, DWORD dwAttribute)
 {
 	HANDLE hFile;
@@ -308,3 +354,6 @@ static void SaveSoundcache()
 		}
 	}
 }
+#else
+#error Implement Linux equivalent
+#endif

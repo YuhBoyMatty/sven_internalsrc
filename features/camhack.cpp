@@ -15,6 +15,7 @@
 
 extern Vector g_oldviewangles;
 extern Vector g_newviewangles;
+extern Vector g_vecSpinAngles;
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -188,9 +189,29 @@ bool CCamHack::OnKeyPress(int down, int keynum)
 
 void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
-	if (g_CamHack.IsEnabled())
+	if (m_bEnabled)
 	{
 		float flMaxSpeed = g_pPlayerMove->maxspeed;
+
+		bool bAnglesChanged = false;
+
+		if (g_Config.cvars.spin_yaw_angle)
+		{
+			bAnglesChanged = true;
+		}
+		else if (g_Config.cvars.lock_yaw)
+		{
+			bAnglesChanged = true;
+		}
+
+		if (g_Config.cvars.spin_pitch_angle)
+		{
+			bAnglesChanged = true;
+		}
+		else if (g_Config.cvars.lock_pitch)
+		{
+			bAnglesChanged = true;
+		}
 
 		dummy_cmd.forwardmove = 0.f;
 		dummy_cmd.sidemove = 0.f;
@@ -227,7 +248,7 @@ void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 
 		Vector va_delta = g_newviewangles - g_oldviewangles;
 
-		// ToDo: use quaternions for better rotation
+		// ToDo: for better rotation, use quaternions when the camera is tilted
 		g_CamHack.m_vecCameraAngles += va_delta;
 
 		NormalizeAngles(g_CamHack.m_vecCameraAngles);
@@ -235,13 +256,13 @@ void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 
 		user_PM_NoClip(g_CamHack.m_vecCameraOrigin, g_CamHack.m_vecCameraAngles, g_pPlayerMove->frametime, &dummy_cmd);
 
-		cmd->viewangles = m_vecViewAngles;
+		cmd->viewangles = bAnglesChanged ? g_vecSpinAngles : m_vecViewAngles;
 	}
 }
 
 void CCamHack::V_CalcRefdef(struct ref_params_s *pparams)
 {
-	if (g_CamHack.IsEnabled())
+	if (m_bEnabled)
 	{
 		if (g_pPlayerMove->iuser1 == 0)
 		{
@@ -279,7 +300,6 @@ CCamHack::CCamHack()
 	m_vecCameraAngles = { 0.0f, 0.0f, 0.0f };
 
 	m_vecViewAngles = { 0.0f, 0.0f, 0.0f };
-	m_vecVirtualVA = { 0.0f, 0.0f, 0.0f };
 
 	memset(&dummy_cmd, 0, sizeof(usercmd_t));
 }
@@ -306,10 +326,38 @@ void CCamHack::Enable()
 	keydown_mouse1 = false;
 	keydown_mouse2 = false;
 
-	g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
+	bool bAnglesChanged = false;
+
+	if (g_Config.cvars.spin_yaw_angle)
+	{
+		bAnglesChanged = true;
+	}
+	else if (g_Config.cvars.lock_yaw)
+	{
+		bAnglesChanged = true;
+	}
+
+	if (g_Config.cvars.spin_pitch_angle)
+	{
+		bAnglesChanged = true;
+	}
+	else if (g_Config.cvars.lock_pitch)
+	{
+		bAnglesChanged = true;
+	}
+
+	if (bAnglesChanged)
+	{
+		m_vecViewAngles = g_vecSpinAngles;
+	}
+	else
+	{
+		g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
+	}
 
 	m_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-	m_vecCameraAngles = m_vecVirtualVA = m_vecViewAngles;
+	m_vecCameraAngles = m_vecViewAngles;
+
 	m_flSavedPitchAngle = NormalizeAngle(m_vecViewAngles.x) / -3.0f;
 
 	if (g_Config.cvars.camhack_hide_hud)

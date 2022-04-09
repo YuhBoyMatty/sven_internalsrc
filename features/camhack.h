@@ -47,7 +47,6 @@ public:
 	Vector m_vecCameraAngles;
 
 	Vector m_vecViewAngles;
-	Vector m_vecVirtualVA;
 
 private:
 	bool m_bEnabled;

@@ -19,3 +19,15 @@ Changelog for Sven Internal
 - Added BunnymodXT-like speedometer
 - Added feature to automatically hide HUD when use CamHack
 - Added feature to change the colors of HUD (experimental)
+
+09/04/2022 - Version 2.0.4:
+- IMPROTANT: place your old config "../sven_internal/sven_internal.ini" in this folder (create if needed) "../sven_internal/config/sven_internal.ini" and rename it to "default.ini"
+- Folders used by Sven Internal will be created automatically
+- Now ESP shows players from other teams as enemies
+- Enhacned Anti-AFK mode "Spam Gibme": to don't lose weapons, before suicide, player will select a weapon from 1st slot in the inventory
+- Added Anti-AFK mode "Spam Kill" same as "Spam Gibme"
+- Added simple manager of configs that lets you to save/load/remove/create any count of configs in the Menu
+- To the console command "sc_load_config" can be passed optional argument to load a specific config (for example, sc_load_config my_config)
+- Fixed gauss' tertiary attack glitch when use spinner
+- Fixed issues with CamHack when enabled spinner
+- Fixed inability to use longjump with spinner

@@ -2,6 +2,8 @@
 
 #include <hl_sdk/engine/APIProxy.h>
 
+#include <IInventory.h>
+#include <IClient.h>
 #include <convar.h>
 #include <dbg.h>
 
@@ -9,6 +11,8 @@
 
 #include "../game/utils.h"
 #include "../config.h"
+
+extern float g_flClientDataLastUpdate;
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -20,7 +24,7 @@ CAntiAFK g_AntiAFK;
 // ConCommands
 //-----------------------------------------------------------------------------
 
-CON_COMMAND_EXTERN(sc_antiafk, ConCommand_AntiAFK, "Set Anti-AFK Mode [0-5]")
+CON_COMMAND_EXTERN(sc_antiafk, ConCommand_AntiAFK, "Set Anti-AFK Mode [0-5]. Available modes:\n0 - Off\n1 - Step Forward & Back\n2 - Spam Gibme\n3 - Spam Kill\n4 - Walk Around & Spam Inputs\n5 - Walk Around\n6 - Go Right\n")
 {
 	if (args.ArgC() >= 2)
 	{
@@ -33,7 +37,6 @@ CON_COMMAND_EXTERN(sc_antiafk, ConCommand_AntiAFK, "Set Anti-AFK Mode [0-5]")
 		else
 		{
 			Msg("Wrong Anti-AFK mode\n");
-			Msg("Available modes:\n0 - Off\n1 - Step Forward & Back\n2 - Spam Gibme\n3 - Walk Around & Spam Inputs\n4 - Walk Around\n5 - Go Right\n");
 		}
 	}
 	else
@@ -110,7 +113,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 {
 	int nMode = g_Config.cvars.antiafk;
 
-	if (!nMode)
+	if ( !nMode )
 	{
 		m_flComingBackStartTime = -1.0f;
 		m_bComingBackToAFKPoint = false;
@@ -118,20 +121,20 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 		return;
 	}
 
-	bool bDead = g_pPlayerMove->iuser1 != 0 || g_pPlayerMove->dead;
+	bool bDead = Client()->IsDead();
 	
-	if (bDead != m_bDead)
+	if ( bDead != m_bDead )
 	{
-		if (bDead && !m_bDead)
+		if ( bDead && !m_bDead )
 			OnDie();
 		else
 			OnRevive();
 	}
 
-	if (bDead)
+	if ( bDead )
 		return;
 
-	if (g_Config.cvars.antiafk_stay_within_range)
+	if (g_Config.cvars.antiafk_stay_within_range && !(nMode == 2 || nMode == 3))
 	{
 		if (m_vecAFKPoint.x == 0.0f && m_vecAFKPoint.y == 0.0f)
 			m_vecAFKPoint = g_pPlayerMove->origin.AsVector2D();
@@ -156,7 +159,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 			
 			if ( !bReset )
 			{
-				if (m_bComingBackToAFKPoint && flDistanceToAFKPointSqr <= M_SQR(25.0f))
+				if ( m_bComingBackToAFKPoint && flDistanceToAFKPointSqr <= M_SQR(25.0f) )
 				{
 					m_bComingBackToAFKPoint = false;
 					m_flComingBackStartTime = -1.0f;
@@ -166,9 +169,10 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 				Vector2D vecForward;
 				Vector2D vecRight;
 
-				Vector2D vecDir = (m_vecAFKPoint - vecOrigin).Normalize();
+				Vector2D vecDir = m_vecAFKPoint - vecOrigin;
 
 				m_bComingBackToAFKPoint = true;
+				vecDir.NormalizeInPlace();
 
 				// Rotate the wish vector by a random direction, must help if we stuck somewhere
 				int nRandom = g_pEngineFuncs->RandomLong(0, 1);
@@ -198,8 +202,8 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 				vecRight.y = -vecForward.x;
 
 				// Multiply by max movement speed
-				vecForward = vecForward * g_pPlayerMove->maxspeed;
-				vecRight = vecRight * g_pPlayerMove->maxspeed;
+				vecForward *= g_pPlayerMove->maxspeed;
+				vecRight *= g_pPlayerMove->maxspeed;
 
 				// Project onto direction vector
 				float forwardmove = DotProduct(vecForward, vecDir);
@@ -219,19 +223,106 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 		m_flComingBackStartTime = -1.0f;
 	}
 
-	if (nMode == 1)
+	switch (nMode)
+	{
+	case 1:
 	{
 		static bool forward_step = true;
 
-		cmd->forwardmove = forward_step ? 100.0f : -100.0f;
+		cmd->forwardmove = forward_step ? 50.0f : -50.0f;
 
 		forward_step = !forward_step;
+
+		break;
 	}
-	else if (nMode == 2)
+
+	case 2:
+	case 3:
 	{
-		g_pEngineFuncs->ClientCmd("gibme\n");
+		bool bSuicided = false;
+		bool bHasAnyWeapon = false;
+
+		switch ( Client()->GetCurrentWeaponID() )
+		{
+		case WEAPON_CROWBAR:
+		case WEAPON_MEDKIT:
+		case WEAPON_WRENCH:
+		case WEAPON_BARNACLE_GRAPPLE:
+			if (nMode == 2)
+				g_pEngineFuncs->ClientCmd("gibme\n");
+			else
+				g_pEngineFuncs->ClientCmd("kill\n");
+
+			bSuicided = true;
+			break;
+		}
+
+		if ( !bSuicided )
+		{
+			bool bFound = false;
+			WEAPON *pWeapon = NULL;
+
+			for (int i = 0; i < Inventory()->GetMaxWeaponSlots(); i++)
+			{
+				for (int j = 0; j < Inventory()->GetMaxWeaponPositions(); j++)
+				{
+					if (pWeapon = Inventory()->GetWeapon(i, j))
+					{
+						if ( !bHasAnyWeapon && Inventory()->HasAmmo(pWeapon) )
+							bHasAnyWeapon = true;
+
+						switch (pWeapon->iId)
+						{
+						case WEAPON_CROWBAR:
+						case WEAPON_WRENCH:
+						case WEAPON_BARNACLE_GRAPPLE:
+							Inventory()->SelectWeapon(pWeapon);
+							bFound = true;
+
+							break;
+
+						case WEAPON_MEDKIT:
+							if (Inventory()->GetPrimaryAmmoCount(pWeapon) > 0)
+							{
+								Inventory()->SelectWeapon(pWeapon);
+								break;
+							}
+
+							bFound = true;
+							break;
+						}
+
+						if (bFound)
+							break;
+					}
+				}
+
+				if (bFound)
+					break;
+			}
+
+			if ( !bFound )
+			{
+				if (bHasAnyWeapon)
+				{
+					if ( !(Client()->GetCurrentWeaponID() == WEAPON_NONE && (Client()->Time() - g_flClientDataLastUpdate) >= 0.5f) )
+						g_pEngineFuncs->ClientCmd("gibme\n");
+				}
+				else if (nMode == 2)
+				{
+					g_pEngineFuncs->ClientCmd("gibme\n");
+				}
+				else
+				{
+					g_pEngineFuncs->ClientCmd("kill\n");
+				}
+			}
+		}
+
+		break;
 	}
-	else if (nMode == 3)
+
+	case 4:
 	{
 		constexpr int delay_count = 30;
 
@@ -278,8 +369,11 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 
 			RotateCamera();
 		}
+
+		break;
 	}
-	else if (nMode == 4)
+
+	case 5:
 	{
 		constexpr int delay_count = 60;
 
@@ -289,13 +383,19 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 		WalkAround(cmd, delay, movement_button, delay_count);
 
 		RotateCamera();
+
+		break;
 	}
-	else if (nMode == 5)
+
+	case 6:
 	{
 		cmd->buttons |= IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT;
 		cmd->sidemove = g_pPlayerMove->maxspeed;
 
 		RotateCamera();
+
+		break;
+	}
 	}
 
 	if (g_pPlayerMove->waterlevel == WL_EYES)

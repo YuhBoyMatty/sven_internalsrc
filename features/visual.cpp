@@ -479,6 +479,8 @@ void CVisual::ESP()
 
 		if (bScreenBottom && bScreenTop)
 		{
+			int iHealth = bPlayer ? g_pPlayerUtils->GetHealth(i) : 0;
+
 			bool bIsEntityFriend = IsEntityClassFriend(classInfo);
 			bool bIsEntityNeutral = IsEntityClassNeutral(classInfo);
 
@@ -488,12 +490,10 @@ void CVisual::ESP()
 
 			float boxHeight = vecScreenTop[1] - vecScreenBottom[1];
 
-			if (bPlayer)
-			{
-				//if (pEntity->curstate.usehull)
-				//	boxHeight *= 0.9986f;
-			}
-			else if (bItem)
+			if ( bPlayer && iHealth < -1 ) // enemy team
+				bIsEntityFriend = false;
+
+			if (bItem)
 			{
 				r = int(255.f * g_Config.cvars.esp_item_color[0]);
 				g = int(255.f * g_Config.cvars.esp_item_color[1]);
@@ -553,32 +553,44 @@ void CVisual::ESP()
 
 			if (bPlayer)
 			{
-				if (g_Config.cvars.esp_box_player_health)
+				if (g_Config.cvars.esp_box_player_health && iHealth != 0)
 				{
-					int iHealth, iActualHealth;
+					int r, g, b;
 
-					if ( ( iHealth = int(g_pPlayerUtils->GetHealth(i)) ) != 0 )
+					int iActualHealth = iHealth;
+
+					if (iHealth == -1)
+						iActualHealth = iHealth = 0;
+					else if (iHealth > 100)
+						iHealth = 100;
+
+					int y = int(vecScreenBottom[1] + (boxHeight - 8.0f));
+
+					if (bIsEntityFriend)
 					{
-						iActualHealth = iHealth;
-
-						if (iHealth == -1)
-							iActualHealth = iHealth = 0;
-						else if (iHealth > 100)
-							iHealth = 100;
-
-						int y = int(vecScreenBottom[1] + (boxHeight - 8.0f));
-
-						g_Drawing.DrawStringF(g_hESP,
-											  int(vecScreenBottom[0]),
-											  y,
-											  int( 255.f * (iHealth > 50 ? 1.f - 2.f * (iHealth - 50) / 100.f : 1.f) ),
-											  int( 255.f * ((iHealth > 50 ? 1.f : 2.f * iHealth / 100.f)) ),
-											  0,
-											  255,
-											  FONT_ALIGN_CENTER,
-											  "%d",
-											  iActualHealth);
+						r = int( 255.f * (iHealth > 50 ? 1.f - 2.f * (iHealth - 50) / 100.f : 1.f) );
+						g = int( 255.f * ((iHealth > 50 ? 1.f : 2.f * iHealth / 100.f)) );
+						b = 0;
 					}
+					else
+					{
+						iActualHealth = -1;
+
+						r = 0;
+						g = 255;
+						b = 255;
+					}
+
+					g_Drawing.DrawStringF(g_hESP,
+											int(vecScreenBottom[0]),
+											y,
+											r,
+											g,
+											b,
+											255,
+											FONT_ALIGN_CENTER,
+											"%d",
+											iActualHealth);
 				}
 
 				if (g_Config.cvars.esp_box_player_armor)

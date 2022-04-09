@@ -4,10 +4,11 @@ Sven Internal is a C++ plugin for [SvenMod](https://github.com/sw1ft747/SvenMod)
 Imagine cheating in a co-op game =)
 
 # How to install
-First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/SvenMod)), then download the plugins's `.DLL` file and place it in the folder `Sven Co-op/svenmod/plugins/`, next add the plugin to file `plugins.txt` (see the header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/SvenMod)). 
+First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/SvenMod)), then download archive `svenint.rar` and place all folders from it in the root folder of the game, next add plugin `sven_internal.dll` to file `plugins.txt` (see header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/SvenMod)). 
 
 # Features
 - Menu (key **INSERT** as default)
+- Customizable Configs
 - ESP
 - Wallhack
 - Glow & Chams
@@ -37,7 +38,7 @@ Note: some files/folders may not appear, you need to create them.
 
 This folder is used to save the config, save list of muted players, load list of players (their Steam64 ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
-File `sven_internal.ini` is the config file (you can save it via menu or console command `sc_save_config`).
+Folder `config` contains all config files. You can save your config via menu or console command `sc_save_config`, and you can load a config via concommand `sc_save_config <optional: filename>`.
 
 File `chat_colors_players.txt` allows to change chat color for a specific player, will be automatically loaded.
 

@@ -1,9 +1,15 @@
+#include <algorithm>
+
+#include <IConfigManager.h>
+#include <ISvenModAPI.h>
+#include <dbg.h>
+
 #include "config.h"
 
 #include "features/skybox.h"
+#include "utils/menu_styles.h"
 
-#include <IConfigManager.h>
-#include <convar.h>
+extern void WindowStyle();
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -11,13 +17,115 @@
 
 CConfig g_Config;
 
+static char s_szConfigsDir[MAX_PATH] = { 0 };
+
+//-----------------------------------------------------------------------------
+// Init config stuff
+//-----------------------------------------------------------------------------
+
+void CConfig::Init()
+{
+	std::string sDir = g_pSvenModAPI->GetBaseDirectory();
+
+#ifdef PLATFORM_WINDOWS
+	snprintf(s_szConfigsDir, sizeof(s_szConfigsDir), "%s\\sven_internal\\config", g_pSvenModAPI->GetBaseDirectory());
+#else
+	snprintf(s_szConfigsDir, sizeof(s_szConfigsDir), "%s/sven_internal/config", g_pSvenModAPI->GetBaseDirectory());
+#endif
+
+#ifdef PLATFORM_WINDOWS
+	DWORD ret = GetFileAttributes( (sDir + "\\sven_internal\\config\\default.ini").c_str() );
+
+	if ( ret == INVALID_FILE_ATTRIBUTES || ret & FILE_ATTRIBUTE_DIRECTORY )
+	{
+		FILE *file = fopen("sven_internal/config/default.ini", "w");
+		if (file) fclose(file);
+	}
+#else
+#error Implement Linux equivalent
+#endif
+
+	UpdateConfigs();
+	current_config = "default.ini";
+
+	sDir.clear();
+}
+
+void CConfig::UpdateConfigs()
+{
+	configs.clear();
+
+#ifdef PLATFORM_WINDOWS
+	HANDLE hFile;
+	WIN32_FIND_DATAA FileInformation;
+
+	char szFolderInitialPath[MAX_PATH] = { 0 };
+
+	snprintf(szFolderInitialPath, sizeof(szFolderInitialPath), "%s\\*.*", s_szConfigsDir);
+
+	hFile = ::FindFirstFileA(szFolderInitialPath, &FileInformation);
+
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			if (FileInformation.cFileName[0] != '.')
+			{
+			#pragma warning(push)
+			#pragma warning(push)
+			#pragma warning(disable: 26450)
+			#pragma warning(disable: 4307)
+
+				if ( !(FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+				{
+					const char *pszExtension = NULL;
+					const char *buffer = FileInformation.cFileName;
+
+					while (*buffer)
+					{
+						if (*buffer == '.')
+							pszExtension = buffer;
+
+						buffer++;
+					}
+
+					if (pszExtension && !stricmp(pszExtension, ".ini"))
+					{
+						configs.push_back(FileInformation.cFileName);
+					}
+				}
+
+			#pragma warning(pop)
+			#pragma warning(pop)
+			}
+		} while (::FindNextFileA(hFile, &FileInformation) == TRUE);
+
+		::FindClose(hFile);
+	}
+#else
+#error Implement Linux equivalent
+#endif
+
+	std::vector<std::string>::iterator it = std::find(configs.begin(), configs.end(), current_config.c_str());
+
+	if (it == configs.end())
+	{
+		current_config.clear();
+	}
+
+	std::sort(configs.begin(), configs.end());
+}
+
 //-----------------------------------------------------------------------------
 // Import config vars
 //-----------------------------------------------------------------------------
 
 bool CConfig::Load()
 {
-	if (ConfigManager()->BeginImport("sven_internal/sven_internal.ini"))
+	if (current_config.empty())
+		return false;
+
+	if (ConfigManager()->BeginImport( (std::string("sven_internal/config/") + current_config).c_str() ))
 	{
 		if (ConfigManager()->BeginSectionImport("SETTINGS"))
 		{
@@ -423,7 +531,10 @@ bool CConfig::Load()
 
 void CConfig::Save()
 {
-	if (ConfigManager()->BeginExport("sven_internal/sven_internal.ini"))
+	if (current_config.empty())
+		return;
+
+	if (ConfigManager()->BeginExport( (std::string("sven_internal/config/") + current_config).c_str()))
 	{
 		if (ConfigManager()->BeginSectionExport("SETTINGS"))
 		{
@@ -816,16 +927,99 @@ void CConfig::Save()
 	}
 }
 
+void CConfig::New()
+{
+	config_vars v;
+	std::string sSavedConfig = current_config;
+
+	memcpy(&v, &cvars, sizeof(config_vars));
+	memcpy(&cvars, &default_cvars, sizeof(config_vars));
+
+	current_config = "new_config.ini";
+
+	Save();
+
+	current_config = sSavedConfig;
+
+	memcpy(&cvars, &v, sizeof(config_vars));
+}
+
+void CConfig::Remove()
+{
+	if (current_config.empty())
+		return;
+
+	std::string sDir = g_pSvenModAPI->GetBaseDirectory();
+
+#ifdef PLATFORM_WINDOWS
+	sDir += "\\sven_internal\\config\\";
+#else
+	sDir += "/sven_internal/config/";
+#endif
+	sDir += current_config;
+
+#ifdef PLATFORM_WINDOWS
+	DeleteFile(sDir.c_str());
+#else
+#error Implement Linux equivalent
+#endif
+}
+
 //-----------------------------------------------------------------------------
 // Console commands
 //-----------------------------------------------------------------------------
 
-CON_COMMAND(sc_load_config, "Load config from file \"sven_internal/sven_internal.ini\"")
+CON_COMMAND(sc_load_config, "Load a config file from folder \"../sven_internal/config/*.ini\"\nUsage:  sc_load_config <optional: filename>")
 {
-	g_Config.Load();
+	if (args.ArgC() > 1)
+	{
+		const char *pszFileName = args[1];
+
+		const char *pszExtension = NULL;
+		const char *buffer = pszFileName;
+
+		while (*buffer)
+		{
+			if (*buffer == '.')
+				pszExtension = buffer;
+
+			buffer++;
+		}
+
+		if (pszExtension && stricmp(pszExtension, ".ini"))
+		{
+			Msg("sc_load_config: expected name of the file with \".ini\" extension\n");
+			return;
+		}
+
+		std::string sPrevConfig;
+		std::string sFileName = args[1];
+
+		if (!pszExtension)
+		{
+			sFileName += ".ini";
+		}
+
+		sPrevConfig = g_Config.current_config;
+		g_Config.current_config = sFileName;
+
+		if ( !g_Config.Load() )
+		{
+			g_Config.current_config = sPrevConfig;
+		}
+		else
+		{
+			LoadMenuTheme();
+			WindowStyle();
+		}
+	}
+	else
+	{
+		g_Config.Load();
+	}
 }
 
-CON_COMMAND(sc_save_config, "Save config to file \"sven_internal/sven_internal.ini\"")
+CON_COMMAND(sc_save_config, "Save a config to folder \"../sven_internal/config/\"")
 {
 	g_Config.Save();
 }

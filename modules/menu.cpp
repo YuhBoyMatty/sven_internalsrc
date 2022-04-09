@@ -34,6 +34,7 @@ static WNDPROC hGameWndProc = NULL;
 static bool s_bThemeLoaded = false;
 
 static bool s_bMenuSettings = false;
+static bool s_bMenuConfig = false;
 static bool s_bMenuVisuals = false;
 static bool s_bMenuHud = false;
 static bool s_bMenuUtility = false;
@@ -68,7 +69,7 @@ private:
 //-----------------------------------------------------------------------------
 
 // Restores window style
-static void WindowStyle()
+void WindowStyle()
 {
 	ImGuiStyle *style = &ImGui::GetStyle();
 
@@ -116,12 +117,12 @@ void ShowMainMenu()
 	if (g_bMenuEnabled)
 	{
 		// Main Window
-		ImGui::SetNextWindowSize(ImVec2(250.0f, 255.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(250.0f, 285.0f), ImGuiCond_FirstUseEver);
 
 		if (g_Config.cvars.menu_auto_resize)
 		{
 			ImGui::Begin("Sven Internal", &g_bMenuEnabled, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-			ImGui::SetWindowSize(ImVec2(250.0f, 255.0f));
+			ImGui::SetWindowSize(ImVec2(250.0f, 285.0f));
 		}
 		else
 		{
@@ -178,6 +179,15 @@ void ShowMainMenu()
 			ImGui::Spacing();
 			ImGui::Separator();
 			ImGui::Spacing();
+
+			ImGui::Spacing();
+
+			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (66));
+			if (ImGui::Button("Config", ImVec2(149, 28)))
+			{
+				s_bMenuConfig ^= true;
+			}
+
 			ImGui::Spacing();
 
 			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (66));
@@ -1505,9 +1515,10 @@ void ShowMainMenu()
 							"0 - Off",
 							"1 - Step Forward & Back",
 							"2 - Spam Gibme",
-							"3 - Walk Around & Spam Inputs",
-							"4 - Walk Around",
-							"5 - Go Right"
+							"3 - Spam Kill",
+							"4 - Walk Around & Spam Inputs",
+							"5 - Walk Around",
+							"6 - Go Right"
 						};
 
 						ImGui::Spacing();
@@ -1833,14 +1844,77 @@ void ShowMainMenu()
 			}
 		}
 
+		//Config
+		if (s_bMenuConfig)
+		{
+			ImGui::SetNextWindowSize(ImVec2(300.0f, 250.0f), ImGuiCond_FirstUseEver);
+			if (g_Config.cvars.menu_auto_resize)
+			{
+				ImGui::Begin("Config", &s_bMenuConfig, ImGuiWindowFlags_NoResize);
+				ImGui::SetWindowSize(ImVec2(300.0f, 250.0f));
+			}
+			else
+			{
+			    ImGui::Begin("Config", &s_bMenuConfig);
+		    }
+
+			ImGui::Spacing();
+
+			ImGui::Text("List of Configs");
+
+			if (ImGui::BeginListBox("##configs_list", ImVec2(-FLT_MIN, 8 * ImGui::GetTextLineHeightWithSpacing())))
+			{
+				for (size_t i = 0; i < g_Config.configs.size(); i++)
+				{
+					bool bSelected = (g_Config.current_config.compare( g_Config.configs[i] ) == 0);
+
+					if (ImGui::Selectable(g_Config.configs[i].c_str(), bSelected))
+						g_Config.current_config = g_Config.configs[i];
+
+					if (bSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndListBox();
+			}
+
+			if (ImGui::Button("Load"))
+			{
+				g_Config.Load();
+
+				LoadMenuTheme();
+				WindowStyle();
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Save"))
+				g_Config.Save();
+
+			ImGui::SameLine();
+			
+			if (ImGui::Button("New"))
+				g_Config.New();
+			
+			ImGui::SameLine();
+			
+			if (ImGui::Button("Delete"))
+				g_Config.Remove();
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			ImGui::End();
+		}
+
 		//Settings
 		if (s_bMenuSettings)
 		{
-			ImGui::SetNextWindowSize(ImVec2(300.0f, 460.0f), ImGuiCond_FirstUseEver);
+			ImGui::SetNextWindowSize(ImVec2(300.0f, 390.0f), ImGuiCond_FirstUseEver);
 			if (g_Config.cvars.menu_auto_resize)
 			{
 				ImGui::Begin("Settings", &s_bMenuSettings, ImGuiWindowFlags_NoResize);
-				ImGui::SetWindowSize(ImVec2(300.0f, 460.0f));
+				ImGui::SetWindowSize(ImVec2(300.0f, 390.0f));
 			}
 			else
 			{
@@ -1848,32 +1922,6 @@ void ShowMainMenu()
 		    }
 
 			{
-				ImGui::Spacing();
-
-				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (110 / 2));
-				ImGui::Text("Save & Load Config");
-
-				ImGui::Spacing();
-				ImGui::Spacing();
-
-				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (85 / 2));
-
-				if (ImGui::Button("Load"))
-				{
-					g_Config.Load();
-
-					LoadMenuTheme();
-					WindowStyle();
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Save"))
-					g_Config.Save();
-
-				ImGui::Spacing();
-				ImGui::Separator();
-				ImGui::Spacing();
 				ImGui::Spacing();
 
 				ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (60 / 2));
@@ -1971,7 +2019,7 @@ void ShowMainMenu()
 				{
 					LoadSavedStyle();
 
-					LoadMenuTheme();
+					WindowStyle();
 					WindowStyle();
 				}
 				ImGui::PopItemWidth();

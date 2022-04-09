@@ -51,6 +51,8 @@ CMisc g_Misc;
 cvar_t *ex_interp = NULL;
 cvar_t *default_fov = NULL;
 
+Vector g_vecSpinAngles(0.f, 0.f, 0.f);
+
 static int s_nSinkState = 0;
 static int s_iWeaponID = -1;
 
@@ -443,11 +445,11 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	{
 		AutoSelfSink();
 		AutoCeilClipping(cmd);
+		JumpBug(frametime, cmd);
 		AutoJump(cmd);
 		DoubleDuck(cmd);
-		Spinner(cmd);
 		FastRun(cmd);
-		JumpBug(frametime, cmd);
+		Spinner(cmd);
 	}
 
 	if (s_bFreeze)
@@ -760,8 +762,20 @@ static bool IsFiring(usercmd_t *cmd)
 		case WEAPON_GAUSS:
 			if ( ClientWeapon()->GetWeaponData()->fuser4 > 0.f )
 			{
-				if ( Client()->ButtonLast() & IN_ATTACK2 && !(cmd->buttons & IN_ATTACK2) )
+				if ( Client()->ButtonLast() & IN_ATTACK2 )
+				{
+					if ( !(cmd->buttons & IN_ATTACK2) )
+						return true;
+				}
+				else if ( Client()->ButtonLast() & IN_ALT1 )
+				{
+					if ( !(cmd->buttons & IN_ALT1) )
+						return true;
+				}
+				else if ( ClientWeapon()->GetWeaponData()->fuser4 == 1.f )
+				{
 					return true;
+				}
 
 				return false;
 			}
@@ -818,39 +832,59 @@ static bool IsFiring(usercmd_t *cmd)
 	return false;
 }
 
+static bool IsBusyWithLongJump(usercmd_t *cmd)
+{
+	if ( cmd->buttons & IN_JUMP && Client()->IsOnGround() )
+	{
+		if ( g_pPlayerMove->bInDuck || g_pPlayerMove->flags & FL_DUCKING )
+		{
+			if ( cmd->buttons & IN_DUCK && g_pPlayerMove->flDuckTime > 0.f )
+			{
+				const char *pszValue = g_pEngineFuncs->PhysInfo_ValueForKey("slj");
+				bool bCanSuperJump = (pszValue && *pszValue == '1');
+
+				if ( bCanSuperJump && g_pPlayerMove->velocity.Length() > 50.f )
+				{
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
 void CMisc::Spinner(struct usercmd_s *cmd)
 {
-	static Vector vSpinAngles(0.f, 0.f, 0.f);
-
 	bool bAnglesChanged = false;
 	m_bSpinCanChangePitch = false;
 
 	if (g_Config.cvars.spin_yaw_angle)
 	{
 		if ( !g_Config.cvars.lock_pitch && !g_Config.cvars.spin_pitch_angle )
-			vSpinAngles.x = cmd->viewangles.x;
+			g_vecSpinAngles.x = cmd->viewangles.x;
 
-		vSpinAngles.y += g_Config.cvars.spin_yaw_rotation_angle;
-		vSpinAngles.y = NormalizeAngle(vSpinAngles.y);
+		g_vecSpinAngles.y += g_Config.cvars.spin_yaw_rotation_angle;
+		g_vecSpinAngles.y = NormalizeAngle(g_vecSpinAngles.y);
 
 		bAnglesChanged = true;
 	}
 	else if (g_Config.cvars.lock_yaw)
 	{
 		if ( !g_Config.cvars.lock_pitch && !g_Config.cvars.spin_pitch_angle )
-			vSpinAngles.x = cmd->viewangles.x;
+			g_vecSpinAngles.x = cmd->viewangles.x;
 
-		vSpinAngles.y = g_Config.cvars.lock_yaw_angle;
+		g_vecSpinAngles.y = g_Config.cvars.lock_yaw_angle;
 		bAnglesChanged = true;
 	}
 
 	if (g_Config.cvars.spin_pitch_angle)
 	{
 		if ( !g_Config.cvars.lock_yaw && !g_Config.cvars.spin_yaw_angle )
-			vSpinAngles.y = cmd->viewangles.y;
+			g_vecSpinAngles.y = cmd->viewangles.y;
 
-		vSpinAngles.x += g_Config.cvars.spin_pitch_rotation_angle;
-		vSpinAngles.x = NormalizeAngle(vSpinAngles.x);
+		g_vecSpinAngles.x += g_Config.cvars.spin_pitch_rotation_angle;
+		g_vecSpinAngles.x = NormalizeAngle(g_vecSpinAngles.x);
 
 		m_bSpinCanChangePitch = true;
 		bAnglesChanged = true;
@@ -858,9 +892,9 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 	else if (g_Config.cvars.lock_pitch)
 	{
 		if ( !g_Config.cvars.lock_yaw && !g_Config.cvars.spin_yaw_angle )
-			vSpinAngles.y = cmd->viewangles.y;
+			g_vecSpinAngles.y = cmd->viewangles.y;
 
-		vSpinAngles.x = g_Config.cvars.lock_pitch_angle;
+		g_vecSpinAngles.x = g_Config.cvars.lock_pitch_angle;
 
 		m_bSpinCanChangePitch = true;
 		bAnglesChanged = true;
@@ -870,10 +904,10 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 	{
 		if (g_pPlayerMove->movetype == MOVETYPE_WALK && g_pPlayerMove->waterlevel <= WL_FEET)
 		{
-			if ( !(cmd->buttons & IN_USE || IsFiring(cmd)) )
+			if ( !(cmd->buttons & IN_USE || cmd->impulse == 201 || IsFiring(cmd) || IsBusyWithLongJump(cmd)) )
 			{
-				m_flSpinPitchAngle = vSpinAngles.x / -3.0f;
-				UTIL_SetAnglesSilent(vSpinAngles, cmd);
+				m_flSpinPitchAngle = g_vecSpinAngles.x / -3.0f;
+				UTIL_SetAnglesSilent(g_vecSpinAngles, cmd);
 			}
 			else
 			{

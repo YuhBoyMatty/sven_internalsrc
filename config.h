@@ -5,7 +5,11 @@
 #pragma once
 #endif
 
+#include <vector>
+#include <string>
+
 #include <platform.h>
+#include <convar.h>
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
@@ -19,9 +23,18 @@
 
 class CConfig
 {
+	friend void sc_load_config(const CCommand &args);
+	friend void sc_save_config(const CCommand &args);
+
 public:
+	void Init();
+	void UpdateConfigs();
+
 	bool Load();
 	void Save();
+
+	void New();
+	void Remove();
 
 	struct config_vars
 	{
@@ -88,7 +101,7 @@ public:
 		bool show_jumpspeed = false;
 		float jumpspeed_fade_duration = 0.7f;
 		float speed_width_fraction = 0.5f;
-		float speed_height_fraction = 0.88f;
+		float speed_height_fraction = 0.9f;
 		float speed_color[3] = { 100.f / 255.f, 130.f / 255.f, 200.f / 255.f };
 		
 		bool show_speed_legacy = false;
@@ -339,6 +352,10 @@ public:
 	};
 
 	config_vars cvars;
+	config_vars default_cvars;
+
+	std::string current_config;
+	std::vector<std::string> configs;
 };
 
 //-----------------------------------------------------------------------------
