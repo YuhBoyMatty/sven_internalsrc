@@ -53,6 +53,9 @@ cvar_t *default_fov = NULL;
 
 Vector g_vecSpinAngles(0.f, 0.f, 0.f);
 
+static int s_iStickTarget = 0;
+static Vector s_vecStickPrevPos;
+
 static int s_nSinkState = 0;
 static int s_iWeaponID = -1;
 
@@ -296,6 +299,43 @@ CON_COMMAND_EXTERN_NO_WRAPPER(sc_drop_empty_weapon, ConCommand_DropEmptyWeapon, 
 	}
 }
 
+CON_COMMAND(sc_stick, "Follow a player")
+{
+	if (args.ArgC() >= 2)
+	{
+		if (g_pClient->IsDead())
+		{
+			Msg("You're dead\n");
+			return;
+		}
+
+		int iPlayerIndex = atoi(args[1]);
+
+		if (iPlayerIndex > 0 && iPlayerIndex <= MAXCLIENTS)
+		{
+			cl_entity_t *pPlayer = g_pEngineFuncs->GetEntityByIndex(iPlayerIndex);
+
+			if (pPlayer)
+			{
+				s_iStickTarget = iPlayerIndex;
+				s_vecStickPrevPos = pPlayer->prevstate.origin;
+			}
+			else
+			{
+				Msg("No such player\n");
+			}
+		}
+		else
+		{
+			s_iStickTarget = 0;
+		}
+	}
+	else
+	{
+		Msg("Usage:  sc_stick <player index>\n");
+	}
+}
+
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_freeze, ConCommand_Freeze, "Block connection with a server")
 {
 	Msg(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
@@ -313,6 +353,19 @@ CON_COMMAND(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox 
 	if (g_pPlayerMove && g_pPlayerMove->movevars)
 	{
 		Msg("Skybox: %s\n", g_pPlayerMove->movevars->skyName);
+	}
+}
+
+CON_COMMAND(sc_print_steamids, "sc_print_steamids - Print Steam64 IDs of players")
+{
+	for (int i = 1; i <= MAXCLIENTS; i++)
+	{
+		player_info_t *pPlayerInfo = g_pEngineStudio->PlayerInfo(i - 1);
+
+		if ( pPlayerInfo )
+		{
+			Msg("%d. %s1 - %llu\n", i, pPlayerInfo->name, pPlayerInfo->m_nSteamID);
+		}
 	}
 }
 
@@ -450,6 +503,7 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		DoubleDuck(cmd);
 		FastRun(cmd);
 		Spinner(cmd);
+		Stick(cmd);
 	}
 
 	if (s_bFreeze)
@@ -572,7 +626,7 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 {
 	static int nJumpBugState = 0;
 
-	if (g_Config.cvars.jumpbug && g_pPlayerMove->flFallVelocity >= 500.0f)
+	if (g_Config.cvars.jumpbug && g_pPlayerMove->flFallVelocity > 580.0f)
 	{
 		Vector vBottomOrigin = g_pPlayerMove->origin; vBottomOrigin.z -= 8192.0f;
 		pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, /* g_pPlayerMove->usehull */ (g_pPlayerMove->flags & FL_DUCKING) ? 1 : 0, -1);
@@ -917,6 +971,58 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 		else
 		{
 			m_bSpinCanChangePitch = false;
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Stick
+//-----------------------------------------------------------------------------
+
+void CMisc::Stick(struct usercmd_s *cmd)
+{
+	if (s_iStickTarget)
+	{
+		cl_entity_t *pPlayer = g_pEngineFuncs->GetEntityByIndex(s_iStickTarget);
+
+		if (pPlayer && pPlayer->curstate.messagenum >= g_pEngineFuncs->GetLocalPlayer()->curstate.messagenum && !g_pClient->IsDead())
+		{
+			Vector2D vecForward;
+			Vector2D vecRight;
+
+			Vector vPredictPos = pPlayer->curstate.origin + (pPlayer->curstate.origin - s_vecStickPrevPos);
+
+			Vector2D vecDir = vPredictPos.AsVector2D() - g_pPlayerMove->origin.AsVector2D();
+			vecDir.NormalizeInPlace();
+
+			vecForward.x = cosf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
+			vecForward.y = sinf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
+
+			vecRight.x = vecForward.y;
+			vecRight.y = -vecForward.x;
+
+			vecForward *= g_pPlayerMove->maxspeed;
+			vecRight *= g_pPlayerMove->maxspeed;
+
+			float forwardmove = DotProduct(vecForward, vecDir);
+			float sidemove = DotProduct(vecRight, vecDir);
+
+			cmd->forwardmove = forwardmove;
+			cmd->sidemove = sidemove;
+
+			if (g_pClient->GetWaterLevel() > WL_NOT_IN_WATER && pPlayer->curstate.origin.z >= g_pPlayerMove->origin.z)
+			{
+				if (g_pClient->GetFlags() & FL_WATERJUMP)
+					cmd->buttons |= IN_DUCK;
+
+				cmd->upmove = g_pPlayerMove->maxspeed;
+			}
+
+			s_vecStickPrevPos = pPlayer->curstate.origin;
+		}
+		else
+		{
+			s_iStickTarget = 0;
 		}
 	}
 }

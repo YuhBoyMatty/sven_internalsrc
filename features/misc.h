@@ -31,6 +31,7 @@ private:
 	void DoubleDuck(struct usercmd_s *cmd);
 	void FastRun(struct usercmd_s *cmd);
 	void Spinner(struct usercmd_s *cmd);
+	void Stick(struct usercmd_s *cmd);
 	
 	void AutoCeilClipping(struct usercmd_s *cmd);
 	void FakeLag(float frametime);
