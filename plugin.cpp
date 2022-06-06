@@ -219,7 +219,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.4";
+	return "2.0.5";
 }
 
 const char *CSvenInternal::GetDescription(void)
