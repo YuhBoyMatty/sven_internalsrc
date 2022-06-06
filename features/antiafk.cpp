@@ -13,6 +13,7 @@
 #include "../config.h"
 
 extern float g_flClientDataLastUpdate;
+extern bool g_bLoading;
 
 //-----------------------------------------------------------------------------
 // Vars
@@ -20,11 +21,13 @@ extern float g_flClientDataLastUpdate;
 
 CAntiAFK g_AntiAFK;
 
+static bool s_bSpawning = false;
+
 //-----------------------------------------------------------------------------
 // ConCommands
 //-----------------------------------------------------------------------------
 
-CON_COMMAND_EXTERN(sc_antiafk, ConCommand_AntiAFK, "Set Anti-AFK Mode [0-5]. Available modes:\n0 - Off\n1 - Step Forward & Back\n2 - Spam Gibme\n3 - Spam Kill\n4 - Walk Around & Spam Inputs\n5 - Walk Around\n6 - Go Right\n")
+CON_COMMAND_EXTERN(sc_antiafk, ConCommand_AntiAFK, "Set Anti-AFK Mode [0-5]. Available modes:\n0 - Off\n1 - Step Forward & Back\n2 - Spam Gibme\n3 - Spam Kill\n4 - Walk Around & Spam Inputs\n5 - Walk Around\n6 - Go Right")
 {
 	if (args.ArgC() >= 2)
 	{
@@ -134,8 +137,23 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 	if ( bDead )
 		return;
 
+	bool bSpawning = g_bLoading;
+
 	if (g_Config.cvars.antiafk_stay_within_range && !(nMode == 2 || nMode == 3))
 	{
+		if (bSpawning != s_bSpawning)
+		{
+			if ( !bSpawning )
+			{
+				OnRevive();
+			}
+			else
+			{
+				s_bSpawning = bSpawning;
+				return;
+			}
+		}
+
 		if (m_vecAFKPoint.x == 0.0f && m_vecAFKPoint.y == 0.0f)
 			m_vecAFKPoint = g_pPlayerMove->origin.AsVector2D();
 
@@ -163,6 +181,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 				{
 					m_bComingBackToAFKPoint = false;
 					m_flComingBackStartTime = -1.0f;
+					s_bSpawning = bSpawning;
 					return;
 				}
 
@@ -182,7 +201,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 				float ct = cosf(flTheta);
 				float st = sinf(flTheta);
 
-				if (nRandom % 2) // counter clockwise
+				if (nRandom == 1) // counter clockwise
 				{
 					vecDir.x = vecDir.x * ct - vecDir.y * st;
 					vecDir.y = vecDir.x * st + vecDir.y * ct;
@@ -213,6 +232,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 				cmd->forwardmove = forwardmove;
 				cmd->sidemove = sidemove;
 
+				s_bSpawning = bSpawning;
 				return;
 			}
 		}
@@ -222,6 +242,8 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 		m_bComingBackToAFKPoint = false;
 		m_flComingBackStartTime = -1.0f;
 	}
+
+	s_bSpawning = bSpawning;
 
 	switch (nMode)
 	{
@@ -285,10 +307,9 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 							if (Inventory()->GetPrimaryAmmoCount(pWeapon) > 0)
 							{
 								Inventory()->SelectWeapon(pWeapon);
-								break;
+								bFound = true;
 							}
 
-							bFound = true;
 							break;
 						}
 
