@@ -175,15 +175,19 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("intro_barney.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNEY, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("intro_otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("hungerbarney.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_ENEMY | FL_CLASS_DEAD_BODY));
 
 	g_HashModelsTable.Insert("headcrab.mdl", LINK_CLASS_INFO(CLASS_NPC_HEADCRAB, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("baby_headcrab.mdl", LINK_CLASS_INFO(CLASS_NPC_BABY_HEADCRAB, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("hungercrab.mdl", LINK_CLASS_INFO(CLASS_NPC_BABY_HEADCRAB, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("otisf.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("hungerotis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("zombie.mdl", LINK_CLASS_INFO(CLASS_NPC_ZOMBIE, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("zombie_soldier.mdl", LINK_CLASS_INFO(CLASS_NPC_ZOMBIE_SOLDIER, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("zombie_barney.mdl", LINK_CLASS_INFO(CLASS_NPC_ZOMBIE, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("hungerzombie.mdl", LINK_CLASS_INFO(CLASS_NPC_ZOMBIE, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("bullsquid.mdl", LINK_CLASS_INFO(CLASS_NPC_BULLSQUID, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("houndeye.mdl", LINK_CLASS_INFO(CLASS_NPC_HOUNDEYE, FL_CLASS_ENEMY));
@@ -210,6 +214,7 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("chubby.mdl", LINK_CLASS_INFO(CLASS_NPC_CHUMTOAD, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("chumtoad.mdl", LINK_CLASS_INFO(CLASS_NPC_CHUMTOAD, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("piranha.mdl", LINK_CLASS_INFO(CLASS_NPC_PIRANHA, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("zombierat.mdl", LINK_CLASS_INFO(CLASS_NPC_SNARK, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("controller.mdl", LINK_CLASS_INFO(CLASS_NPC_ALIEN_CONTROLLER, FL_CLASS_ENEMY));
 
