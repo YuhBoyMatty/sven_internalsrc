@@ -2019,7 +2019,7 @@ void ShowMainMenu()
 				{
 					LoadSavedStyle();
 
-					WindowStyle();
+					LoadMenuTheme();
 					WindowStyle();
 				}
 				ImGui::PopItemWidth();
