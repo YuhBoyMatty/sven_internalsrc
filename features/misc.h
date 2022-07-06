@@ -5,13 +5,22 @@
 #pragma once
 #endif
 
+#include <unordered_map>
+#include <string>
+
 #include <IDetoursAPI.h>
 #include <base_feature.h>
+
+typedef std::unordered_map<std::string, std::string> CmdMap;
 
 class CMisc : public CBaseFeature
 {
 public:
+	CmdMap m_OnTickCommands;
+
+public:
 	CMisc();
+	~CMisc();
 
 	virtual bool Load();
 	virtual void PostLoad();
@@ -32,6 +41,7 @@ private:
 	void FastRun(struct usercmd_s *cmd);
 	void Spinner(struct usercmd_s *cmd);
 	void Stick(struct usercmd_s *cmd);
+	void RapidAction(struct usercmd_s *cmd);
 	
 	void AutoCeilClipping(struct usercmd_s *cmd);
 	void FakeLag(float frametime);
@@ -54,8 +64,11 @@ private:
 	DetourHandle_t m_hNetchan_Transmit;
 	DetourHandle_t m_hCHud__Think;
 
+private:
 	float m_flSpinPitchAngle;
 	bool m_bSpinCanChangePitch;
+
+	int m_iFakeLagCounter;
 };
 
 extern CMisc g_Misc;

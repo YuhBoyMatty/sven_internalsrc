@@ -336,6 +336,18 @@ CON_COMMAND(sc_stick, "Follow a player")
 	}
 }
 
+CON_COMMAND_NO_WRAPPER(sc_fastcrowbar, "Toggle fast crowbar")
+{
+	Msg(g_Config.cvars.fast_crowbar ? "Fast Crowbar disabled\n" : "Fast Crowbar enabled\n");
+	g_Config.cvars.fast_crowbar = !g_Config.cvars.fast_crowbar;
+}
+
+CON_COMMAND_NO_WRAPPER(sc_fastrevive, "Toggle fast revive")
+{
+	Msg(g_Config.cvars.fast_medkit ? "Fast Revive disabled\n" : "Fast Revive enabled\n");
+	g_Config.cvars.fast_medkit = !g_Config.cvars.fast_medkit;
+}
+
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_freeze, ConCommand_Freeze, "Block connection with a server")
 {
 	Msg(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
@@ -364,8 +376,100 @@ CON_COMMAND(sc_print_steamids, "sc_print_steamids - Print Steam64 IDs of players
 
 		if ( pPlayerInfo )
 		{
-			Msg("%d. %s1 - %llu\n", i, pPlayerInfo->name, pPlayerInfo->m_nSteamID);
+			Msg("%d. %s - %llu\n", i, pPlayerInfo->name, pPlayerInfo->m_nSteamID);
 		}
+	}
+}
+
+CON_COMMAND(sc_register_on_tick_command, "sc_register_on_tick_command - Register a command that will be called each tick")
+{
+	if (args.ArgC() >= 3)
+	{
+		const char *pszAlias = args[1];
+		const char *pszCommand = args[2];
+
+		if (*pszAlias == 0)
+		{
+			Msg("No alias\n");
+			return;
+		}
+		
+		if (*pszCommand == 0)
+		{
+			Msg("No command\n");
+			return;
+		}
+
+		if (strlen(pszAlias) > 32)
+		{
+			Msg("Alias' name is too long!\n");
+			return;
+		}
+
+		std::string sAlias = pszAlias;
+		std::string sCommand = pszCommand;
+
+		g_Misc.m_OnTickCommands.insert_or_assign( sAlias, sCommand );
+
+		Msg("On tick command with alias \"%s\" was registered/replaced\n", pszAlias);
+	}
+	else
+	{
+		Msg("Usage:  sc_register_on_tick_command <alias> <command>\n");
+	}
+}
+
+CON_COMMAND(sc_remove_on_tick_command, "sc_remove_on_tick_command - Remove a command that called each tick")
+{
+	if (args.ArgC() >= 2)
+	{
+		const char *pszAlias = args[1];
+
+		if (*pszAlias == 0)
+		{
+			Msg("No alias\n");
+			return;
+		}
+		
+		if (strlen(pszAlias) > 32)
+		{
+			Msg("Alias' name is too long!\n");
+			return;
+		}
+
+		std::string sAlias = pszAlias;
+
+		auto found = g_Misc.m_OnTickCommands.find( sAlias );
+
+		if ( found != g_Misc.m_OnTickCommands.end() )
+		{
+			if ( g_Misc.m_OnTickCommands.erase( sAlias ) == 1 )
+			{
+				Msg("On tick command with alias \"%s\" was removed\n", pszAlias);
+			}
+			else
+			{
+				Msg("Failed to remove on tick command with given alias\n");
+			}
+		}
+		else
+		{
+			Msg("On tick command with alias \"%s\" isn't registered\n", pszAlias);
+		}
+	}
+	else
+	{
+		Msg("Usage:  sc_remove_on_tick_command <alias>\n");
+	}
+}
+
+CON_COMMAND(sc_print_on_tick_commands, "sc_print_on_tick_commands - Prints all on tick commands")
+{
+	Msg("[Alias = Command]\n");
+
+	for (const std::pair<std::string, std::string> &pair : g_Misc.m_OnTickCommands)
+	{
+		Msg("%s = \"%s\"\n", pair.first.c_str(), pair.second.c_str());
 	}
 }
 
@@ -451,8 +555,9 @@ DECLARE_CLASS_FUNC(void, HOOKED_CHud__Think, CHud *pHud)
 
 		while (pList)
 		{
-			if ((pList->p->m_iFlags & HUD_ACTIVE) != 0)
+			if ( (pList->p->m_iFlags & HUD_ACTIVE) != 0 )
 				pList->p->Think();
+
 			pList = pList->pNext;
 		}
 
@@ -471,6 +576,12 @@ DECLARE_CLASS_FUNC(void, HOOKED_CHud__Think, CHud *pHud)
 
 void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
+	// Execute on tick commands
+	for (const std::pair<std::string, std::string> &pair : m_OnTickCommands)
+	{
+		g_pEngineFuncs->ClientCmd( pair.second.c_str() );
+	}
+
 	// Clamp speedhack values
 	if (sc_speedhack.GetFloat() < 0.0f)
 		sc_speedhack.SetValue("0");
@@ -504,6 +615,7 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		FastRun(cmd);
 		Spinner(cmd);
 		Stick(cmd);
+		RapidAction(cmd);
 	}
 
 	if (s_bFreeze)
@@ -594,6 +706,63 @@ void CMisc::OnAddEntityPost(int is_visible, int type, struct cl_entity_s *ent, c
 void CMisc::OnVideoInit()
 {
 	line_beamindex = 0;
+}
+
+//-----------------------------------------------------------------------------
+// Some rapid stuff
+//-----------------------------------------------------------------------------
+
+void CMisc::RapidAction(struct usercmd_s *cmd)
+{
+	if ( (g_Config.cvars.fast_crowbar || g_Config.cvars.fast_medkit) && !Client()->IsDead() )
+	{
+		bool bDoRapidAction = false;
+
+		if ( g_Config.cvars.fast_crowbar )
+		{
+			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR )
+			{
+				if (cmd->buttons & IN_ATTACK)
+				{
+					bDoRapidAction = true;
+				}
+			}
+		}
+		
+		if ( g_Config.cvars.fast_medkit )
+		{
+			if ( Client()->GetCurrentWeaponID() == WEAPON_MEDKIT )
+			{
+				if (cmd->buttons & (IN_ATTACK | IN_ATTACK2))
+				{
+					bDoRapidAction = true;
+				}
+			}
+		}
+
+		if (bDoRapidAction)
+		{
+			if (m_iFakeLagCounter < 45)
+			{
+				bSendPacket = false;
+				m_iFakeLagCounter++;
+			}
+			else
+			{
+				bSendPacket = true;
+				m_iFakeLagCounter = 0;
+			}
+
+			UTIL_SetGameSpeed(20000.f);
+
+			cmd->forwardmove = 0.f;
+			cmd->sidemove = 0.f;
+		}
+	}
+	else
+	{
+		m_iFakeLagCounter = 0;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1383,6 +1552,13 @@ CMisc::CMisc()
 
 	m_flSpinPitchAngle = 0.f;
 	m_bSpinCanChangePitch = false;
+
+	m_iFakeLagCounter = 0;
+}
+
+CMisc::~CMisc()
+{
+	m_OnTickCommands.clear();
 }
 
 bool CMisc::Load()

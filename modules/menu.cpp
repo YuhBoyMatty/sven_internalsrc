@@ -1341,6 +1341,12 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 						ImGui::Spacing();
+						
+						ImGui::Checkbox("Fast Crowbar", &g_Config.cvars.fast_crowbar); ImGui::SameLine();
+						ImGui::Checkbox("Fast Medkit", &g_Config.cvars.fast_medkit);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
 
 						ImGui::Separator();
 

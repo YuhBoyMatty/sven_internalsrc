@@ -388,6 +388,9 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("TertiaryAttackGlitch", cvars.tertiary_attack_glitch);
 			ConfigManager()->ImportParam("SaveSoundcache", cvars.save_soundcache);
 			ConfigManager()->ImportParam("RotateDeadBody", cvars.rotate_dead_body);
+			ConfigManager()->ImportParam("AutoCeilClipping", cvars.auto_ceil_clipping);
+			ConfigManager()->ImportParam("FastCrowbar", cvars.fast_crowbar);
+			ConfigManager()->ImportParam("FastRevive", cvars.fast_medkit);
 			ConfigManager()->ImportParam("RemoveFOVCap", cvars.remove_fov_cap);
 			ConfigManager()->ImportParam("NoWeaponAnim", cvars.no_weapon_anim);
 			ConfigManager()->ImportParam("ColorPulsator", cvars.color_pulsator);
@@ -797,6 +800,9 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("TertiaryAttackGlitch", cvars.tertiary_attack_glitch);
 			ConfigManager()->ExportParam("SaveSoundcache", cvars.save_soundcache);
 			ConfigManager()->ExportParam("RotateDeadBody", cvars.rotate_dead_body);
+			ConfigManager()->ExportParam("AutoCeilClipping", cvars.auto_ceil_clipping);
+			ConfigManager()->ExportParam("FastCrowbar", cvars.fast_crowbar);
+			ConfigManager()->ExportParam("FastRevive", cvars.fast_medkit);
 			ConfigManager()->ExportParam("RemoveFOVCap", cvars.remove_fov_cap);
 			ConfigManager()->ExportParam("NoWeaponAnim", cvars.no_weapon_anim);
 			ConfigManager()->ExportParam("ColorPulsator", cvars.color_pulsator);
