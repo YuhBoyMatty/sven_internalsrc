@@ -38,3 +38,8 @@ Changelog for Sven Internal
 - Added 'sc_stick <player_index>' command to stick to a specified player
 - Added some They Hunger models in class table
 - Adjusted fall velocity when jumpbug is used
+
+06/07/20222 - Version 2.0.6:
+- Added the missing parameter "AutoCeilClipping" in the config
+- Added rapid fire on crowbar and medkit (sc_fastcrowbar, sc_fastmedkit) [Thanks to guwi]
+- Added feature to register commands that will be executed each game tick (sc_register_on_tick_command, sc_remove_on_tick_command, sc_print_on_tick_commands)
