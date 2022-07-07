@@ -463,7 +463,7 @@ float CChatColors::Hue2RGB(float p, float q, float t)
 
 bool CChatColors::Load()
 {
-	m_pfnGetClientColor = MemoryUtils()->FindPattern( g_pModules->Client, Patterns::Client::GetClientColor );
+	m_pfnGetClientColor = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::GetClientColor );
 
 	if ( !m_pfnGetClientColor )
 	{
@@ -471,7 +471,7 @@ bool CChatColors::Load()
 		return false;
 	}
 	
-	m_pfnCHudBaseTextBlock__Print = MemoryUtils()->FindPattern( g_pModules->Client, Patterns::Client::CHudBaseTextBlock__Print);
+	m_pfnCHudBaseTextBlock__Print = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::CHudBaseTextBlock__Print);
 
 	if ( !m_pfnCHudBaseTextBlock__Print )
 	{

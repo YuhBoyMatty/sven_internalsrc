@@ -43,6 +43,9 @@ namespace Patterns
 
 		EXTERN_PATTERN(GetClientColor);
 
+		EXTERN_PATTERN(ScaleColors);
+		EXTERN_PATTERN(ScaleColors_RGBA);
+
 		EXTERN_PATTERN(CHud__Think);
 
 		EXTERN_PATTERN(WeaponsResource__GetFirstPos);

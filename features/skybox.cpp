@@ -250,7 +250,7 @@ CSkybox::CSkybox()
 
 bool CSkybox::Load()
 {
-	m_pfnR_LoadSkyboxInt = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::R_LoadSkyboxInt );
+	m_pfnR_LoadSkyboxInt = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::R_LoadSkyboxInt );
 
 	if ( !m_pfnR_LoadSkyboxInt )
 	{

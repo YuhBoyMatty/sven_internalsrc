@@ -43,3 +43,6 @@ Changelog for Sven Internal
 - Added the missing parameter "AutoCeilClipping" in the config
 - Added rapid fire on crowbar and medkit (sc_fastcrowbar, sc_fastmedkit) [Thanks to guwi]
 - Added feature to register commands that will be executed each game tick (sc_register_on_tick_command, sc_remove_on_tick_command, sc_print_on_tick_commands)
+
+07/07/20222 - Version 2.0.7:
+- Minor fixes

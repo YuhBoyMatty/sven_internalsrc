@@ -385,7 +385,7 @@ void CVisual::ESP()
 	// What a mess lol
 	for (register int i = 1; i <= MAXENTS; ++i)
 	{
-		if (i == nLocalPlayer)
+		if ( i == nLocalPlayer )
 			continue;
 
 		bool bPlayer;
@@ -407,7 +407,7 @@ void CVisual::ESP()
 		if ( !pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || pEntity == pViewModel || pEntity->curstate.messagenum < pLocal->curstate.messagenum )
 			continue;
 
-		if (pszSlashLastOccur = strrchr(pModel->name, '/'))
+		if ( pszSlashLastOccur = strrchr(pModel->name, '/') )
 			pszModelName = pszSlashLastOccur + 1;
 		else
 			continue;
@@ -440,27 +440,27 @@ void CVisual::ESP()
 		bPlayer = pEntity->player;
 		flDistance = (pEntity->origin - pLocal->origin).Length();
 
-		if (flDistance > g_Config.cvars.esp_distance)
+		if ( flDistance > g_Config.cvars.esp_distance )
 			continue;
 
 		Vector vecBottom = pEntity->origin;
 		Vector vecTop = pEntity->origin;
 
-		if (!bPlayer)
+		if ( !bPlayer )
 		{
-			if (!bClassInfoRetrieved)
+			if ( !bClassInfoRetrieved )
 				classInfo = GetEntityClassInfo(pModel->name);
 
-			if (classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents)
+			if ( classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents )
 				continue;
 
 			// Don't process if entity isn't an ESP's target, or its dead body or trash
-			if (g_Config.cvars.esp_targets == 2 || IsEntityClassDeadbody(classInfo, pEntity->curstate.solid) || IsEntityClassTrash(classInfo))
+			if ( g_Config.cvars.esp_targets == 2 || IsEntityClassDeadbody(classInfo, pEntity->curstate.solid) || IsEntityClassTrash(classInfo) )
 				continue;
 		}
 		else
 		{
-			if (g_Config.cvars.esp_targets == 1)
+			if ( g_Config.cvars.esp_targets == 1 )
 				continue;
 
 			vecBottom.z -= pEntity->curstate.maxs.z;
@@ -468,7 +468,7 @@ void CVisual::ESP()
 
 		vecTop.z += pEntity->curstate.maxs.z;
 
-		if (bPlayer && pEntity->curstate.usehull)
+		if ( bPlayer && pEntity->curstate.usehull )
 		{
 			vecTop.z = pEntity->origin.z + VEC_DUCK_HULL_MAX.z;
 			vecBottom.z = pEntity->origin.z + VEC_DUCK_HULL_MIN.z;
@@ -477,7 +477,7 @@ void CVisual::ESP()
 		bool bScreenBottom = UTIL_WorldToScreen(vecBottom, vecScreenBottom);
 		bool bScreenTop = UTIL_WorldToScreen(vecTop, vecScreenTop);
 
-		if (bScreenBottom && bScreenTop)
+		if ( bScreenBottom && bScreenTop )
 		{
 			int iHealth = bPlayer ? g_pPlayerUtils->GetHealth(i) : 0;
 
@@ -493,19 +493,19 @@ void CVisual::ESP()
 			if ( bPlayer && iHealth < -1 ) // enemy team
 				bIsEntityFriend = false;
 
-			if (bItem)
+			if ( bItem )
 			{
 				r = int(255.f * g_Config.cvars.esp_item_color[0]);
 				g = int(255.f * g_Config.cvars.esp_item_color[1]);
 				b = int(255.f * g_Config.cvars.esp_item_color[2]);
 			}
-			else if (bIsEntityNeutral)
+			else if ( bIsEntityNeutral )
 			{
 				r = int(255.f * g_Config.cvars.esp_neutral_color[0]);
 				g = int(255.f * g_Config.cvars.esp_neutral_color[1]);
 				b = int(255.f * g_Config.cvars.esp_neutral_color[2]);
 			}
-			else if (!bIsEntityFriend)
+			else if ( !bIsEntityFriend )
 			{
 				r = int(255.f * g_Config.cvars.esp_enemy_color[0]);
 				g = int(255.f * g_Config.cvars.esp_enemy_color[1]);
@@ -845,8 +845,6 @@ void CVisual::PostLoad()
 	g_Drawing.SetupFonts();
 
 	g_pBoneTransform = (bone_matrix3x4_t *)g_pEngineStudio->StudioGetLightTransform();
-
-	auto t = (*g_pBoneTransform)[1];
 
 	m_hUserMsgHook_ScreenShake = Hooks()->HookUserMessage( "ScreenShake", UserMsgHook_ScreenShake, &ORIG_UserMsgHook_ScreenShake );
 	m_hUserMsgHook_ScreenFade = Hooks()->HookUserMessage( "ScreenFade", UserMsgHook_ScreenFade, &ORIG_UserMsgHook_ScreenFade );

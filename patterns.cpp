@@ -36,6 +36,9 @@ namespace Patterns
 
 		DEFINE_PATTERN(GetClientColor, "8B 4C 24 04 85 C9 7E 35 6B C1 ? 0F BF 80 ? ? ? ? 48 83 F8 03");
 
+		DEFINE_PATTERN(ScaleColors, "66 0F 6E 4C 24 10 8B 4C 24 04 0F 5B C9");
+		DEFINE_PATTERN(ScaleColors_RGBA, "8B 4C 24 04 0F B6 41 03 66 0F 6E C8 0F B6 01 0F 5B C9");
+
 		DEFINE_PATTERN(CHud__Think, "83 EC 08 53 56 57 8B F9 E8 ? ? ? ? 8B 37 D9 5C 24");
 
 		DEFINE_PATTERN(WeaponsResource__GetFirstPos, "6B 54 24 04 68 56 57 33 F6 8B F9 81 C2 ? ? ? ? 8B 02 85 C0 74");

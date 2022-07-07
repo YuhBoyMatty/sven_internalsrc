@@ -159,10 +159,10 @@ static void InitTertiaryAttackGlitch()
 	ud_t instruction;
 	DWORD *dwVTable[] = { NULL, NULL, NULL, NULL };
 
-	void *weapon_gauss = Sys_GetProcAddress( g_pModules->Client, "weapon_gauss" ); // vtable <- (byte *)weapon_gauss + 0x63
-	void *weapon_minigun = Sys_GetProcAddress( g_pModules->Client, "weapon_minigun" ); // vtable <- (byte *)weapon_minigun + 0x63
-	void *weapon_handgrenade = Sys_GetProcAddress( g_pModules->Client, "weapon_handgrenade" ); // vtable <- (byte *)weapon_handgrenade + 0x63
-	void *weapon_shockrifle = Sys_GetProcAddress( g_pModules->Client, "weapon_shockrifle" ); // vtable <- (byte *)weapon_shockrifle + 0x67
+	void *weapon_gauss = Sys_GetProcAddress( SvenModAPI()->Modules()->Client, "weapon_gauss" ); // vtable <- (byte *)weapon_gauss + 0x63
+	void *weapon_minigun = Sys_GetProcAddress( SvenModAPI()->Modules()->Client, "weapon_minigun" ); // vtable <- (byte *)weapon_minigun + 0x63
+	void *weapon_handgrenade = Sys_GetProcAddress( SvenModAPI()->Modules()->Client, "weapon_handgrenade" ); // vtable <- (byte *)weapon_handgrenade + 0x63
+	void *weapon_shockrifle = Sys_GetProcAddress( SvenModAPI()->Modules()->Client, "weapon_shockrifle" ); // vtable <- (byte *)weapon_shockrifle + 0x67
 
 	if ( !weapon_gauss || !weapon_minigun || !weapon_handgrenade || !weapon_shockrifle )
 	{
@@ -361,7 +361,7 @@ bool CPatchesModule::PatchInterp()
 {
 	DWORD dwProtection;
 
-	void *pPatchInterpString = MemoryUtils()->FindString(g_pModules->Hardware, "cl_updaterate min");
+	void *pPatchInterpString = MemoryUtils()->FindString(SvenModAPI()->Modules()->Hardware, "cl_updaterate min");
 
 	if (!pPatchInterpString)
 	{
@@ -369,7 +369,7 @@ bool CPatchesModule::PatchInterp()
 		return false;
 	}
 
-	BYTE *pPatchInterp = (BYTE *)MemoryUtils()->FindAddress(g_pModules->Hardware, pPatchInterpString);
+	BYTE *pPatchInterp = (BYTE *)MemoryUtils()->FindAddress(SvenModAPI()->Modules()->Hardware, pPatchInterpString);
 
 	if (!pPatchInterp)
 	{
@@ -477,7 +477,7 @@ bool CPatchesModule::Load()
 	m_dwCurrentThreadID = GetCurrentThreadId();
 	m_dwCurrentProcessID = GetCurrentProcessId();
 
-	void *pNextCmdTime = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::flNextCmdTime );
+	void *pNextCmdTime = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::flNextCmdTime );
 
 	if ( !pNextCmdTime )
 	{
@@ -485,7 +485,7 @@ bool CPatchesModule::Load()
 		return false;
 	}
 
-	void *pTextureLoadAddress = MemoryUtils()->FindString( g_pModules->Hardware, "Texture load: %6.1fms" );
+	void *pTextureLoadAddress = MemoryUtils()->FindString( SvenModAPI()->Modules()->Hardware, "Texture load: %6.1fms" );
 
 	if ( !pTextureLoadAddress )
 	{
@@ -493,7 +493,7 @@ bool CPatchesModule::Load()
 		return false;
 	}
 
-	void *pTextureLoad = MemoryUtils()->FindAddress( g_pModules->Hardware, pTextureLoadAddress );
+	void *pTextureLoad = MemoryUtils()->FindAddress( SvenModAPI()->Modules()->Hardware, pTextureLoadAddress );
 
 	if ( !pTextureLoad )
 	{

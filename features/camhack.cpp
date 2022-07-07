@@ -87,7 +87,7 @@ static void ClampViewAngles(Vector &viewangles)
 
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_camhack, ConCommand_CamHack, "Toggle CamHack")
 {
-	if (g_pPlayerMove->iuser1 != 0 || SvenModAPI()->GetClientState() != CLS_ACTIVE)
+	if ( !Client()->IsInGame() || Client()->IsSpectating() )
 		return;
 
 	if (g_CamHack.IsEnabled())
@@ -191,7 +191,7 @@ void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
 	if (m_bEnabled)
 	{
-		float flMaxSpeed = g_pPlayerMove->maxspeed;
+		float flMaxSpeed = Client()->GetMaxSpeed();
 
 		bool bAnglesChanged = false;
 
@@ -254,7 +254,7 @@ void CCamHack::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		NormalizeAngles(g_CamHack.m_vecCameraAngles);
 		ClampViewAngles(g_CamHack.m_vecCameraAngles);
 
-		user_PM_NoClip(g_CamHack.m_vecCameraOrigin, g_CamHack.m_vecCameraAngles, g_pPlayerMove->frametime, &dummy_cmd);
+		user_PM_NoClip(g_CamHack.m_vecCameraOrigin, g_CamHack.m_vecCameraAngles, Client()->Frametime(), &dummy_cmd);
 
 		cmd->viewangles = bAnglesChanged ? g_vecSpinAngles : m_vecViewAngles;
 	}
@@ -264,7 +264,7 @@ void CCamHack::V_CalcRefdef(struct ref_params_s *pparams)
 {
 	if (m_bEnabled)
 	{
-		if (g_pPlayerMove->iuser1 == 0)
+		if ( !Client()->IsSpectating() )
 		{
 			cl_entity_t *pLocal = g_pEngineFuncs->GetLocalPlayer();
 
@@ -355,7 +355,7 @@ void CCamHack::Enable()
 		g_pEngineFuncs->GetViewAngles(m_vecViewAngles);
 	}
 
-	m_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+	m_vecCameraOrigin = g_pPlayerMove->origin + Client()->GetViewOffset();
 	m_vecCameraAngles = m_vecViewAngles;
 
 	m_flSavedPitchAngle = NormalizeAngle(m_vecViewAngles.x) / -3.0f;
@@ -431,5 +431,5 @@ void CCamHack::ResetRollAxis()
 
 void CCamHack::ResetOrientation()
 {
-	m_vecCameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+	m_vecCameraOrigin = g_pPlayerMove->origin + Client()->GetViewOffset();
 }

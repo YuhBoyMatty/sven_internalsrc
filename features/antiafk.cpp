@@ -221,8 +221,8 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 				vecRight.y = -vecForward.x;
 
 				// Multiply by max movement speed
-				vecForward *= g_pPlayerMove->maxspeed;
-				vecRight *= g_pPlayerMove->maxspeed;
+				vecForward *= Client()->GetMaxSpeed();
+				vecRight *= Client()->GetMaxSpeed();
 
 				// Project onto direction vector
 				float forwardmove = DotProduct(vecForward, vecDir);
@@ -411,7 +411,7 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 	case 6:
 	{
 		cmd->buttons |= IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT;
-		cmd->sidemove = g_pPlayerMove->maxspeed;
+		cmd->sidemove = Client()->GetMaxSpeed();
 
 		RotateCamera();
 
@@ -419,9 +419,9 @@ void CAntiAFK::AntiAFK(struct usercmd_s *cmd)
 	}
 	}
 
-	if (g_pPlayerMove->waterlevel == WL_EYES)
+	if (Client()->GetWaterLevel() == WL_EYES)
 	{
-		cmd->upmove = g_pPlayerMove->maxspeed;
+		cmd->upmove = Client()->GetMaxSpeed();
 	}
 }
 
@@ -474,7 +474,7 @@ REPEAT:
 		}
 		else
 		{
-			cmd->sidemove = g_pPlayerMove->maxspeed;
+			cmd->sidemove = Client()->GetMaxSpeed();
 		}
 	}
 	else if (movement_button == IN_BACK)
@@ -488,7 +488,7 @@ REPEAT:
 		}
 		else
 		{
-			cmd->forwardmove = -g_pPlayerMove->maxspeed;
+			cmd->forwardmove = -Client()->GetMaxSpeed();
 		}
 	}
 	else if (movement_button == IN_MOVELEFT)
@@ -502,7 +502,7 @@ REPEAT:
 		}
 		else
 		{
-			cmd->sidemove = -g_pPlayerMove->maxspeed;
+			cmd->sidemove = -Client()->GetMaxSpeed();
 		}
 	}
 	else if (movement_button == IN_FORWARD)
@@ -516,7 +516,7 @@ REPEAT:
 		}
 		else
 		{
-			cmd->forwardmove = g_pPlayerMove->maxspeed;
+			cmd->forwardmove = Client()->GetMaxSpeed();
 		}
 	}
 

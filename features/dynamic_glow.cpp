@@ -1,5 +1,7 @@
 // Dynamic Glow
 
+#include <IClient.h>
+
 #include <hl_sdk/common/dlight.h>
 #include <hl_sdk/common/entity_types.h>
 #include <hl_sdk/engine/APIProxy.h>
@@ -22,13 +24,13 @@ CDynamicGlow g_DynamicGlow;
 
 void CDynamicGlow::OnHUDRedraw() // glow local player
 {
-	if (g_Config.cvars.dyn_glow_self && g_pPlayerMove->iuser1 == 0)
+	if ( g_Config.cvars.dyn_glow_self && !Client()->IsSpectating() )
 	{
 		float flRadius = g_Config.cvars.dyn_glow_self_radius;
 		float flDecay = g_Config.cvars.dyn_glow_self_decay;
 		float flDieTime = g_pEngineFuncs->GetClientTime() + DYNAMIC_LIGHT_LIFE_TIME;
 
-		CreateDynamicLight(g_pPlayerMove->player_index + 1, g_pPlayerMove->origin, g_Config.cvars.dyn_glow_self_color, flRadius, flDecay, flDieTime);
+		CreateDynamicLight(Client()->GetPlayerIndex(), g_pPlayerMove->origin, g_Config.cvars.dyn_glow_self_color, flRadius, flDecay, flDieTime);
 	}
 }
 
@@ -38,7 +40,7 @@ void CDynamicGlow::OnAddEntityPost(int is_visible, int type, struct cl_entity_s 
 	{
 		if (type == ET_PLAYER)
 		{
-			if (g_Config.cvars.dyn_glow_players && ent->index != g_pPlayerMove->player_index + 1)
+			if (g_Config.cvars.dyn_glow_players && ent->index != Client()->GetPlayerIndex())
 			{
 				float flRadius = g_Config.cvars.dyn_glow_players_radius;
 				float flDecay = g_Config.cvars.dyn_glow_players_decay;

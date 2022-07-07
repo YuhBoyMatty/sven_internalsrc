@@ -39,6 +39,8 @@
 DECLARE_HOOK(void, __cdecl, IN_Move, float, usercmd_t *);
 
 DECLARE_HOOK(qboolean, __cdecl, Netchan_CanPacket, netchan_t *);
+DECLARE_HOOK(void, __cdecl, ScaleColors, int *r, int *g, int *b, int alpha);
+DECLARE_HOOK(void, __cdecl, ScaleColors_RGBA, Color *clr);
 DECLARE_HOOK(void, __cdecl, SPR_Set, VHSPRITE hPic, int r, int g, int b);
 
 DECLARE_HOOK(void, APIENTRY, glBegin, GLenum);
@@ -93,6 +95,8 @@ public:
 private:
 	void *m_pfnIN_Move;
 	void *m_pfnNetchan_CanPacket;
+	void *m_pfnScaleColors;
+	void *m_pfnScaleColors_RGBA;
 	void *m_pfnSPR_Set;
 	void *m_pfnglBegin;
 	void *m_pfnglColor4f;
@@ -101,6 +105,8 @@ private:
 
 	DetourHandle_t m_hIN_Move;
 	DetourHandle_t m_hNetchan_CanPacket;
+	DetourHandle_t m_hScaleColors;
+	DetourHandle_t m_hScaleColors_RGBA;
 	DetourHandle_t m_hSPR_Set;
 	DetourHandle_t m_hglBegin;
 	DetourHandle_t m_hglColor4f;
@@ -248,13 +254,29 @@ DECLARE_FUNC(qboolean, __cdecl, HOOKED_Netchan_CanPacket, netchan_t *netchan)
 	return ORIG_Netchan_CanPacket(netchan);
 }
 
-int SpriteArray[] =
+DECLARE_FUNC(void, __cdecl, HOOKED_ScaleColors, int *r, int *g, int *b, int alpha)
 {
-	0, 2, 1, 0, 0, 1, 1, 0, 1, 2,
-	2, 0, 0, 0, 2, 1, 0, 0, 0, 0,
-	0, 0, 2, 1, 0, 0, 0, 2, 0, 1,
-	0, 0, 0, 2, 0, 2, 1, 0, 0, 0,
-};
+	if ( g_Config.cvars.remap_hud_color )
+	{
+		*r = int(g_Config.cvars.hud_color[0] * 255.f);
+		*g = int(g_Config.cvars.hud_color[1] * 255.f);
+		*b = int(g_Config.cvars.hud_color[2] * 255.f);
+	}
+
+	ORIG_ScaleColors(r, g, b, alpha);
+}
+
+DECLARE_FUNC(void, __cdecl, HOOKED_ScaleColors_RGBA, Color *clr)
+{
+	if ( g_Config.cvars.remap_hud_color )
+	{
+		clr->r = int(g_Config.cvars.hud_color[0] * 255.f);
+		clr->g = int(g_Config.cvars.hud_color[1] * 255.f);
+		clr->b = int(g_Config.cvars.hud_color[2] * 255.f);
+	}
+
+	ORIG_ScaleColors_RGBA(clr);
+}
 
 DECLARE_FUNC(void, __cdecl, HOOKED_SPR_Set, VHSPRITE hPic, int r, int g, int b)
 {
@@ -783,7 +805,7 @@ bool CHooksModule::Load()
 		return false;
 	}
 
-	m_pfnIN_Move = MemoryUtils()->FindPattern( g_pModules->Client, Patterns::Client::IN_Move );
+	m_pfnIN_Move = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::IN_Move);
 
 	if ( !m_pfnIN_Move )
 	{
@@ -791,7 +813,7 @@ bool CHooksModule::Load()
 		return false;
 	}
 	
-	m_pfnNetchan_CanPacket = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::Netchan_CanPacket );
+	m_pfnNetchan_CanPacket = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::Netchan_CanPacket );
 
 	if ( !m_pfnNetchan_CanPacket )
 	{
@@ -799,7 +821,7 @@ bool CHooksModule::Load()
 		return false;
 	}
 	
-	m_pfnV_RenderView = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::V_RenderView );
+	m_pfnV_RenderView = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::V_RenderView );
 
 	if ( !m_pfnV_RenderView )
 	{
@@ -807,11 +829,27 @@ bool CHooksModule::Load()
 		return false;
 	}
 	
-	m_pfnR_SetupFrame = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::R_SetupFrame );
+	m_pfnR_SetupFrame = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::R_SetupFrame );
 
 	if ( !m_pfnR_SetupFrame )
 	{
 		Warning("Couldn't find function \"R_SetupFrame\"\n");
+		return false;
+	}
+	
+	m_pfnScaleColors = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::ScaleColors );
+
+	if ( !m_pfnScaleColors )
+	{
+		Warning("Couldn't find function \"ScaleColors\"\n");
+		return false;
+	}
+	
+	m_pfnScaleColors_RGBA = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::ScaleColors_RGBA );
+
+	if ( !m_pfnScaleColors_RGBA )
+	{
+		Warning("Couldn't find function \"ScaleColors_RGBA\"\n");
 		return false;
 	}
 
@@ -824,6 +862,8 @@ void CHooksModule::PostLoad()
 {
 	m_hIN_Move = DetoursAPI()->DetourFunction( m_pfnIN_Move, HOOKED_IN_Move, GET_FUNC_PTR(ORIG_IN_Move) );
 	m_hNetchan_CanPacket = DetoursAPI()->DetourFunction( m_pfnNetchan_CanPacket, HOOKED_Netchan_CanPacket, GET_FUNC_PTR(ORIG_Netchan_CanPacket) );
+	m_hScaleColors = DetoursAPI()->DetourFunction( m_pfnScaleColors, HOOKED_ScaleColors, GET_FUNC_PTR(ORIG_ScaleColors) );
+	m_hScaleColors_RGBA = DetoursAPI()->DetourFunction( m_pfnScaleColors_RGBA, HOOKED_ScaleColors_RGBA, GET_FUNC_PTR(ORIG_ScaleColors_RGBA) );
 	m_hSPR_Set = DetoursAPI()->DetourFunction( m_pfnSPR_Set, HOOKED_SPR_Set, GET_FUNC_PTR(ORIG_SPR_Set) );
 	m_hglBegin = DetoursAPI()->DetourFunction( m_pfnglBegin, HOOKED_glBegin, GET_FUNC_PTR(ORIG_glBegin) );
 	m_hglColor4f = DetoursAPI()->DetourFunction( m_pfnglColor4f, HOOKED_glColor4f, GET_FUNC_PTR(ORIG_glColor4f) );
@@ -840,6 +880,8 @@ void CHooksModule::Unload()
 {
 	DetoursAPI()->RemoveDetour( m_hIN_Move );
 	DetoursAPI()->RemoveDetour( m_hNetchan_CanPacket );
+	DetoursAPI()->RemoveDetour( m_hScaleColors );
+	DetoursAPI()->RemoveDetour( m_hScaleColors_RGBA );
 	DetoursAPI()->RemoveDetour( m_hSPR_Set );
 	DetoursAPI()->RemoveDetour( m_hglBegin );
 	DetoursAPI()->RemoveDetour( m_hglColor4f );

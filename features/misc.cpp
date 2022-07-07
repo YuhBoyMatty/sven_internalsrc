@@ -71,7 +71,7 @@ static int s_iBottomColorOffset = 0;
 static float s_flWeaponOffset[32] =
 {
 	0.0f, // 0
-	0.0f, // 1
+	-1.5f, // 1
 	-4.0f, // 2
 	0.0f, // 3
 	-2.5f, // 4
@@ -80,19 +80,19 @@ static float s_flWeaponOffset[32] =
 	-5.0f, // 7
 	-9.2f, // 8
 	-3.0f, // 9
-	0.0f, // 10
+	-5.0f, // 10
 	-8.0f, // 11
 	-4.0f, // 12
 	0.0f, // 13
 	0.0f, // 14
-	0.0f, // 15
+	-3.0f, // 15
 	0.0f, // 16
 	-4.15f, // 17
-	0.0f, // 18
+	-0.7f, // 18
 	0.0f, // 19
-	0.0f, // 20
+	-2.0f, // 20
 	0.0f, // 21
-	0.0f, // 22
+	-9.0f, // 22
 	-7.3f, // 23
 	-4.25f, // 24
 	0.0f, // 25
@@ -108,11 +108,9 @@ static float s_flWeaponOffset[32] =
 // Common Functions
 //-----------------------------------------------------------------------------
 
-static float GetWeaponOffset(cl_entity_s *pViewModel, int iWeaponID)
+static float GetWeaponOffset(cl_entity_s *pViewModel)
 {
-	// ToDo: use class_table
-
-	if (iWeaponID == 0)
+	if ( ClientWeapon()->IsCustom() )
 	{
 		const char *pszModelName = pViewModel->model->name;
 
@@ -131,39 +129,22 @@ static float GetWeaponOffset(cl_entity_s *pViewModel, int iWeaponID)
 				--pszModelNameEnd;
 			}
 
-			if (!strcmp(pszModelName, "v_crowbar.mdl"))
-			{
-				return -1.5f;
-			}
-			else if (!strcmp(pszModelName, "v_pipe_wrench.mdl"))
-			{
-				return -2.0f;
-			}
-			else if (!strcmp(pszModelName, "v_medkit.mdl"))
-			{
-				return -0.7f;
-			}
-			else if (!strcmp(pszModelName, "v_bgrap.mdl"))
-			{
-				return -9.0f;
-			}
-			else if (!strcmp(pszModelName, "v_357.mdl"))
+			if ( !strcmp(pszModelName, "v_357.mdl") )
 			{
 				return -6.2f;
-			}
-			else if (!strcmp(pszModelName, "v_egon.mdl"))
-			{
-				return -5.0f;
-			}
-			else if (!strcmp(pszModelName, "v_squeak.mdl"))
-			{
-				return -3.0f;
 			}
 		}
 	}
 	else
 	{
-		return s_flWeaponOffset[iWeaponID];
+		int iWeaponID = Client()->GetCurrentWeaponID();
+		constexpr int iMaxWeapons = (sizeof(s_flWeaponOffset) / sizeof(s_flWeaponOffset[0]));
+
+		Assert( iWeaponID >= 0 && iWeaponID < iMaxWeapons );
+
+		iWeaponID = (int)clamp(iWeaponID, 0, iMaxWeapons - 1);
+
+		return s_flWeaponOffset[ iWeaponID ];
 	}
 
 	return 0.0f;
@@ -250,10 +231,10 @@ CON_COMMAND_EXTERN_NO_WRAPPER(sc_auto_ceil_clipping, ConCommand_AutoCeilClipping
 
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_selfsink, ConCommand_AutoSelfSink, "Perform self sink")
 {
-	if ( g_pPlayerMove->iuser1 != 0 || g_pPlayerMove->dead )
+	if ( Client()->IsDead() )
 		return;
 
-	if (g_pPlayerMove->view_ofs.z == VEC_DUCK_VIEW.z)
+	if (Client()->GetViewOffset().z == VEC_DUCK_VIEW.z)
 	{
 		g_pEngineFuncs->SetViewAngles(Vector(-0.1f, -90.0f, 0.0f));
 		g_pEngineFuncs->ClientCmd("+jump\n");
@@ -303,7 +284,7 @@ CON_COMMAND(sc_stick, "Follow a player")
 {
 	if (args.ArgC() >= 2)
 	{
-		if (g_pClient->IsDead())
+		if ( Client()->IsDead() )
 		{
 			Msg("You're dead\n");
 			return;
@@ -342,9 +323,9 @@ CON_COMMAND_NO_WRAPPER(sc_fastcrowbar, "Toggle fast crowbar")
 	g_Config.cvars.fast_crowbar = !g_Config.cvars.fast_crowbar;
 }
 
-CON_COMMAND_NO_WRAPPER(sc_fastrevive, "Toggle fast revive")
+CON_COMMAND_NO_WRAPPER(sc_fastmedkit, "Toggle fast medkit")
 {
-	Msg(g_Config.cvars.fast_medkit ? "Fast Revive disabled\n" : "Fast Revive enabled\n");
+	Msg(g_Config.cvars.fast_medkit ? "Fast Medkit disabled\n" : "Fast Medkit enabled\n");
 	g_Config.cvars.fast_medkit = !g_Config.cvars.fast_medkit;
 }
 
@@ -360,7 +341,7 @@ CON_COMMAND_EXTERN_NO_WRAPPER(sc_freeze2, ConCommand_Freeze2, "Block connection 
 	s_bFreeze2 = !s_bFreeze2;
 }
 
-CON_COMMAND(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox name")
+CON_COMMAND_NO_WRAPPER(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox name")
 {
 	if (g_pPlayerMove && g_pPlayerMove->movevars)
 	{
@@ -368,7 +349,7 @@ CON_COMMAND(sc_print_skybox_name, "sc_print_skybox_name - Prints current skybox 
 	}
 }
 
-CON_COMMAND(sc_print_steamids, "sc_print_steamids - Print Steam64 IDs of players")
+CON_COMMAND_NO_WRAPPER(sc_print_steamids, "sc_print_steamids - Print Steam64 IDs of players")
 {
 	for (int i = 1; i <= MAXCLIENTS; i++)
 	{
@@ -463,7 +444,7 @@ CON_COMMAND(sc_remove_on_tick_command, "sc_remove_on_tick_command - Remove a com
 	}
 }
 
-CON_COMMAND(sc_print_on_tick_commands, "sc_print_on_tick_commands - Prints all on tick commands")
+CON_COMMAND_NO_WRAPPER(sc_print_on_tick_commands, "sc_print_on_tick_commands - Prints all on tick commands")
 {
 	Msg("[Alias = Command]\n");
 
@@ -590,14 +571,14 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		sc_speedhack_ltfx.SetValue("-100");
 
 	// Set speedhack
-	UTIL_SetGameSpeed(static_cast<double>(sc_speedhack.GetFloat()));
+	UTIL_SetGameSpeed( static_cast<double>(sc_speedhack.GetFloat()) );
 	*dbRealtime += static_cast<double>(sc_speedhack_ltfx.GetFloat()) * frametime;
 
 	FakeLag(frametime);
 	ColorPulsator();
 	TertiaryAttackGlitch();
 
-	if (g_Config.cvars.rotate_dead_body && g_pPlayerMove->dead)
+	if ( g_Config.cvars.rotate_dead_body && g_pPlayerMove->dead )
 	{
 		Vector va;
 
@@ -605,7 +586,7 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		cmd->viewangles = va;
 	}
 
-	if (g_pPlayerMove->iuser1 < 1)
+	if ( !Client()->IsSpectating() )
 	{
 		AutoSelfSink();
 		AutoCeilClipping(cmd);
@@ -649,7 +630,7 @@ void CMisc::OnAddEntityPost(int is_visible, int type, struct cl_entity_s *ent, c
 {
 	if (g_Config.cvars.show_players_push_direction)
 	{
-		if (is_visible && type == ET_PLAYER && ent->index != g_pPlayerMove->player_index + 1)
+		if ( is_visible && type == ET_PLAYER && ent->index != Client()->GetPlayerIndex() )
 		{
 			Vector vecEnd;
 			Vector vecEnd2;
@@ -795,18 +776,18 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 {
 	static int nJumpBugState = 0;
 
-	if (g_Config.cvars.jumpbug && g_pPlayerMove->flFallVelocity > 580.0f)
+	if (g_Config.cvars.jumpbug && Client()->GetFallVelocity() > 500.0f)
 	{
 		Vector vBottomOrigin = g_pPlayerMove->origin; vBottomOrigin.z -= 8192.0f;
-		pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, /* g_pPlayerMove->usehull */ (g_pPlayerMove->flags & FL_DUCKING) ? 1 : 0, -1);
+		pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, /* g_pPlayerMove->usehull */ (Client()->GetFlags() & FL_DUCKING) ? 1 : 0, -1);
 
 		float flHeight = fabsf(pTrace->endpos.z - g_pPlayerMove->origin.z);
-		float flGroundNormalAngle = acos(pTrace->plane.normal.z);
+		//float flGroundNormalAngle = acos(pTrace->plane.normal.z);
 
-		if (flGroundNormalAngle <= acosf(0.7f) && g_pPlayerMove->waterlevel == WL_NOT_IN_WATER)
+		if ( /* flGroundNormalAngle <= acosf(0.7f) && */ Client()->GetWaterLevel() == WL_NOT_IN_WATER )
 		{
 			float flPlayerHeight = flHeight; // = 0.0f
-			float flFrameZDist = fabsf((g_pPlayerMove->flFallVelocity + (800.0f * frametime)) * frametime);
+			float flFrameZDist = fabsf((Client()->GetFallVelocity() + (800.0f * frametime)) * frametime);
 
 			//if (g_Local.flGroundNormalAngle > 1.0f)
 			//{
@@ -871,13 +852,13 @@ void CMisc::DoubleDuck(struct usercmd_s *cmd)
 	{
 		static bool bForceUnduck = false;
 
-		if (bForceUnduck)
+		if ( bForceUnduck )
 		{
 			cmd->buttons &= ~IN_DUCK;
 
 			bForceUnduck = false;
 		}
-		else if (g_pPlayerMove->onground != -1)
+		else if ( Client()->IsOnGround() )
 		{
 			cmd->buttons |= IN_DUCK;
 
@@ -892,10 +873,10 @@ void CMisc::DoubleDuck(struct usercmd_s *cmd)
 
 void CMisc::FastRun(struct usercmd_s *cmd)
 {
-	if (g_Config.cvars.fastrun && g_pPlayerMove->onground != -1)
+	if ( g_Config.cvars.fastrun && Client()->IsOnGround() )
 	{
 		static bool bFastRun = false;
-		float flMaxSpeed = g_pPlayerMove->maxspeed;
+		float flMaxSpeed = Client()->GetMaxSpeed();
 
 		if ((cmd->buttons & IN_FORWARD && cmd->buttons & IN_MOVELEFT) || (cmd->buttons & IN_BACK && cmd->buttons & IN_MOVERIGHT))
 		{
@@ -1059,14 +1040,14 @@ static bool IsBusyWithLongJump(usercmd_t *cmd)
 {
 	if ( cmd->buttons & IN_JUMP && Client()->IsOnGround() )
 	{
-		if ( g_pPlayerMove->bInDuck || g_pPlayerMove->flags & FL_DUCKING )
+		if ( Client()->IsDucking() || Client()->GetFlags() & FL_DUCKING)
 		{
 			if ( cmd->buttons & IN_DUCK && g_pPlayerMove->flDuckTime > 0.f )
 			{
 				const char *pszValue = g_pEngineFuncs->PhysInfo_ValueForKey("slj");
 				bool bCanSuperJump = (pszValue && *pszValue == '1');
 
-				if ( bCanSuperJump && g_pPlayerMove->velocity.Length() > 50.f )
+				if ( bCanSuperJump && Client()->GetVelocity().Length() > 50.f)
 				{
 					return true;
 				}
@@ -1125,7 +1106,7 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 
 	if (bAnglesChanged)
 	{
-		if (g_pPlayerMove->movetype == MOVETYPE_WALK && g_pPlayerMove->waterlevel <= WL_FEET)
+		if (Client()->GetMoveType() == MOVETYPE_WALK && Client()->GetWaterLevel() <= WL_FEET)
 		{
 			if ( !(cmd->buttons & IN_USE || cmd->impulse == 201 || IsFiring(cmd) || IsBusyWithLongJump(cmd)) )
 			{
@@ -1154,7 +1135,7 @@ void CMisc::Stick(struct usercmd_s *cmd)
 	{
 		cl_entity_t *pPlayer = g_pEngineFuncs->GetEntityByIndex(s_iStickTarget);
 
-		if (pPlayer && pPlayer->curstate.messagenum >= g_pEngineFuncs->GetLocalPlayer()->curstate.messagenum && !g_pClient->IsDead())
+		if ( pPlayer && pPlayer->curstate.messagenum >= g_pEngineFuncs->GetLocalPlayer()->curstate.messagenum && !Client()->IsDead() )
 		{
 			Vector2D vecForward;
 			Vector2D vecRight;
@@ -1170,8 +1151,8 @@ void CMisc::Stick(struct usercmd_s *cmd)
 			vecRight.x = vecForward.y;
 			vecRight.y = -vecForward.x;
 
-			vecForward *= g_pPlayerMove->maxspeed;
-			vecRight *= g_pPlayerMove->maxspeed;
+			vecForward *= Client()->GetMaxSpeed();
+			vecRight *= Client()->GetMaxSpeed();
 
 			float forwardmove = DotProduct(vecForward, vecDir);
 			float sidemove = DotProduct(vecRight, vecDir);
@@ -1179,12 +1160,12 @@ void CMisc::Stick(struct usercmd_s *cmd)
 			cmd->forwardmove = forwardmove;
 			cmd->sidemove = sidemove;
 
-			if (g_pClient->GetWaterLevel() > WL_NOT_IN_WATER && pPlayer->curstate.origin.z >= g_pPlayerMove->origin.z)
+			if (Client()->GetWaterLevel() > WL_NOT_IN_WATER && pPlayer->curstate.origin.z >= g_pPlayerMove->origin.z)
 			{
-				if (g_pClient->GetFlags() & FL_WATERJUMP)
+				if ( Client()->GetFlags() & FL_WATERJUMP )
 					cmd->buttons |= IN_DUCK;
 
-				cmd->upmove = g_pPlayerMove->maxspeed;
+				cmd->upmove = Client()->GetMaxSpeed();
 			}
 
 			s_vecStickPrevPos = pPlayer->curstate.origin;
@@ -1204,21 +1185,21 @@ void CMisc::AutoCeilClipping(struct usercmd_s *cmd)
 {
 	static bool jumped = false;
 
-	if ( g_Config.cvars.auto_ceil_clipping && g_pPlayerMove->iuser1 == 0 && !g_pPlayerMove->dead )
+	if ( g_Config.cvars.auto_ceil_clipping && !Client()->IsDead() )
 	{
 		if (jumped)
 		{
-			if (g_pPlayerMove->onground == -1 && g_pPlayerMove->waterlevel <= WL_FEET)
+			if ( !Client()->IsOnGround() && Client()->GetWaterLevel() <= WL_FEET)
 			{
 				cmd->buttons |= IN_DUCK;
 
 				// Suicide only if we got apex or started falling
-				if (g_pPlayerMove->velocity.z <= 0.f)
+				if ( Client()->GetVelocity().z <= 0.f )
 				{
 					Vector vecStart = g_pPlayerMove->origin;
 					Vector vecEnd = vecStart + Vector(0.f, 0.f, VEC_DUCK_HULL_MAX.z);
 
-					pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(vecStart, vecEnd, PM_NORMAL, (g_pPlayerMove->flags & FL_DUCKING) ? 1 : 0, -1);
+					pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(vecStart, vecEnd, PM_NORMAL, (Client()->GetFlags() & FL_DUCKING) ? 1 : 0, -1);
 
 					if (pTrace->fraction < 1.0f)
 					{
@@ -1234,7 +1215,7 @@ void CMisc::AutoCeilClipping(struct usercmd_s *cmd)
 		}
 		else
 		{
-			if (g_pPlayerMove->onground == -1 && g_pPlayerMove->velocity.z > 0.f)
+			if ( !Client()->IsOnGround() && Client()->GetVelocity().z > 0.f)
 				jumped = true;
 			else
 				jumped = false;
@@ -1254,14 +1235,14 @@ void CMisc::FakeLag(float frametime)
 {
 	static bool bSetInterpOnce = false;
 
-	if (g_Config.cvars.fakelag_adaptive_ex_interp)
+	if ( g_Config.cvars.fakelag_adaptive_ex_interp )
 	{
 		if (ex_interp->value != 0.01f)
 			ex_interp->value = 0.01f;
 
 		bSetInterpOnce = true;
 	}
-	else if (bSetInterpOnce)
+	else if ( bSetInterpOnce )
 	{
 		if (ex_interp->value == 0.01f)
 			ex_interp->value = 0.1f;
@@ -1269,27 +1250,27 @@ void CMisc::FakeLag(float frametime)
 		bSetInterpOnce = false;
 	}
 
-	if (g_Config.cvars.fakelag)
+	if ( g_Config.cvars.fakelag )
 	{
 		bool bFakeLag = true;
 
-		if (g_Config.cvars.fakelag_move != 0)
+		if ( g_Config.cvars.fakelag_move != 0 )
 		{
-			float flVelocity = g_pPlayerMove->velocity.Length2D();
+			float flVelocity = Client()->GetVelocity().Length2D();
 
-			if (g_Config.cvars.fakelag_move == 1) // On land
+			if ( g_Config.cvars.fakelag_move == 1 ) // On land
 			{
-				if (flVelocity > 0.f)
+				if ( flVelocity > 0.f )
 					bFakeLag = false;
 			}
-			else if (g_Config.cvars.fakelag_move == 2) // On move
+			else if ( g_Config.cvars.fakelag_move == 2 ) // On move
 			{
-				if (flVelocity == 0.f)
+				if ( flVelocity == 0.f )
 					bFakeLag = false;
 			}
-			else if (g_Config.cvars.fakelag_move == 3) // In air
+			else if ( g_Config.cvars.fakelag_move == 3 ) // In air
 			{
-				if (g_pPlayerMove->onground != -1)
+				if ( Client()->IsOnGround() )
 					bFakeLag = false;
 			}
 		}
@@ -1343,7 +1324,7 @@ void CMisc::FakeLag(float frametime)
 			}
 			else if (g_Config.cvars.fakelag_type == 3) // Break lag compensation
 			{
-				Vector velocity = g_pPlayerMove->velocity;
+				Vector velocity = Client()->GetVelocity();
 				velocity.z = 0;
 				float len = velocity.Length() * frametime;
 
@@ -1378,7 +1359,7 @@ void CMisc::AutoSelfSink() // improve it tf
 
 		s_nSinkState = 0;
 	}
-	else if (s_nSinkState == 2 && g_pPlayerMove->view_ofs.z == VEC_DUCK_VIEW.z)
+	else if (s_nSinkState == 2 && Client()->GetViewOffset().z == VEC_DUCK_VIEW.z)
 	{
 		ConCommand_AutoSelfSink();
 	}
@@ -1509,13 +1490,13 @@ void CMisc::QuakeGuns_V_CalcRefdef()
 	{
 		cl_entity_s *pViewModel = g_pEngineFuncs->GetViewModel();
 
-		if (!pViewModel)
+		if ( !pViewModel )
 			return;
 
-		if (s_iWeaponID == -1)
+		if ( Client()->GetCurrentWeaponID() == WEAPON_NONE )
 			return;
 
-		float offset = GetWeaponOffset(pViewModel, s_iWeaponID);
+		float offset = GetWeaponOffset(pViewModel);
 
 		Vector va, right;
 
@@ -1580,7 +1561,7 @@ bool CMisc::Load()
 
 	m_pfnQueryPerformanceCounter = (void *)QueryPerformanceCounter;
 
-	m_pfnCHud__Think = MemoryUtils()->FindPattern( g_pModules->Client, Patterns::Client::CHud__Think );
+	m_pfnCHud__Think = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::CHud__Think );
 
 	if ( !m_pfnCHud__Think )
 	{
@@ -1588,7 +1569,7 @@ bool CMisc::Load()
 		return false;
 	}
 
-	m_pfnNetchan_Transmit = MemoryUtils()->FindPattern( g_pModules->Hardware, Patterns::Hardware::Netchan_Transmit );
+	m_pfnNetchan_Transmit = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::Netchan_Transmit );
 
 	if ( !m_pfnNetchan_Transmit )
 	{
