@@ -389,8 +389,6 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("SaveSoundcache", cvars.save_soundcache);
 			ConfigManager()->ImportParam("RotateDeadBody", cvars.rotate_dead_body);
 			ConfigManager()->ImportParam("AutoCeilClipping", cvars.auto_ceil_clipping);
-			ConfigManager()->ImportParam("FastCrowbar", cvars.fast_crowbar);
-			ConfigManager()->ImportParam("FastRevive", cvars.fast_medkit);
 			ConfigManager()->ImportParam("RemoveFOVCap", cvars.remove_fov_cap);
 			ConfigManager()->ImportParam("NoWeaponAnim", cvars.no_weapon_anim);
 			ConfigManager()->ImportParam("ColorPulsator", cvars.color_pulsator);
@@ -405,6 +403,12 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("SpinPitch", cvars.spin_pitch_angle);
 			ConfigManager()->ImportParam("SpinYawAngle", cvars.spin_yaw_rotation_angle);
 			ConfigManager()->ImportParam("SpinPitchAngle", cvars.spin_pitch_rotation_angle);
+			ConfigManager()->ImportParam("OneTickExploit", cvars.one_tick_exploit);
+			ConfigManager()->ImportParam("OneTickExploitLagInterval", cvars.one_tick_exploit_lag_interval);
+			ConfigManager()->ImportParam("OneTickExploitSpeedhack", cvars.one_tick_exploit_speedhack);
+			ConfigManager()->ImportParam("FastCrowbar", cvars.fast_crowbar);
+			ConfigManager()->ImportParam("FastCrowbar2", cvars.fast_crowbar2);
+			ConfigManager()->ImportParam("FastRevive", cvars.fast_medkit);
 			ConfigManager()->ImportParam("ApplicationSpeed", cvars.application_speed);
 
 			ConfigManager()->EndSectionImport();
@@ -817,6 +821,12 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("SpinPitch", cvars.spin_pitch_angle);
 			ConfigManager()->ExportParam("SpinYawAngle", cvars.spin_yaw_rotation_angle);
 			ConfigManager()->ExportParam("SpinPitchAngle", cvars.spin_pitch_rotation_angle);
+			ConfigManager()->ExportParam("OneTickExploit", cvars.one_tick_exploit);
+			ConfigManager()->ExportParam("OneTickExploitLagInterval", cvars.one_tick_exploit_lag_interval);
+			ConfigManager()->ExportParam("OneTickExploitSpeedhack", cvars.one_tick_exploit_speedhack);
+			ConfigManager()->ExportParam("FastCrowbar", cvars.fast_crowbar);
+			ConfigManager()->ExportParam("FastCrowbar2", cvars.fast_crowbar2);
+			ConfigManager()->ExportParam("FastRevive", cvars.fast_medkit);
 			ConfigManager()->ExportParam("ApplicationSpeed", cvars.application_speed);
 
 			ConfigManager()->EndSectionExport();

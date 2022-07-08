@@ -248,8 +248,6 @@ public:
 		bool rotate_dead_body = false;
 		bool remove_fov_cap = false;
 		bool auto_ceil_clipping = false;
-		bool fast_crowbar = false;
-		bool fast_medkit = false;
 		int no_weapon_anim = 0; // enum
 
 		bool color_pulsator = false;
@@ -266,6 +264,13 @@ public:
 		bool spin_pitch_angle = false;
 		float spin_yaw_rotation_angle = 0.5f;
 		float spin_pitch_rotation_angle = 0.5f;
+
+		bool fast_crowbar = false;
+		bool fast_crowbar2 = false;
+		bool fast_medkit = false;
+		bool one_tick_exploit = false;
+		int one_tick_exploit_lag_interval = 45;
+		float one_tick_exploit_speedhack = 20000.0f;
 
 		float application_speed = 1.0f;
 

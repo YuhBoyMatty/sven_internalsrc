@@ -61,6 +61,7 @@ static int s_iWeaponID = -1;
 
 static bool s_bFreeze = false;
 static bool s_bFreeze2 = false;
+bool g_bForceFreeze2 = false;
 
 static float s_flTopColorDelay = 0.0f;
 static float s_flBottomColorDelay = 0.0f;
@@ -317,10 +318,22 @@ CON_COMMAND(sc_stick, "Follow a player")
 	}
 }
 
+CON_COMMAND_NO_WRAPPER(sc_one_tick_exploit, "Exploits an action on one tick")
+{
+	Msg(g_Config.cvars.one_tick_exploit ? "One Tick Exploit disabled\n" : "One Tick Exploit enabled\n");
+	g_Config.cvars.one_tick_exploit = !g_Config.cvars.one_tick_exploit;
+}
+
 CON_COMMAND_NO_WRAPPER(sc_fastcrowbar, "Toggle fast crowbar")
 {
 	Msg(g_Config.cvars.fast_crowbar ? "Fast Crowbar disabled\n" : "Fast Crowbar enabled\n");
 	g_Config.cvars.fast_crowbar = !g_Config.cvars.fast_crowbar;
+}
+
+CON_COMMAND_NO_WRAPPER(sc_fastcrowbar2, "Toggle fast crowbar [auto freeze]")
+{
+	Msg(g_Config.cvars.fast_crowbar2 ? "Fast Crowbar #2 disabled\n" : "Fast Crowbar #2 enabled\n");
+	g_Config.cvars.fast_crowbar2 = !g_Config.cvars.fast_crowbar2;
 }
 
 CON_COMMAND_NO_WRAPPER(sc_fastmedkit, "Toggle fast medkit")
@@ -519,7 +532,7 @@ DECLARE_FUNC(BOOL, WINAPI, HOOKED_fQueryPerformanceCounter, LARGE_INTEGER *lpPer
 
 DECLARE_FUNC(void, __cdecl, HOOKED_fNetchan_Transmit, netchan_t *chan, int lengthInBytes, unsigned char *data)
 {
-	if (s_bFreeze2)
+	if (s_bFreeze2 || g_bForceFreeze2)
 	{
 		ORIG_fNetchan_Transmit(chan, 0, NULL); // cancel size and data
 		return;
@@ -564,10 +577,10 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	}
 
 	// Clamp speedhack values
-	if (sc_speedhack.GetFloat() < 0.0f)
+	if ( sc_speedhack.GetFloat() < 0.0f )
 		sc_speedhack.SetValue("0");
 	
-	if (sc_speedhack_ltfx.GetFloat() < -100.0f)
+	if ( sc_speedhack_ltfx.GetFloat() < -100.0f )
 		sc_speedhack_ltfx.SetValue("-100");
 
 	// Set speedhack
@@ -590,16 +603,16 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	{
 		AutoSelfSink();
 		AutoCeilClipping(cmd);
-		JumpBug(frametime, cmd);
 		AutoJump(cmd);
+		JumpBug(frametime, cmd);
 		DoubleDuck(cmd);
 		FastRun(cmd);
 		Spinner(cmd);
 		Stick(cmd);
-		RapidAction(cmd);
+		OneTickExploit(cmd);
 	}
 
-	if (s_bFreeze)
+	if ( s_bFreeze )
 		bSendPacket = false;
 }
 
@@ -690,12 +703,12 @@ void CMisc::OnVideoInit()
 }
 
 //-----------------------------------------------------------------------------
-// Some rapid stuff
+// One tick exploit
 //-----------------------------------------------------------------------------
 
-void CMisc::RapidAction(struct usercmd_s *cmd)
+void CMisc::OneTickExploit(struct usercmd_s *cmd)
 {
-	if ( (g_Config.cvars.fast_crowbar || g_Config.cvars.fast_medkit) && !Client()->IsDead() )
+	if ( !Client()->IsDead() )
 	{
 		bool bDoRapidAction = false;
 
@@ -703,7 +716,7 @@ void CMisc::RapidAction(struct usercmd_s *cmd)
 		{
 			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR )
 			{
-				if (cmd->buttons & IN_ATTACK)
+				if ( cmd->buttons & IN_ATTACK )
 				{
 					bDoRapidAction = true;
 				}
@@ -714,9 +727,26 @@ void CMisc::RapidAction(struct usercmd_s *cmd)
 		{
 			if ( Client()->GetCurrentWeaponID() == WEAPON_MEDKIT )
 			{
-				if (cmd->buttons & (IN_ATTACK | IN_ATTACK2))
+				if ( cmd->buttons & (IN_ATTACK | IN_ATTACK2) )
 				{
 					bDoRapidAction = true;
+				}
+			}
+		}
+
+		if ( g_Config.cvars.fast_crowbar2 )
+		{
+			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR )
+			{
+				if ( cmd->buttons & IN_ATTACK )
+				{
+					bDoRapidAction = true;
+					g_bForceFreeze2 = true;
+				}
+				else if ( Client()->ButtonLast() & IN_ATTACK )
+				{
+					bDoRapidAction = true;
+					g_bForceFreeze2 = false;
 				}
 			}
 		}
@@ -743,6 +773,26 @@ void CMisc::RapidAction(struct usercmd_s *cmd)
 	else
 	{
 		m_iFakeLagCounter = 0;
+	}
+
+	if ( g_Config.cvars.one_tick_exploit )
+	{
+		if ( m_iOneTickExploitLagInterval < g_Config.cvars.one_tick_exploit_lag_interval )
+		{
+			bSendPacket = false;
+			m_iOneTickExploitLagInterval++;
+		}
+		else
+		{
+			bSendPacket = true;
+			m_iOneTickExploitLagInterval = 0;
+		}
+
+		UTIL_SetGameSpeed( g_Config.cvars.one_tick_exploit_speedhack );
+	}
+	else
+	{
+		m_iOneTickExploitLagInterval = 0;
 	}
 }
 
@@ -776,31 +826,29 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 {
 	static int nJumpBugState = 0;
 
-	if (g_Config.cvars.jumpbug && Client()->GetFallVelocity() > 500.0f)
+	if (g_Config.cvars.jumpbug && Client()->GetFallVelocity() > 500.0f && g_pPlayerMove->movevars != NULL)
 	{
-		Vector vBottomOrigin = g_pPlayerMove->origin; vBottomOrigin.z -= 8192.0f;
-		pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, /* g_pPlayerMove->usehull */ (Client()->GetFlags() & FL_DUCKING) ? 1 : 0, -1);
+		Vector vecPredictVelocity = Client()->GetVelocity() * frametime;
 
-		float flHeight = fabsf(pTrace->endpos.z - g_pPlayerMove->origin.z);
+		vecPredictVelocity.z = 0.f; // 2D only, height will be predicted separately
+
+		Vector vecPredictOrigin = g_pPlayerMove->origin + vecPredictVelocity;
+		Vector vBottomOrigin = vecPredictOrigin;
+
+		vBottomOrigin.z -= 8192.0f;
+
+		pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(vecPredictOrigin,
+														 vBottomOrigin,
+														 PM_NORMAL,
+														 (Client()->GetFlags() & FL_DUCKING) ? 1 : 0 /* g_pPlayerMove->usehull */,
+														 -1);
+
+		float flHeight = fabsf(pTrace->endpos.z - vecPredictOrigin.z);
 		//float flGroundNormalAngle = acos(pTrace->plane.normal.z);
 
-		if ( /* flGroundNormalAngle <= acosf(0.7f) && */ Client()->GetWaterLevel() == WL_NOT_IN_WATER )
+		if ( /* flGroundNormalAngle <= acosf(0.7f) && */ Client()->GetWaterLevel() == WL_NOT_IN_WATER && g_pEngineFuncs->PM_WaterEntity(pTrace->endpos) == -1 )
 		{
-			float flPlayerHeight = flHeight; // = 0.0f
-			float flFrameZDist = fabsf((Client()->GetFallVelocity() + (800.0f * frametime)) * frametime);
-
-			//if (g_Local.flGroundNormalAngle > 1.0f)
-			//{
-				//bool bDuck = g_pPlayerMove->flags & FL_DUCKING;
-				//Vector vBottomOrigin = g_pPlayerMove->origin; vBottomOrigin.z -= 8192.0f;
-
-				//pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(g_pPlayerMove->origin, vBottomOrigin, PM_NORMAL, bDuck ? 1 : 0 /* g_pPlayerMove->usehull */, -1);
-				//flPlayerHeight = fabsf(g_pPlayerMove->origin.z - pTrace->endpos.z + (bDuck ? 18.0f : 36.0f));
-			//}
-			//else
-			//{
-				//flPlayerHeight = g_Local.flHeight;
-			//}
+			float flFrameZDist = fabsf( (Client()->GetFallVelocity() + (g_pPlayerMove->movevars->gravity * frametime)) * frametime );
 
 			cmd->buttons |= IN_DUCK;
 			cmd->buttons &= ~IN_JUMP;
@@ -819,9 +867,9 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 				break;
 
 			default:
-				if (fabsf(flPlayerHeight - flFrameZDist * 1.5f) <= 20.0f && flFrameZDist > 0.0f)
+				if (flFrameZDist > 0.f && fabsf(flHeight - flFrameZDist * 1.5f) <= 20.f)
 				{
-					float flNeedSpeed = fabsf(flPlayerHeight - 19.f);
+					float flNeedSpeed = fabsf(flHeight - 19.f);
 					float flScale = fabsf(flNeedSpeed / flFrameZDist);
 
 					UTIL_SetGameSpeed(flScale);
@@ -1535,6 +1583,7 @@ CMisc::CMisc()
 	m_bSpinCanChangePitch = false;
 
 	m_iFakeLagCounter = 0;
+	m_iOneTickExploitLagInterval = 0;
 }
 
 CMisc::~CMisc()

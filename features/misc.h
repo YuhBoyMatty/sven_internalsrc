@@ -41,7 +41,7 @@ private:
 	void FastRun(struct usercmd_s *cmd);
 	void Spinner(struct usercmd_s *cmd);
 	void Stick(struct usercmd_s *cmd);
-	void RapidAction(struct usercmd_s *cmd);
+	void OneTickExploit(struct usercmd_s *cmd);
 	
 	void AutoCeilClipping(struct usercmd_s *cmd);
 	void FakeLag(float frametime);
@@ -69,6 +69,7 @@ private:
 	bool m_bSpinCanChangePitch;
 
 	int m_iFakeLagCounter;
+	int m_iOneTickExploitLagInterval;
 };
 
 extern CMisc g_Misc;

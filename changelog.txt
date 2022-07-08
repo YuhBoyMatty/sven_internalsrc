@@ -46,3 +46,11 @@ Changelog for Sven Internal
 
 07/07/20222 - Version 2.0.7:
 - Minor fixes
+
+08/07/20222 - Version 2.0.8:
+- Added one tick exploit (sc_one_tick_exploit)
+- Added some models in class table
+- Added prediction of hotizontal position in auto jumpbug
+- Now auto jumpbug takes in account the server's gravity
+- Fast Crowbar, Fast Medkit features moved to the menu: Player > Misc.
+- Added the second method of Fast Crowbar that freezes the player (sc_fastcrowbar2)

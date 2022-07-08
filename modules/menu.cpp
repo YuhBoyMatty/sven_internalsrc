@@ -1341,12 +1341,6 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 						ImGui::Spacing();
-						
-						ImGui::Checkbox("Fast Crowbar", &g_Config.cvars.fast_crowbar); ImGui::SameLine();
-						ImGui::Checkbox("Fast Medkit", &g_Config.cvars.fast_medkit);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
 
 						ImGui::Separator();
 
@@ -1780,8 +1774,6 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::Separator();
-
 						ImGui::Spacing();
 						ImGui::Spacing();
 
@@ -1813,7 +1805,32 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
+						ImGui::Text("One Tick Exploit");
+
+						ImGui::Spacing();
+
 						ImGui::Separator();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("One Tick Exploit", &g_Config.cvars.one_tick_exploit);
+
+						ImGui::Spacing();
+
+						ImGui::Text("Lag Interval");
+						ImGui::SliderInt("##one_tick_exploit_lag_interval", &g_Config.cvars.one_tick_exploit_lag_interval, 1, 256);
+						
+						ImGui::Text("Speedhack");
+						ImGui::SliderFloat("##one_tick_exploit_speedhack", &g_Config.cvars.one_tick_exploit_speedhack, 0.01f, 1000000000.0f);
+						
+						ImGui::Spacing();
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Fast Crowbar", &g_Config.cvars.fast_crowbar);
+						ImGui::Checkbox("Fast Crowbar [Auto Freeze]", &g_Config.cvars.fast_crowbar2);
+						ImGui::Checkbox("Fast Medkit", &g_Config.cvars.fast_medkit);
 
 						ImGui::Spacing();
 						ImGui::Spacing();

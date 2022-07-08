@@ -23,6 +23,8 @@
 
 static void SaveSoundcache();
 
+extern bool g_bForceFreeze2;
+
 //-----------------------------------------------------------------------------
 // SvenMod's plugin
 //-----------------------------------------------------------------------------
@@ -188,6 +190,14 @@ void CSvenInternal::GameFrame(client_state_t state, double frametime, bool bPost
 					wait_frames_TAGS = 0;
 				}
 			}
+			else
+			{
+				g_bForceFreeze2 = false;
+			}
+		}
+		else
+		{
+			g_bForceFreeze2 = false;
 		}
 	}
 }
@@ -219,7 +229,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.7";
+	return "2.0.8";
 }
 
 const char *CSvenInternal::GetDescription(void)
