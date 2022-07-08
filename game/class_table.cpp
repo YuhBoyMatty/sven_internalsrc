@@ -13,7 +13,7 @@
 
 const char *g_szClassName[] =
 {
-	// position of class name must match with the class id
+	// position of class name must match with the class id, need to improve it..
 	"Unknown",
 
 	"Player",
@@ -70,6 +70,25 @@ const char *g_szClassName[] =
 	"Barnabus",
 	"Skeleton",
 
+	// Wouldn't add them tbh
+	"Stukabat",
+	"Kingpin",
+	"Xen Commander",
+	"Special Forces Grunt",
+	"Barniel",
+	"Archer",
+	"Panthereye",
+	"Fiona",
+	"Twitcher",
+	"Spitter",
+	"Handcrab",
+	"Screamer",
+	"Devourer",
+	"Wheelchair",
+	"Face",
+	"Hellhound",
+	"Addiction",
+
 	// Items
 	"Medkit",
 	"Suit Battery",
@@ -123,19 +142,19 @@ class_info_t GetEntityClassInfo(const char *pszModelName)
 {
 	auto pClassEntry = g_HashClassTable.Find((uint32_t)pszModelName);
 
-	if (!pClassEntry)
+	if ( !pClassEntry )
 	{
 		const char *pszSlashLastOccur = strrchr(pszModelName, '/');
 		const char *pszModelNameSliced = pszModelName;
 
-		if (pszSlashLastOccur)
+		if ( pszSlashLastOccur )
 			pszModelNameSliced = pszSlashLastOccur + 1;
 
 		// Result: "model/hlclassic/scientist.mdl" -> "scientist.mdl"
 
 		class_info_t *pClassInfo = g_HashModelsTable.Find(pszModelNameSliced);
 
-		if (!pClassInfo)
+		if ( !pClassInfo )
 		{
 			g_HashClassTable.Insert((uint32_t)pszModelName, LINK_CLASS_INFO(CLASS_NONE, FL_CLASS_NEUTRAL));
 			return { CLASS_NONE, FL_CLASS_NEUTRAL };
@@ -262,6 +281,31 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("rgrunt.mdl", LINK_CLASS_INFO(CLASS_NPC_ROBOT_GRUNT, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("barnabus.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNABUS, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("skeleton.mdl", LINK_CLASS_INFO(CLASS_NPC_SKELETON, FL_CLASS_ENEMY));
+
+	// Wouldn't add them tbh
+	g_HashModelsTable.Insert("stukabat.mdl", LINK_CLASS_INFO(CLASS_NPC_STUKABAT, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("kingpin.mdl", LINK_CLASS_INFO(CLASS_NPC_KINGPIN, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("tor.mdl", LINK_CLASS_INFO(CLASS_NPC_TOR, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("spforce.mdl", LINK_CLASS_INFO(CLASS_NPC_SPECFOR_GRUNT, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("barniel.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNIEL, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("archer.mdl", LINK_CLASS_INFO(CLASS_NPC_ARCHER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("sslave.mdl", LINK_CLASS_INFO(CLASS_NPC_VORTIGAUNT, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("panther.mdl", LINK_CLASS_INFO(CLASS_NPC_PANTHEREYE, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("hassassinf.mdl", LINK_CLASS_INFO(CLASS_NPC_FEMALE_ASSASSIN, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("fiona.mdl", LINK_CLASS_INFO(CLASS_NPC_FIONA, FL_CLASS_NEUTRAL));
+	g_HashModelsTable.Insert("twitcher.mdl", LINK_CLASS_INFO(CLASS_NPC_TWITCHER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("twitcher2.mdl", LINK_CLASS_INFO(CLASS_NPC_TWITCHER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("twitcher3.mdl", LINK_CLASS_INFO(CLASS_NPC_TWITCHER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("twitcher4.mdl", LINK_CLASS_INFO(CLASS_NPC_TWITCHER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("spitter.mdl", LINK_CLASS_INFO(CLASS_NPC_SPITTER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("handcrab.mdl", LINK_CLASS_INFO(CLASS_NPC_HANDCRAB, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("screamer.mdl", LINK_CLASS_INFO(CLASS_NPC_SCREAMER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("devourer.mdl", LINK_CLASS_INFO(CLASS_NPC_DEVOURER, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("wheelchair_new.mdl", LINK_CLASS_INFO(CLASS_NPC_WHEELCHAIR, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("face_new.mdl", LINK_CLASS_INFO(CLASS_NPC_FACE, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("hellhound.mdl", LINK_CLASS_INFO(CLASS_NPC_HELLHOUND, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("davidbad_cutscene.mdl", LINK_CLASS_INFO(CLASS_NPC_ADDICTION, FL_CLASS_ENEMY));
+	g_HashModelsTable.Insert("davidbad_noaxe.mdl", LINK_CLASS_INFO(CLASS_NPC_ADDICTION, FL_CLASS_ENEMY));
 
 	// Items
 	g_HashModelsTable.Insert("w_medkit.mdl", LINK_CLASS_INFO(CLASS_ITEM_MEDKIT, FL_CLASS_ITEM));
