@@ -28,7 +28,7 @@ screen_info_s g_ScreenInfo;
 // ConCommands, CVars..
 //-----------------------------------------------------------------------------
 
-CON_COMMAND(sc_steamid_to_steamid64, "Converts Steam ID to Steam64 ID, apostrophes \"\" are required")
+CON_COMMAND(sc_steamid_to_steam64id, "Converts Steam ID to Steam64 ID, apostrophes \"\" are required")
 {
 	if (args.ArgC() > 1)
 	{
@@ -46,7 +46,7 @@ CON_COMMAND(sc_steamid_to_steamid64, "Converts Steam ID to Steam64 ID, apostroph
 
 			steamID += v1 + v2 * 2;
 
-			Msg("SteamID64: %llu\n", steamID);
+			Msg("Steam64 ID: %llu\n", steamID);
 			Msg("https://steamcommunity.com/profiles/%llu\n", steamID);
 		}
 		else

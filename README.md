@@ -6,7 +6,7 @@ Currently supported version of the game: 5.25
 Imagine cheating in a co-op game =)
 
 # How to install
-First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/SvenMod)), then download archive `svenint.rar` and place all folders from it in the root folder of the game, next add plugin `sven_internal.dll` to file `plugins.txt` (see header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/SvenMod)). 
+First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/svenmod)). Download the archive `svenint.rar` from (releases [releases](https://github.com/sw1ft747/sven_internal/releases)) and place all files from the archive in the root folder of the game. Next, add the plugin `sven_internal.dll` to the file `plugins.txt` (see the header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/svenmod)). 
 
 # Features
 - Menu (key **INSERT** as default)
@@ -32,17 +32,15 @@ First, if you don't have installed SvenMod then download it and install (see [re
 - Custom Chat Colors
 
 # Files of plugin
-The plugin uses subfolder `sven_internal` in root directory of the game.
+The plugin uses subfolder `sven_internal` in the root directory of the game.
 
 How it looks: `../Sven Co-op/sven_internal/`.
 
-Note: some files/folders may not appear, you need to create them.
+This folder is used to save the config, load list of players (their Steam64 ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
-This folder is used to save the config, save list of muted players, load list of players (their Steam64 ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
+Folder `config` contains all config files. You can save your config via menu or console command `sc_save_config`, also you can load a config via concommand `sc_save_config <optional: filename>`. Automatically the plugin load the config named `default.ini`.
 
-Folder `config` contains all config files. You can save your config via menu or console command `sc_save_config`, and you can load a config via concommand `sc_save_config <optional: filename>`.
-
-File `chat_colors_players.txt` allows to change chat color for a specific player, will be automatically loaded.
+File `chat_colors_players.txt` allows to change the color of nickname for a specific player, will be automatically loaded at plugin load.
 
 Folder `message_spammer` is used by **Message Spammer** to load spam tasks.
 
@@ -54,15 +52,15 @@ Type in the console the following command: `sm printcvars all ? sc_`.
 The command above will print information about each CVar/ConCommand that belongs to the plugin.
 
 # Chat Colors
-Lets you change the color of players when they write something in chat.
+That feature lets you change the color of nickname of players when they write something in the chat.
 
 File `chat_colors_players.txt` used for adding the players in such format: `STEAM64ID : COLOR_NUMBER`.
 
-To convert traditional SteamID to SteamID64 faster, you can use the following console command: `sc_steamid_to_steamid64 [SteamID]`.
+To convert traditional SteamID to Steam64 ID faster, you can use the following console command: `sc_steamid_to_steam64id [SteamID]`.
 
 There're currently 5 color numbers (slots) plus rainbow color, thus you can use 6 unique and customizable colors (can be changed in Menu).
 
-Rainbow color has slot 0, others custom colors from 1 to 5.
+Rainbow color has slot 0, others custom colors have slotos from 1 to 5.
 
 Example for the file:
 ```
@@ -70,12 +68,12 @@ Example for the file:
 76561197962091295 : 5 ; it's a comment too!
 ```
 
-File `chat_colors_players.txt` automatically loads when cheat loaded. Also, you can use a console command `sc_chat_colors_load_players` to reload the list of players.
+File `chat_colors_players.txt` automatically loads when cheat loaded. Also, you can use the console command `sc_chat_colors_load_players` to reload the list of players.
 
 # Message Spammer
 Roughly, it's some kind of AHK.
 
-It uses `*.txt` files from folder `message_spammer` to run spam tasks. Use the following console command to run a spam task: `sc_ms_add [FILENAME]`.
+It uses `*.txt` files from folder `message_spammer` to run spam tasks. Use the following console command to run a spam task: `sc_ms_add <filename>`.
 
 It supports 3 keywords: `loop`, `send` and `sleep`.
 

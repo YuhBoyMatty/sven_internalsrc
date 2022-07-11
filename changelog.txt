@@ -32,25 +32,33 @@ Changelog for Sven Internal
 - Fixed issues with CamHack when enabled spinner
 - Fixed inability to use longjump with spinner
 
-06/06/20222 - Version 2.0.5:
+06/06/2022 - Version 2.0.5:
 - Fixed Anti-AFK when player is loading on the map with enabled option to stay within radius
 - Fixed duplicate call of function 'WindowStyle' in Menu module
 - Added 'sc_stick <player_index>' command to stick to a specified player
 - Added some They Hunger models in class table
 - Adjusted fall velocity when jumpbug is used
 
-06/07/20222 - Version 2.0.6:
+06/07/2022 - Version 2.0.6:
 - Added the missing parameter "AutoCeilClipping" in the config
 - Added rapid fire on crowbar and medkit (sc_fastcrowbar, sc_fastmedkit) [Thanks to guwi]
 - Added feature to register commands that will be executed each game tick (sc_register_on_tick_command, sc_remove_on_tick_command, sc_print_on_tick_commands)
 
-07/07/20222 - Version 2.0.7:
+07/07/2022 - Version 2.0.7:
 - Minor fixes
 
-08/07/20222 - Version 2.0.8:
+08/07/2022 - Version 2.0.8:
 - Added one tick exploit (sc_one_tick_exploit)
 - Added some models in class table
 - Added prediction of hotizontal position in auto jumpbug
 - Now auto jumpbug takes in account the server's gravity
 - Fast Crowbar, Fast Medkit features moved to the menu: Player > Misc.
 - Added the second method of Fast Crowbar that freezes the player (sc_fastcrowbar2)
+
+11/07/2022 - Version 2.0.9:
+- Minor fixes
+- Updated for newer version of SvenMod
+- Added feature to ignore different versions of the same maps [Menu > Utility > Misc.] (won't work on completely different maps)
+- Used class 'CMessageBuffer' instead of poor namespace 'UserMessages'
+- Returned check of slopes for jumpbug
+- Console command 'sc_prints_steamids' won't print empty Steam64 IDs anymore

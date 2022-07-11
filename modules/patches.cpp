@@ -543,7 +543,7 @@ bool CPatchesModule::Load()
 		return false;
 	}
 
-	DWORD dwProtection;
+	int dwProtection;
 	MemoryUtils()->VirtualProtect(g_dbGameSpeed, sizeof(double), PAGE_EXECUTE_READWRITE, &dwProtection);
 
 	return true;

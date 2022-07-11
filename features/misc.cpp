@@ -368,7 +368,7 @@ CON_COMMAND_NO_WRAPPER(sc_print_steamids, "sc_print_steamids - Print Steam64 IDs
 	{
 		player_info_t *pPlayerInfo = g_pEngineStudio->PlayerInfo(i - 1);
 
-		if ( pPlayerInfo )
+		if ( pPlayerInfo && pPlayerInfo->name && pPlayerInfo->name[0] )
 		{
 			Msg("%d. %s - %llu\n", i, pPlayerInfo->name, pPlayerInfo->m_nSteamID);
 		}
@@ -844,9 +844,9 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 														 -1);
 
 		float flHeight = fabsf(pTrace->endpos.z - vecPredictOrigin.z);
-		//float flGroundNormalAngle = acos(pTrace->plane.normal.z);
+		float flGroundNormalAngle = acos(pTrace->plane.normal.z);
 
-		if ( /* flGroundNormalAngle <= acosf(0.7f) && */ Client()->GetWaterLevel() == WL_NOT_IN_WATER && g_pEngineFuncs->PM_WaterEntity(pTrace->endpos) == -1 )
+		if ( flGroundNormalAngle <= acosf(0.7f) && Client()->GetWaterLevel() == WL_NOT_IN_WATER && g_pEngineFuncs->PM_WaterEntity(pTrace->endpos) == -1 )
 		{
 			float flFrameZDist = fabsf( (Client()->GetFallVelocity() + (g_pPlayerMove->movevars->gravity * frametime)) * frametime );
 

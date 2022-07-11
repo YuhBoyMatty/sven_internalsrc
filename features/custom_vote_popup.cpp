@@ -13,7 +13,7 @@
 
 #include <hl_sdk/engine/APIProxy.h>
 #include <keydefs.h>
-#include <usermessages.h>
+#include <messagebuffer.h>
 
 #define DEBUG_VOTE_POPUP 0
 
@@ -33,6 +33,8 @@ struct vote_message_s
 //-----------------------------------------------------------------------------
 
 CUserVotePopup g_VotePopup;
+
+CMessageBuffer VoteMenuBuffer;
 
 UserMsgHookFn ORIG_UserMsgHook_VoteMenu = NULL;
 UserMsgHookFn ORIG_UserMsgHook_EndVote = NULL;
@@ -204,7 +206,8 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 	if (m_bVoteStarted)
 		return false;
 
-	UserMessages::BeginRead(pBuffer, iSize);
+	VoteMenuBuffer.Init(pBuffer, iSize, true);
+	VoteMenuBuffer.BeginReading();
 
 	wchar_t wszBuffer[256];
 
@@ -218,15 +221,15 @@ bool CUserVotePopup::OnVoteStart(const char *pszUserMsg, int iSize, void *pBuffe
 	*m_wszVoteYes = 0;
 	*m_wszVoteNo = 0;
 
-	m_voteType = (votetype_t)UserMessages::ReadByte();
+	m_voteType = (votetype_t)VoteMenuBuffer.ReadByte();
 
-	pszVoteMessage = UserMessages::ReadString();
+	pszVoteMessage = VoteMenuBuffer.ReadString();
 	ValidateMessage(&pszVoteMessage);
 
-	pszVoteYes = UserMessages::ReadString();
+	pszVoteYes = VoteMenuBuffer.ReadString();
 	ValidateMessage(&pszVoteYes);
 	
-	pszVoteNo = UserMessages::ReadString();
+	pszVoteNo = VoteMenuBuffer.ReadString();
 	ValidateMessage(&pszVoteNo);
 
 #if DEBUG_VOTE_POPUP
