@@ -12,6 +12,8 @@ namespace Patterns
 		DEFINE_PATTERN(V_RenderView, "81 EC ? ? 00 00 A1 ? ? ? ? 33 C4 89 84 24 ? ? 00 00 D9 EE D9 15");
 		DEFINE_PATTERN(R_SetupFrame, "83 EC 24 A1 ? ? ? ? 33 C4 89 44 24 20 33 C0 83 3D ? ? ? ? 01 0F 9F C0 50 E8 ? ? ? ? E8");
 		DEFINE_PATTERN(R_LoadSkyboxInt, "81 EC ? ? 00 00 A1 ? ? ? ? 33 C4 89 84 24 ? ? 00 00 53 8B 9C 24 ? ? 00 00 55 56 57 89 5C 24 24");
+		
+		DEFINE_PATTERN(CRC_MapFile, "81 EC ? ? ? ? A1 ? ? ? ? 33 C4 89 84 24 84 04 00 00");
 	}
 
 	namespace Client

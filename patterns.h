@@ -19,6 +19,8 @@ namespace Patterns
 		EXTERN_PATTERN(V_RenderView);
 		EXTERN_PATTERN(R_SetupFrame);
 		EXTERN_PATTERN(R_LoadSkyboxInt);
+
+		EXTERN_PATTERN(CRC_MapFile);
 	}
 
 	namespace Client

@@ -391,10 +391,6 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("AutoCeilClipping", cvars.auto_ceil_clipping);
 			ConfigManager()->ImportParam("RemoveFOVCap", cvars.remove_fov_cap);
 			ConfigManager()->ImportParam("NoWeaponAnim", cvars.no_weapon_anim);
-			ConfigManager()->ImportParam("ColorPulsator", cvars.color_pulsator);
-			ConfigManager()->ImportParam("ColorPulsatorTop", cvars.color_pulsator_top);
-			ConfigManager()->ImportParam("ColorPulsatorBottom", cvars.color_pulsator_bottom);
-			ConfigManager()->ImportParam("ColorPulsatorDelay", cvars.color_pulsator_delay);
 			ConfigManager()->ImportParam("LockPitch", cvars.lock_pitch);
 			ConfigManager()->ImportParam("LockYaw", cvars.lock_yaw);
 			ConfigManager()->ImportParam("LockPitchAngle", cvars.lock_pitch_angle);
@@ -403,6 +399,11 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("SpinPitch", cvars.spin_pitch_angle);
 			ConfigManager()->ImportParam("SpinYawAngle", cvars.spin_yaw_rotation_angle);
 			ConfigManager()->ImportParam("SpinPitchAngle", cvars.spin_pitch_rotation_angle);
+			ConfigManager()->ImportParam("ColorPulsator", cvars.color_pulsator);
+			ConfigManager()->ImportParam("ColorPulsatorTop", cvars.color_pulsator_top);
+			ConfigManager()->ImportParam("ColorPulsatorBottom", cvars.color_pulsator_bottom);
+			ConfigManager()->ImportParam("ColorPulsatorDelay", cvars.color_pulsator_delay);
+			ConfigManager()->ImportParam("IgnoreDifferentMapVersions", cvars.ignore_different_map_versions);
 			ConfigManager()->ImportParam("OneTickExploit", cvars.one_tick_exploit);
 			ConfigManager()->ImportParam("OneTickExploitLagInterval", cvars.one_tick_exploit_lag_interval);
 			ConfigManager()->ImportParam("OneTickExploitSpeedhack", cvars.one_tick_exploit_speedhack);
@@ -809,10 +810,6 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("FastRevive", cvars.fast_medkit);
 			ConfigManager()->ExportParam("RemoveFOVCap", cvars.remove_fov_cap);
 			ConfigManager()->ExportParam("NoWeaponAnim", cvars.no_weapon_anim);
-			ConfigManager()->ExportParam("ColorPulsator", cvars.color_pulsator);
-			ConfigManager()->ExportParam("ColorPulsatorTop", cvars.color_pulsator_top);
-			ConfigManager()->ExportParam("ColorPulsatorBottom", cvars.color_pulsator_bottom);
-			ConfigManager()->ExportParam("ColorPulsatorDelay", cvars.color_pulsator_delay);
 			ConfigManager()->ExportParam("LockPitch", cvars.lock_pitch);
 			ConfigManager()->ExportParam("LockYaw", cvars.lock_yaw);
 			ConfigManager()->ExportParam("LockPitchAngle", cvars.lock_pitch_angle);
@@ -821,6 +818,11 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("SpinPitch", cvars.spin_pitch_angle);
 			ConfigManager()->ExportParam("SpinYawAngle", cvars.spin_yaw_rotation_angle);
 			ConfigManager()->ExportParam("SpinPitchAngle", cvars.spin_pitch_rotation_angle);
+			ConfigManager()->ExportParam("ColorPulsator", cvars.color_pulsator);
+			ConfigManager()->ExportParam("ColorPulsatorTop", cvars.color_pulsator_top);
+			ConfigManager()->ExportParam("ColorPulsatorBottom", cvars.color_pulsator_bottom);
+			ConfigManager()->ExportParam("ColorPulsatorDelay", cvars.color_pulsator_delay);
+			ConfigManager()->ExportParam("IgnoreDifferentMapVersions", cvars.ignore_different_map_versions);
 			ConfigManager()->ExportParam("OneTickExploit", cvars.one_tick_exploit);
 			ConfigManager()->ExportParam("OneTickExploitLagInterval", cvars.one_tick_exploit_lag_interval);
 			ConfigManager()->ExportParam("OneTickExploitSpeedhack", cvars.one_tick_exploit_speedhack);

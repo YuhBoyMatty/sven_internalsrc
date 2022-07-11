@@ -1342,6 +1342,67 @@ void ShowMainMenu()
 						ImGui::Spacing();
 						ImGui::Spacing();
 
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Text("Lock View Angles");
+
+						ImGui::Spacing();
+
+						ImGui::Separator();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Lock Pitch", &g_Config.cvars.lock_pitch);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Lock Pitch: Angle", &g_Config.cvars.lock_pitch_angle, -179.999f, 180.0f);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Lock Yaw", &g_Config.cvars.lock_yaw);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Lock Yaw: Angle", &g_Config.cvars.lock_yaw_angle, 0.0f, 360.0f);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Text("Spinner");
+
+						ImGui::Spacing();
+
+						ImGui::Separator();
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Inclined Rotation", &g_Config.cvars.spin_pitch_angle);
+
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Inclined Rotation: Angle", &g_Config.cvars.spin_pitch_rotation_angle, -10.0f, 10.0f);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::Checkbox("Spin Yaw", &g_Config.cvars.spin_yaw_angle);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
+						ImGui::SliderFloat("Spin Yaw: Angle", &g_Config.cvars.spin_yaw_rotation_angle, -10.0f, 10.0f);
+
+						ImGui::Spacing();
+						ImGui::Spacing();
+
 						ImGui::Separator();
 
 						ImGui::Text("");
@@ -1555,7 +1616,7 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 
-						ImGui::SliderFloat("Stay Within Radius", &g_Config.cvars.antiafk_stay_radius, 25.0f, 500.0f);
+						ImGui::SliderFloat("Stay Within Radius", &g_Config.cvars.antiafk_stay_radius, 10.0f, 500.0f);
 
 						ImGui::Spacing();
 
@@ -1741,13 +1802,13 @@ void ShowMainMenu()
 						ImGui::EndTabItem();
 					}
 
-					// Misc (Spinner, Application Speed)
+					// Misc (One Tick Exploit, Application Speed)
 					if (ImGui::BeginTabItem("Misc."))
 					{
 						ImGui::Spacing();
 						ImGui::Spacing();
 
-						ImGui::Text("Lock View Angles");
+						ImGui::Text("Other");
 
 						ImGui::Spacing();
 
@@ -1755,52 +1816,8 @@ void ShowMainMenu()
 
 						ImGui::Spacing();
 						ImGui::Spacing();
-
-						ImGui::Checkbox("Lock Pitch", &g_Config.cvars.lock_pitch);
-
-						ImGui::Spacing();
-
-						ImGui::SliderFloat("Lock Pitch: Angle", &g_Config.cvars.lock_pitch_angle, -179.999f, 180.0f);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::Checkbox("Lock Yaw", &g_Config.cvars.lock_yaw);
-
-						ImGui::Spacing();
-
-						ImGui::SliderFloat("Lock Yaw: Angle", &g_Config.cvars.lock_yaw_angle, 0.0f, 360.0f);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::Text("Spinner");
-
-						ImGui::Spacing();
-
-						ImGui::Separator();
 						
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::Checkbox("Inclined Rotation", &g_Config.cvars.spin_pitch_angle);
-
-						ImGui::Spacing();
-
-						ImGui::SliderFloat("Inclined Rotation: Angle", &g_Config.cvars.spin_pitch_rotation_angle, -10.0f, 10.0f);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::Checkbox("Spin Yaw", &g_Config.cvars.spin_yaw_angle);
-
-						ImGui::Spacing();
-						ImGui::Spacing();
-
-						ImGui::SliderFloat("Spin Yaw: Angle", &g_Config.cvars.spin_yaw_rotation_angle, -10.0f, 10.0f);
+						ImGui::Checkbox("Ignore Different Map Versions", &g_Config.cvars.ignore_different_map_versions);
 
 						ImGui::Spacing();
 						ImGui::Spacing();

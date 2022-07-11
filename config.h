@@ -265,6 +265,8 @@ public:
 		float spin_yaw_rotation_angle = 0.5f;
 		float spin_pitch_rotation_angle = 0.5f;
 
+		bool ignore_different_map_versions = false;
+
 		bool fast_crowbar = false;
 		bool fast_crowbar2 = false;
 		bool fast_medkit = false;

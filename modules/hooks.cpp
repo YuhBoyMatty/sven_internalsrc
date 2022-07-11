@@ -1,10 +1,13 @@
 #include <hl_sdk/engine/APIProxy.h>
+#include <hl_sdk/common/protocol.h>
 #include <netchan.h>
 
 #include <dbg.h>
 #include <base_feature.h>
+#include <messagebuffer.h>
 
 #include <IHooks.h>
+#include <IUtils.h>
 #include <ISvenModAPI.h>
 #include <IMemoryUtils.h>
 
@@ -49,7 +52,12 @@ DECLARE_HOOK(void, APIENTRY, glColor4f, GLfloat, GLfloat, GLfloat, GLfloat);
 DECLARE_HOOK(void, __cdecl, V_RenderView);
 DECLARE_HOOK(void, __cdecl, R_SetupFrame);
 
+DECLARE_HOOK(int, __cdecl, CRC_MapFile, uint32 *ulCRC, char *pszMapName);
+
 DECLARE_CLASS_HOOK(void, StudioRenderModel, CStudioModelRenderer *);
+
+NetMsgHookFn ORIG_NetMsgHook_ServerInfo = NULL;
+CMessageBuffer ServerInfoBuffer;
 
 //-----------------------------------------------------------------------------
 // Imports
@@ -76,7 +84,10 @@ float g_flClientDataLastUpdate = -1.f;
 Vector g_oldviewangles(0.f, 0.f, 0.f);
 Vector g_newviewangles(0.f, 0.f, 0.f);
 
+uint32 g_ulMapCRC = -1;
+
 static int s_iWaterLevel = 0;
+static bool s_bCheckMapCRC = false;
 
 //-----------------------------------------------------------------------------
 // Hooks module feature
@@ -102,6 +113,7 @@ private:
 	void *m_pfnglColor4f;
 	void *m_pfnV_RenderView;
 	void *m_pfnR_SetupFrame;
+	void *m_pfnCRC_MapFile;
 
 	DetourHandle_t m_hIN_Move;
 	DetourHandle_t m_hNetchan_CanPacket;
@@ -112,8 +124,10 @@ private:
 	DetourHandle_t m_hglColor4f;
 	DetourHandle_t m_hV_RenderView;
 	DetourHandle_t m_hR_SetupFrame;
+	DetourHandle_t m_hCRC_MapFile;
 
 	DetourHandle_t m_hStudioRenderModel;
+	DetourHandle_t m_hNetMsgHook_ServerInfo;
 };
 
 //-----------------------------------------------------------------------------
@@ -246,6 +260,22 @@ DECLARE_FUNC(void, __cdecl, HOOKED_IN_Move, float frametime, usercmd_t *cmd)
 // Engine hooks
 //-----------------------------------------------------------------------------
 
+void HOOKED_NetMsgHook_ServerInfo(void)
+{
+	CNetMessageParams *params = Utils()->GetNetMessageParams();
+
+	ServerInfoBuffer.Init( params->buffer, params->readcount, params->badread );
+
+	ServerInfoBuffer.ReadLong(); // Protocol
+	ServerInfoBuffer.ReadLong(); // Server Number
+
+	g_ulMapCRC = (uint32)ServerInfoBuffer.ReadLong();
+
+	s_bCheckMapCRC = true;
+
+	ORIG_NetMsgHook_ServerInfo();
+}
+
 DECLARE_FUNC(qboolean, __cdecl, HOOKED_Netchan_CanPacket, netchan_t *netchan)
 {
 	if ( !bSendPacket )
@@ -344,6 +374,27 @@ DECLARE_FUNC(void, __cdecl, HOOKED_V_RenderView)
 	//	glFogf(GL_FOG_DENSITY, g_Config.cvars.fog_density / 200.f);
 	//	glFogfv(GL_FOG_COLOR, glColor);
 	//}
+}
+
+DECLARE_FUNC(int, __cdecl, HOOKED_CRC_MapFile, uint32 *ulCRC, char *pszMapName)
+{
+	int result = ORIG_CRC_MapFile(ulCRC, pszMapName);
+
+	if ( s_bCheckMapCRC )
+	{
+		if ( *ulCRC != g_ulMapCRC && g_Config.cvars.ignore_different_map_versions )
+		{
+			Warning("[Sven Internal] Uh oh, your version of the map is different from the server one. Don't worry, we'll keep connecting\n");
+			Warning("[Sven Internal] Client's CRC of the map: %X\n", g_ulMapCRC);
+			Warning("[Sven Internal] Server's CRC of the map: %X\n", *ulCRC);
+
+			*ulCRC = g_ulMapCRC;
+		}
+
+		s_bCheckMapCRC = false;
+	}
+
+	return result;
 }
 
 DECLARE_CLASS_FUNC(void, HOOKED_StudioRenderModel, CStudioModelRenderer *thisptr)
@@ -593,7 +644,7 @@ HOOK_RESULT CClientPostHooks::HUD_Redraw(float time, int intermission)
 
 HOOK_RESULT HOOK_RETURN_VALUE CClientPostHooks::HUD_UpdateClientData(int *changed, client_data_t *pcldata, float flTime)
 {
-	g_bLoading = (flTime == 0.f && flTime > 0.f) || (flTime < g_flClientDataLastUpdate);
+	g_bLoading = (flTime < g_flClientDataLastUpdate) || (g_flClientDataLastUpdate == -1.f);
 
 	if (*changed)
 		g_flClientDataLastUpdate = flTime;
@@ -837,6 +888,14 @@ bool CHooksModule::Load()
 		return false;
 	}
 	
+	m_pfnCRC_MapFile = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Hardware, Patterns::Hardware::CRC_MapFile );
+
+	if ( !m_pfnCRC_MapFile )
+	{
+		Warning("Couldn't find function \"CRC_MapFile\"\n");
+		return false;
+	}
+	
 	m_pfnScaleColors = MemoryUtils()->FindPattern( SvenModAPI()->Modules()->Client, Patterns::Client::ScaleColors );
 
 	if ( !m_pfnScaleColors )
@@ -869,8 +928,11 @@ void CHooksModule::PostLoad()
 	m_hglColor4f = DetoursAPI()->DetourFunction( m_pfnglColor4f, HOOKED_glColor4f, GET_FUNC_PTR(ORIG_glColor4f) );
 	m_hV_RenderView = DetoursAPI()->DetourFunction( m_pfnV_RenderView, HOOKED_V_RenderView, GET_FUNC_PTR(ORIG_V_RenderView) );
 	m_hR_SetupFrame = DetoursAPI()->DetourFunction( m_pfnR_SetupFrame, HOOKED_R_SetupFrame, GET_FUNC_PTR(ORIG_R_SetupFrame) );
+	m_hCRC_MapFile = DetoursAPI()->DetourFunction( m_pfnCRC_MapFile, HOOKED_CRC_MapFile, GET_FUNC_PTR(ORIG_CRC_MapFile) );
 
 	m_hStudioRenderModel = DetoursAPI()->DetourVirtualFunction( g_pStudioRenderer, 20, HOOKED_StudioRenderModel, GET_FUNC_PTR(ORIG_StudioRenderModel) );
+
+	m_hNetMsgHook_ServerInfo = Hooks()->HookNetworkMessage( SVC_SERVERINFO, HOOKED_NetMsgHook_ServerInfo, &ORIG_NetMsgHook_ServerInfo );
 
 	Hooks()->RegisterClientHooks( &g_ClientHooks );
 	Hooks()->RegisterClientPostHooks( &g_ClientPostHooks );
@@ -887,8 +949,11 @@ void CHooksModule::Unload()
 	DetoursAPI()->RemoveDetour( m_hglColor4f );
 	DetoursAPI()->RemoveDetour( m_hV_RenderView );
 	DetoursAPI()->RemoveDetour( m_hR_SetupFrame );
+	DetoursAPI()->RemoveDetour( m_hCRC_MapFile );
 
 	DetoursAPI()->RemoveDetour( m_hStudioRenderModel );
+
+	Hooks()->UnhookNetworkMessage( m_hNetMsgHook_ServerInfo );
 
 	Hooks()->UnregisterClientPostHooks( &g_ClientPostHooks );
 	Hooks()->UnregisterClientHooks( &g_ClientHooks );
