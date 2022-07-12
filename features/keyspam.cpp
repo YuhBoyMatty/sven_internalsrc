@@ -18,6 +18,12 @@ CKeySpam g_KeySpam;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
+CON_COMMAND_EXTERN(sc_spam_hold_mode, ConCommand_SpamHoldMode, "Toggle spam hold mode")
+{
+	Msg(g_Config.cvars.keyspam_hold_mode ? "Hold Mode disabled\n" : "Hold Mode enabled\n");
+	g_Config.cvars.keyspam_hold_mode = !g_Config.cvars.keyspam_hold_mode;
+}
+
 CON_COMMAND_EXTERN(sc_spam_use, ConCommand_UseSpam, "Toggle E spam")
 {
 	g_pEngineFuncs->ClientCmd("-use");
