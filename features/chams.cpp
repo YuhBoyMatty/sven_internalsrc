@@ -9,6 +9,7 @@
 #include <hl_sdk/cl_dll/StudioModelRenderer.h>
 
 #include "chams.h"
+#include "firstperson_roaming.h"
 
 #include "../game/utils.h"
 #include "../config.h"
@@ -220,6 +221,9 @@ bool CChams::StudioRenderModel()
 		}
 		else // player entity
 		{
+			if ( g_Config.cvars.fp_roaming && g_pStudioRenderer->m_pCurrentEntity == g_FirstPersonRoaming.GetTargetPlayer() )
+				return true;
+
 			bRenderHandled = Glow(pEntity, g_Config.cvars.glow_players, g_Config.cvars.glow_players_wall, g_Config.cvars.chams_players, g_Config.cvars.glow_players_width, g_Config.cvars.glow_players_color);
 			bRenderHandled = Chams(pEntity, g_Config.cvars.chams_players, g_Config.cvars.chams_players_wall, g_Config.cvars.chams_players_color, g_Config.cvars.chams_players_wall_color) || bRenderHandled;
 		}
