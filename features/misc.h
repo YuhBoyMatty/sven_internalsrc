@@ -37,6 +37,7 @@ public:
 private:
 	void AutoJump(struct usercmd_s *cmd);
 	void JumpBug(float frametime, struct usercmd_s *cmd);
+	void EdgeJump(float frametime, struct usercmd_s *cmd);
 	void DoubleDuck(struct usercmd_s *cmd);
 	void FastRun(struct usercmd_s *cmd);
 	void Spinner(struct usercmd_s *cmd);

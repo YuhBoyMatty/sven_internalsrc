@@ -381,6 +381,7 @@ bool CConfig::Load()
 		if (ConfigManager()->BeginSectionImport("MISC"))
 		{
 			ConfigManager()->ImportParam("AutoJump", cvars.autojump);
+			ConfigManager()->ImportParam("EdgeJump", cvars.edgejump);
 			ConfigManager()->ImportParam("JumpBug", cvars.jumpbug);
 			ConfigManager()->ImportParam("DoubleDuck", cvars.doubleduck);
 			ConfigManager()->ImportParam("FastRun", cvars.fastrun);
@@ -799,6 +800,7 @@ void CConfig::Save()
 		{
 			ConfigManager()->ExportParam("AutoJump", cvars.autojump);
 			ConfigManager()->ExportParam("JumpBug", cvars.jumpbug);
+			ConfigManager()->ExportParam("EdgeJump", cvars.edgejump);
 			ConfigManager()->ExportParam("DoubleDuck", cvars.doubleduck);
 			ConfigManager()->ExportParam("FastRun", cvars.fastrun);
 			ConfigManager()->ExportParam("QuakeGuns", cvars.quake_guns);

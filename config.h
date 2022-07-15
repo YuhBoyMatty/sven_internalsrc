@@ -240,6 +240,7 @@ public:
 
 		bool autojump = true;
 		bool jumpbug = false;
+		bool edgejump = false;
 		bool doubleduck = false;
 		bool fastrun = false;
 		bool quake_guns = false;

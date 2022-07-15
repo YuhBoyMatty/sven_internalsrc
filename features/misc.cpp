@@ -194,37 +194,43 @@ CON_COMMAND(sc_test, "Retrieve entity's info")
 	}
 }
 
-CON_COMMAND_EXTERN_NO_WRAPPER(sc_autojump, ConCommand_AutoJump, "Toggle autojump")
+CON_COMMAND_NO_WRAPPER(sc_autojump, "Toggle autojump")
 {
 	Msg(g_Config.cvars.autojump ? "Auto Jump disabled\n" : "Auto Jump enabled\n");
 	g_Config.cvars.autojump = !g_Config.cvars.autojump;
 }
 
-CON_COMMAND_EXTERN_NO_WRAPPER(sc_doubleduck, ConCommand_DoubleDuck, "Toggle doubleduck")
+CON_COMMAND_NO_WRAPPER(sc_doubleduck, "Toggle doubleduck")
 {
 	Msg(g_Config.cvars.doubleduck ? "Double Duck disabled\n" : "Double Duck enabled\n");
 	g_Config.cvars.doubleduck = !g_Config.cvars.doubleduck;
 }
 
-CON_COMMAND_EXTERN_NO_WRAPPER(sc_jumpbug, ConCommand_JumpBug, "Toggle jumpbug")
+CON_COMMAND_NO_WRAPPER(sc_jumpbug, "Toggle jumpbug")
 {
 	Msg(g_Config.cvars.jumpbug ? "Jump Bug disabled\n" : "Jump Bug enabled\n");
 	g_Config.cvars.jumpbug = !g_Config.cvars.jumpbug;
 }
 
-CON_COMMAND_EXTERN_NO_WRAPPER(sc_fakelag, ConCommand_FakeLag, "Toggle fake lag")
+CON_COMMAND_NO_WRAPPER(sc_edgejump, "Toggle edgejump")
+{
+	Msg(g_Config.cvars.edgejump ? "Edge Jump disabled\n" : "Edge Jump enabled\n");
+	g_Config.cvars.edgejump = !g_Config.cvars.edgejump;
+}
+
+CON_COMMAND_NO_WRAPPER(sc_fakelag, "Toggle fake lag")
 {
 	Msg(g_Config.cvars.fakelag ? "Fake Lag disabled\n" : "Fake Lag enabled\n");
 	g_Config.cvars.fakelag = !g_Config.cvars.fakelag;
 }
 
-CON_COMMAND_EXTERN_NO_WRAPPER(sc_fastrun, ConCommand_FastRun, "Toggle fast run")
+CON_COMMAND_NO_WRAPPER(sc_fastrun, "Toggle fast run")
 {
 	Msg(g_Config.cvars.fastrun ? "Fast Run disabled\n" : "Fast Run enabled\n");
 	g_Config.cvars.fastrun = !g_Config.cvars.fastrun;
 }
 
-CON_COMMAND_EXTERN_NO_WRAPPER(sc_auto_ceil_clipping, ConCommand_AutoCeilClipping, "Automatically suicide when you touch a ceil to perform clipping")
+CON_COMMAND_NO_WRAPPER(sc_auto_ceil_clipping, "Automatically suicide when you touch a ceil to perform clipping")
 {
 	Msg(g_Config.cvars.auto_ceil_clipping ? "Auto Ceil-Clipping disabled\n" : "Auto Ceil-Clipping enabled\n");
 	g_Config.cvars.auto_ceil_clipping = !g_Config.cvars.auto_ceil_clipping;
@@ -350,7 +356,7 @@ CON_COMMAND_EXTERN_NO_WRAPPER(sc_freeze, ConCommand_Freeze, "Block connection wi
 
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_freeze2, ConCommand_Freeze2, "Block connection with a server with 2nd method")
 {
-	Msg(s_bFreeze ? "Connection restored\n" : "Connection blocked\n");
+	Msg(s_bFreeze2 ? "Connection restored\n" : "Connection blocked\n");
 	s_bFreeze2 = !s_bFreeze2;
 }
 
@@ -605,6 +611,7 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		AutoCeilClipping(cmd);
 		AutoJump(cmd);
 		JumpBug(frametime, cmd);
+		EdgeJump(frametime, cmd);
 		DoubleDuck(cmd);
 		FastRun(cmd);
 		Spinner(cmd);
@@ -749,6 +756,14 @@ void CMisc::OneTickExploit(struct usercmd_s *cmd)
 					g_bForceFreeze2 = false;
 				}
 			}
+			else
+			{
+				g_bForceFreeze2 = false;
+			}
+		}
+		else
+		{
+			g_bForceFreeze2 = false;
 		}
 
 		if (bDoRapidAction)
@@ -887,6 +902,36 @@ void CMisc::JumpBug(float frametime, struct usercmd_s *cmd)
 	else
 	{
 		nJumpBugState = 0;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Auto Edgejump
+//-----------------------------------------------------------------------------
+
+void CMisc::EdgeJump(float frametime, struct usercmd_s *cmd)
+{
+	if ( g_Config.cvars.edgejump )
+	{
+		if ( Client()->IsOnGround() )
+		{
+			Vector vecPredictVelocity = Client()->GetVelocity() * frametime;
+			Vector vecPredictOrigin = Client()->GetOrigin() + vecPredictVelocity;
+
+			Vector vecEnd = vecPredictOrigin;
+			vecEnd.z -= 3.f;
+
+			pmtrace_t *pTrace = g_pEngineFuncs->PM_TraceLine(vecPredictOrigin,
+															 vecEnd,
+															 PM_NORMAL,
+															 (Client()->GetFlags() & FL_DUCKING) ? 1 : 0,
+															 -1);
+
+			if (pTrace->fraction == 1.f)
+			{
+				cmd->buttons |= IN_JUMP;
+			}
+		}
 	}
 }
 
