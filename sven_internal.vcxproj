@@ -157,6 +157,7 @@
     <ClInclude Include="imgui_impl\imgui_impl_opengl2.h" />
     <ClInclude Include="imgui_impl\imgui_impl_win32.h" />
     <ClInclude Include="modules\hooks.h" />
+    <ClInclude Include="modules\menu.h" />
     <ClInclude Include="patterns.h" />
     <ClInclude Include="strafe\strafe.h" />
     <ClInclude Include="strafe\strafe_utils.h" />

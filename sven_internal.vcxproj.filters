@@ -226,5 +226,8 @@
     <ClInclude Include="SvenMod\public\hl_sdk\cl_dll\interpolation.h">
       <Filter>Sven Internal\Game Utils</Filter>
     </ClInclude>
+    <ClInclude Include="modules\menu.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
