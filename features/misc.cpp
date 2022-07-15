@@ -236,6 +236,24 @@ CON_COMMAND_NO_WRAPPER(sc_auto_ceil_clipping, "Automatically suicide when you to
 	g_Config.cvars.auto_ceil_clipping = !g_Config.cvars.auto_ceil_clipping;
 }
 
+CON_COMMAND_EXTERN_NO_WRAPPER(sc_rotate_dead_body, ConCommand_RotateDeadBody, "Toggle rotate dead body")
+{
+	Msg(g_Config.cvars.rotate_dead_body ? "Rotate Dead Body disabled\n" : "Rotate Dead Body enabled\n");
+	g_Config.cvars.rotate_dead_body = !g_Config.cvars.rotate_dead_body;
+}
+
+CON_COMMAND_EXTERN_NO_WRAPPER(sc_tertiary_attack_glitch, ConCommand_TertiaryAttackGlitch, "Toggle tertiary attack glitch")
+{
+	Msg(g_Config.cvars.tertiary_attack_glitch ? "Tertiary Attack Glitch disabled\n" : "Tertiary Attack Glitch enabled\n");
+	g_Config.cvars.tertiary_attack_glitch = !g_Config.cvars.tertiary_attack_glitch;
+}
+
+CON_COMMAND_EXTERN_NO_WRAPPER(sc_quake_guns, ConCommand_QuakeGuns, "Toggle Quake guns")
+{
+	Msg(g_Config.cvars.quake_guns ? "Quake Guns disabled\n" : "Quake Guns enabled\n");
+	g_Config.cvars.quake_guns = !g_Config.cvars.quake_guns;
+}
+
 CON_COMMAND_EXTERN_NO_WRAPPER(sc_selfsink, ConCommand_AutoSelfSink, "Perform self sink")
 {
 	if ( Client()->IsDead() )
@@ -285,6 +303,12 @@ CON_COMMAND_EXTERN_NO_WRAPPER(sc_drop_empty_weapon, ConCommand_DropEmptyWeapon, 
 			}
 		}
 	}
+}
+
+CON_COMMAND_EXTERN_NO_WRAPPER(sc_first_person_roaming, ConCommand_FirstPersonRoaming, "Toggle first-person roaming")
+{
+	Msg(g_Config.cvars.fp_roaming ? "First-Person Roaming disabled\n" : "First-Person Roaming enabled\n");
+	g_Config.cvars.fp_roaming = !g_Config.cvars.fp_roaming;
 }
 
 CON_COMMAND(sc_stick, "Follow a player")
