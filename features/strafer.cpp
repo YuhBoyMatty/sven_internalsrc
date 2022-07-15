@@ -58,10 +58,16 @@ static void UpdateStrafeData(float flYaw)
 // ConCommands
 //-----------------------------------------------------------------------------
 
-CON_COMMAND_EXTERN(sc_strafe, ConCommand_VectorialStrafe, "Toggle Vectorial Strafing")
+CON_COMMAND_NO_WRAPPER(sc_strafe, "Toggle Vectorial Strafing")
 {
 	Msg(g_Config.cvars.strafe ? "Vectorial Strafer disabled\n" : "Vectorial Strafer enabled\n");
 	g_Config.cvars.strafe = !g_Config.cvars.strafe;
+}
+
+CON_COMMAND_NO_WRAPPER(sc_strafe_ignore_ground, "Ignore ground when strafe")
+{
+	Msg(g_Config.cvars.strafe_ignore_ground ? "Enabled strafer when on ground\n" : "Disabled strafer when on ground\n");
+	g_Config.cvars.strafe_ignore_ground = !g_Config.cvars.strafe_ignore_ground;
 }
 
 CON_COMMAND(sc_strafe_dir, "Set strafing direction. Directions:\n\t0 - to the left\n\t1 - to the right\n\t2 - best strafe\n\t3 - to view angles")
