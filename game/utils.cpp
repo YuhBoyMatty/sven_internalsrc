@@ -56,7 +56,57 @@ CON_COMMAND(sc_steamid_to_steam64id, "Converts Steam ID to Steam64 ID, apostroph
 	}
 	else
 	{
-		ConMsg("Usage:  sc_steamid_to_steamid64 <steamid>\n");
+		ConMsg("Usage:  sc_steamid_to_steam64id <steamid>\n");
+	}
+}
+
+CON_COMMAND(getang, "Prints current view angles")
+{
+	Vector va;
+	g_pEngineFuncs->GetViewAngles(va);
+
+	Msg("View Angles: %.6f %.6f %.6f\n", VectorExpand(va));
+}
+
+CON_COMMAND(setang, "Sets view angles")
+{
+	if (args.ArgC() >= 2)
+	{
+		Vector va;
+		float x, y, z;
+
+		x = atof(args[1]);
+
+		g_pEngineFuncs->GetViewAngles(va);
+
+		if (args.ArgC() >= 3)
+		{
+			y = atof(args[2]);
+
+			if (args.ArgC() >= 4)
+			{
+				z = atof(args[3]);
+			}
+			else
+			{
+				z = va.z;
+			}
+		}
+		else
+		{
+			y = va.y;
+			z = va.z;
+		}
+
+		va.x = x;
+		va.y = y;
+		va.z = z;
+
+		g_pEngineFuncs->SetViewAngles( va );
+	}
+	else
+	{
+		Msg("Usage:  setang <x> <optional: y> <optional: z>\n");
 	}
 }
 
