@@ -155,7 +155,7 @@ static float GetWeaponOffset(cl_entity_s *pViewModel)
 // Commands, CVars..
 //-----------------------------------------------------------------------------
 
-CON_COMMAND(sc_test, "Retrieve entity's info")
+CON_COMMAND(sc_test, "Retrieve an entity's info")
 {
 	if (args.ArgC() > 1)
 	{
@@ -527,8 +527,8 @@ static ConCommand output_command__sc_freeze_toggle("-sc_freeze_toggle", freeze_t
 static ConCommand input_command__sc_freeze2_toggle("+sc_freeze2_toggle", freeze2_toggle_key_down, "Freeze #2 input");
 static ConCommand output_command__sc_freeze2_toggle("-sc_freeze2_toggle", freeze2_toggle_key_up, "Freeze #2 output");
 
-ConVar sc_speedhack("sc_speedhack", "1", FCVAR_CLIENTDLL, "sc_speedhack [value] - Set speedhack value");
-ConVar sc_speedhack_ltfx("sc_speedhack_ltfx", "0", FCVAR_CLIENTDLL, "sc_speedhack_ltfx [value] - Set LTFX speedhack value; 0 - disable, value < 0 - slower, value > 0 - faster");
+ConVar sc_speedhack("sc_speedhack", "1", FCVAR_CLIENTDLL, "sc_speedhack <value> - Set speedhack value");
+ConVar sc_speedhack_ltfx("sc_speedhack_ltfx", "0", FCVAR_CLIENTDLL, "sc_speedhack_ltfx <value> - Set LTFX speedhack value; 0 - disable, value < 0 - slower, value > 0 - faster");
 
 //-----------------------------------------------------------------------------
 // Hooks
@@ -621,7 +621,7 @@ void CMisc::CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	ColorPulsator();
 	TertiaryAttackGlitch();
 
-	if ( g_Config.cvars.rotate_dead_body && g_pPlayerMove->dead )
+	if ( g_Config.cvars.rotate_dead_body && Client()->IsDying() )
 	{
 		Vector va;
 
@@ -1157,7 +1157,7 @@ static bool IsBusyWithLongJump(usercmd_t *cmd)
 {
 	if ( cmd->buttons & IN_JUMP && Client()->IsOnGround() )
 	{
-		if ( Client()->IsDucking() || Client()->GetFlags() & FL_DUCKING)
+		if ( Client()->IsDucking() )
 		{
 			if ( cmd->buttons & IN_DUCK && g_pPlayerMove->flDuckTime > 0.f )
 			{
@@ -1310,7 +1310,7 @@ void CMisc::AutoCeilClipping(struct usercmd_s *cmd)
 			{
 				cmd->buttons |= IN_DUCK;
 
-				// Suicide only if we got apex or started falling
+				// Suicide only if we reached apex or started falling
 				if ( Client()->GetVelocity().z <= 0.f )
 				{
 					Vector vecStart = g_pPlayerMove->origin;

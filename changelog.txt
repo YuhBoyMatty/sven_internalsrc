@@ -1,5 +1,10 @@
 Changelog for Sven Internal
 
+18/07/2022 - Version 2.0.11:
+- Some fixes in the code
+- Added feature No Recoil (experimental)
+- Added missing CVars: 'setang' and 'getang'
+
 15/07/2022 - Version 2.0.10:
 - Added auto edgejump
 - Added some missing commands (sc_strafe_ignore_ground, sc_spam_hold_mode, sc_rotate_dead_body, sc_tertiary_attack_glitch, sc_quake_guns, sc_first_person_roaming)
