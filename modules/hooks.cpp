@@ -22,6 +22,7 @@
 
 // Features
 #include "../features/misc.h"
+#include "../features/aim.h"
 #include "../features/visual.h"
 #include "../features/antiafk.h"
 #include "../features/camhack.h"
@@ -139,6 +140,7 @@ FORCEINLINE void RunClientMoveHooks(float frametime, usercmd_t *cmd, int active)
 	g_Strafer.CreateMove(frametime, cmd, active);
 	g_KeySpam.CreateMove(frametime, cmd, active);
 	g_Misc.CreateMove(frametime, cmd, active);
+	g_Aim.CreateMove(frametime, cmd, active);
 	g_AntiAFK.CreateMove(frametime, cmd, active);
 	g_CamHack.CreateMove(frametime, cmd, active);
 	g_MessageSpammer.CreateMove(frametime, cmd, active);
@@ -385,8 +387,8 @@ DECLARE_FUNC(int, __cdecl, HOOKED_CRC_MapFile, uint32 *ulCRC, char *pszMapName)
 		if ( *ulCRC != g_ulMapCRC && g_Config.cvars.ignore_different_map_versions )
 		{
 			Warning("[Sven Internal] Uh oh, your version of the map is different from the server one. Don't worry, we'll keep connecting\n");
-			Warning("[Sven Internal] Client's CRC of the map: %X\n", g_ulMapCRC);
-			Warning("[Sven Internal] Server's CRC of the map: %X\n", *ulCRC);
+			Warning("Client's CRC of the map: %X\n", g_ulMapCRC);
+			Warning("Server's CRC of the map: %X\n", *ulCRC);
 
 			*ulCRC = g_ulMapCRC;
 		}
@@ -515,6 +517,8 @@ HOOK_RESULT CClientHooks::CAM_Think(void)
 HOOK_RESULT CClientHooks::V_CalcRefdef(ref_params_t *pparams)
 {
 	s_iWaterLevel = pparams->waterlevel;
+
+	g_Aim.Pre_V_CalcRefdef(pparams);
 
 	return HOOK_CONTINUE;
 }
@@ -708,6 +712,7 @@ HOOK_RESULT CClientPostHooks::V_CalcRefdef(ref_params_t *pparams)
 {
 	g_CamHack.V_CalcRefdef(pparams);
 	g_Misc.V_CalcRefdef(pparams);
+	g_Aim.Post_V_CalcRefdef(pparams);
 	g_FirstPersonRoaming.V_CalcRefdef(pparams);
 
 	return HOOK_CONTINUE;

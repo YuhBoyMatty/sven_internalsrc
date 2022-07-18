@@ -128,6 +128,9 @@
     <ClCompile Include="SvenMod\public\hl_sdk\cl_dll\interpolation.cpp">
       <Filter>Sven Internal\Game Utils</Filter>
     </ClCompile>
+    <ClCompile Include="features\aim.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
@@ -228,6 +231,9 @@
     </ClInclude>
     <ClInclude Include="modules\menu.h">
       <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="features\aim.h">
+      <Filter>Sven Internal\Features</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

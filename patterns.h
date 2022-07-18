@@ -50,6 +50,8 @@ namespace Patterns
 
 		EXTERN_PATTERN(CHud__Think);
 
+		EXTERN_PATTERN(V_PunchAxis);
+
 		EXTERN_PATTERN(WeaponsResource__GetFirstPos);
 	}
 

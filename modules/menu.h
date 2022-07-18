@@ -28,6 +28,7 @@ public:
 	void Draw();
 
 private:
+	void DrawWindowAim();
 	void DrawWindowVisuals();
 	void DrawWindowHUD();
 	void DrawWindowUtility();
@@ -42,8 +43,11 @@ private:
 	DetourHandle_t m_hSetCursorPos;
 
 	bool m_bThemeLoaded;
+
 	bool m_bMenuSettings;
 	bool m_bMenuConfig;
+
+	bool m_bMenuAim;
 	bool m_bMenuVisuals;
 	bool m_bMenuHud;
 	bool m_bMenuUtility;

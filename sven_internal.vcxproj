@@ -96,6 +96,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="features\aim.cpp" />
     <ClCompile Include="features\antiafk.cpp" />
     <ClCompile Include="features\camhack.cpp" />
     <ClCompile Include="features\chams.cpp" />
@@ -132,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="features\aim.h" />
     <ClInclude Include="features\antiafk.h" />
     <ClInclude Include="features\camhack.h" />
     <ClInclude Include="features\chams.h" />

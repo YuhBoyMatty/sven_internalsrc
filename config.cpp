@@ -140,6 +140,14 @@ bool CConfig::Load()
 			ConfigManager()->EndSectionImport();
 		}
 
+		if (ConfigManager()->BeginSectionImport("AIM"))
+		{
+			ConfigManager()->ImportParam("NoRecoil", cvars.no_recoil);
+			ConfigManager()->ImportParam("NoRecoilVisual", cvars.no_recoil_visual);
+
+			ConfigManager()->EndSectionImport();
+		}
+
 		if (ConfigManager()->BeginSectionImport("ESP"))
 		{
 			ConfigManager()->ImportParam("Enable", cvars.esp);
@@ -554,6 +562,14 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("AutoResize", cvars.menu_auto_resize);
 			ConfigManager()->ExportParam("Theme", cvars.menu_theme);
 			ConfigManager()->ExportParam("Opacity", cvars.menu_opacity);
+
+			ConfigManager()->EndSectionExport();
+		}
+		
+		if (ConfigManager()->BeginSectionExport("AIM"))
+		{
+			ConfigManager()->ExportParam("NoRecoil", cvars.no_recoil);
+			ConfigManager()->ExportParam("NoRecoilVisual", cvars.no_recoil_visual);
 
 			ConfigManager()->EndSectionExport();
 		}

@@ -43,6 +43,8 @@ namespace Patterns
 
 		DEFINE_PATTERN(CHud__Think, "83 EC 08 53 56 57 8B F9 E8 ? ? ? ? 8B 37 D9 5C 24");
 
+		DEFINE_PATTERN(V_PunchAxis, "8B 44 24 04 F3 0F 10 44 24 08 F3 0F 11 04 85");
+
 		DEFINE_PATTERN(WeaponsResource__GetFirstPos, "6B 54 24 04 68 56 57 33 F6 8B F9 81 C2 ? ? ? ? 8B 02 85 C0 74");
 	}
 

@@ -75,12 +75,12 @@ void CMenuModule::Draw()
 	if ( g_bMenuEnabled )
 	{
 		// Main Window
-		ImGui::SetNextWindowSize(ImVec2(250.0f, 285.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(250.0f, 316.0f), ImGuiCond_FirstUseEver);
 
 		if (g_Config.cvars.menu_auto_resize)
 		{
 			ImGui::Begin("Sven Internal", &g_bMenuEnabled, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-			ImGui::SetWindowSize(ImVec2(250.0f, 285.0f));
+			ImGui::SetWindowSize(ImVec2(250.0f, 316.0f));
 		}
 		else
 		{
@@ -123,7 +123,14 @@ void CMenuModule::Draw()
 
 			// Main Buttons
 			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (66));
+			if (ImGui::Button("Aim", ImVec2(149, 28)))
+			{
+				m_bMenuAim ^= true;
+			}
 
+			ImGui::Spacing();
+			
+			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (66));
 			if (ImGui::Button("Visuals", ImVec2(149, 28)))
 			{
 				m_bMenuVisuals ^= true;
@@ -132,7 +139,6 @@ void CMenuModule::Draw()
 			ImGui::Spacing();
 
 			ImGui::SameLine((ImGui::GetContentRegionAvail().x / 2) - (66));
-
 			if (ImGui::Button("HUD", ImVec2(149, 28)))
 			{
 				m_bMenuHud ^= true;
@@ -168,11 +174,73 @@ void CMenuModule::Draw()
 		}
 		ImGui::End();
 
+		DrawWindowAim();
 		DrawWindowVisuals();
 		DrawWindowHUD();
 		DrawWindowUtility();
 		DrawWindowConfig();
 		DrawWindowSettings();
+	}
+}
+
+void CMenuModule::DrawWindowAim()
+{
+	// Aim
+	if (m_bMenuAim)
+	{
+		ImGui::SetNextWindowSize(ImVec2(500.0f, 600.0f), ImGuiCond_FirstUseEver);
+		if (g_Config.cvars.menu_auto_resize)
+		ImGui::Begin("Aim", &m_bMenuAim, ImGuiWindowFlags_AlwaysAutoResize);
+		else
+		ImGui::Begin("Aim", &m_bMenuAim);
+		{
+			if (ImGui::BeginTabBar("##tabs"))
+			{
+				// Recoil & Spread
+				if (ImGui::BeginTabItem("Recoil & Spread"))
+				{
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Text("Recoil & Spread");
+
+					ImGui::Spacing();
+
+					ImGui::Separator();
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Text("No Recoil");
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					extern ConVar sc_no_recoil;
+					extern ConVar sc_no_recoil_visual;
+
+					if (ImGui::Checkbox("No Recoil", &g_Config.cvars.no_recoil))
+					{
+						sc_no_recoil.SetValue( !sc_no_recoil.GetBool() );
+					}
+					
+					if (ImGui::Checkbox("No Recoil [Visual]", &g_Config.cvars.no_recoil_visual))
+					{
+						sc_no_recoil_visual.SetValue( !sc_no_recoil_visual.GetBool() );
+					}
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Separator();
+
+					ImGui::Text("");
+					ImGui::Spacing();
+
+					ImGui::EndTabItem();
+				}
+			}
+		}
 	}
 }
 
@@ -266,8 +334,7 @@ void CMenuModule::DrawWindowVisuals()
 
 					static const char* no_weap_anim_items[] = { "0 - Off", "1 - All Animations", "2 - Take Animations" };
 
-					ImGui::Combo(" ", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
-
+					ImGui::Combo("##no_weap_anims", &g_Config.cvars.no_weapon_anim, no_weap_anim_items, IM_ARRAYSIZE(no_weap_anim_items));
 
 					ImGui::Spacing();
 					ImGui::Spacing();
@@ -2189,6 +2256,7 @@ CMenuModule::CMenuModule()
 	m_bThemeLoaded = false;
 	m_bMenuSettings = false;
 	m_bMenuConfig = false;
+	m_bMenuAim = false;
 	m_bMenuVisuals = false;
 	m_bMenuHud = false;
 	m_bMenuUtility = false;
