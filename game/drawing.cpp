@@ -27,8 +27,9 @@
 
 CDrawing g_Drawing;
 
-vgui::HFont g_hESP;
-vgui::HFont g_hESP2;
+vgui::HFont g_hFontESP;
+vgui::HFont g_hFontESP2;
+vgui::HFont g_hFontSpeedometer;
 vgui::HFont g_hFontVotePopup;
 //vgui::HFont MENU;
 
@@ -64,8 +65,11 @@ void CDrawing::Init()
 
 void CDrawing::SetupFonts()
 {
-	g_pVGUI->Surface()->AddGlyphSetToFont(g_hESP = g_pVGUI->Surface()->CreateFont(), "Choktoff", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
-	g_pVGUI->Surface()->AddGlyphSetToFont(g_hESP2 = g_pVGUI->Surface()->CreateFont(), "Choktoff", 38, FW_MEDIUM, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	//g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP = g_pVGUI->Surface()->CreateFont(), "Choktoff", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	//g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontSpeedometer = g_pVGUI->Surface()->CreateFont(), "Choktoff", 38, FW_MEDIUM, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP = g_pVGUI->Surface()->CreateFont(), "Verdana", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP2 = g_pVGUI->Surface()->CreateFont(), "Verdana", 26, FW_SEMIBOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontSpeedometer = g_pVGUI->Surface()->CreateFont(), "Verdana", 38, FW_MEDIUM, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
 	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontVotePopup = g_pVGUI->Surface()->CreateFont(), "Lucida-Console", 20, FW_EXTRABOLD, NULL, NULL, vgui::ISurface::FONTFLAG_NONE, 0, 0);
 	//g_pSurface->AddGlyphSetToFont(MENU = g_pSurface->CreateFont(), "Arial", 14, FW_BOLD, NULL, NULL, FONTFLAG_NONE, 0, 0); //Main font
 }

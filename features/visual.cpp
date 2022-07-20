@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <gl/GL.h>
+#include <omp.h>
 
 #include <algorithm>
 
@@ -257,7 +258,7 @@ void CVisual::ShowSpeed()
 			else
 				flSpeed = g_pPlayerMove->velocity.Length2D();
 
-			g_Drawing.DrawStringF(g_hESP2,
+			g_Drawing.DrawStringF(g_hFontSpeedometer,
 								  int(m_iScreenWidth * g_Config.cvars.speed_width_fraction_legacy),
 								  int(m_iScreenHeight * g_Config.cvars.speed_height_fraction_legacy),
 								  int(255.f * g_Config.cvars.speed_color_legacy[0]),
@@ -374,7 +375,7 @@ void CVisual::DrawCrosshair()
 
 void CVisual::ESP()
 {
-	if (!g_Config.cvars.esp)
+	if ( !g_Config.cvars.esp )
 		return;
 
 	cl_entity_s *pLocal = g_pEngineFuncs->GetLocalPlayer();
@@ -382,9 +383,11 @@ void CVisual::ESP()
 
 	int nLocalPlayer = pLocal->index;
 
-	// What a mess lol
+#pragma omp parallel for /* num_threads(2) */ // not sure if it's worth it
 	for (register int i = 1; i <= MAXENTS; ++i)
 	{
+		// What a mess lol
+
 		if ( i == nLocalPlayer )
 			continue;
 
@@ -443,6 +446,8 @@ void CVisual::ESP()
 		if ( flDistance > g_Config.cvars.esp_distance )
 			continue;
 
+		float boxWidth;
+
 		Vector vecBottom = pEntity->origin;
 		Vector vecTop = pEntity->origin;
 
@@ -454,24 +459,39 @@ void CVisual::ESP()
 			if ( classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents )
 				continue;
 
-			// Don't process if entity isn't an ESP's target, or its dead body or trash
+			// Don't process if entity isn't an ESP's target, or its dead body or some kind of trash
 			if ( g_Config.cvars.esp_targets == 2 || IsEntityClassDeadbody(classInfo, pEntity->curstate.solid) || IsEntityClassTrash(classInfo) )
 				continue;
+
+			if ( !bItem )
+			{
+				vecTop.z += pEntity->curstate.maxs.z;
+				vecBottom.z -= pEntity->curstate.mins.z;
+
+				boxWidth = max(pEntity->curstate.maxs.x - pEntity->curstate.mins.x, pEntity->curstate.maxs.y - pEntity->curstate.mins.y) /
+					(pEntity->curstate.maxs.z - pEntity->curstate.mins.z);
+			}
 		}
 		else
 		{
 			if ( g_Config.cvars.esp_targets == 1 )
 				continue;
 
-			vecBottom.z -= pEntity->curstate.maxs.z;
-		}
+			// Ducking
+			if ( pEntity->curstate.usehull )
+			{
+				vecTop.z += VEC_DUCK_HULL_MAX.z;
+				vecBottom.z += VEC_DUCK_HULL_MIN.z;
 
-		vecTop.z += pEntity->curstate.maxs.z;
+				boxWidth = (VEC_DUCK_HULL_MAX.x - VEC_DUCK_HULL_MIN.x) / (VEC_DUCK_HULL_MAX.z - VEC_DUCK_HULL_MIN.z);
+			}
+			else
+			{
+				vecTop.z += pEntity->curstate.maxs.z;
+				vecBottom.z -= pEntity->curstate.maxs.z;
 
-		if ( bPlayer && pEntity->curstate.usehull )
-		{
-			vecTop.z = pEntity->origin.z + VEC_DUCK_HULL_MAX.z;
-			vecBottom.z = pEntity->origin.z + VEC_DUCK_HULL_MIN.z;
+				boxWidth = (VEC_HULL_MAX.x - VEC_HULL_MIN.x) / (VEC_HULL_MAX.z - VEC_HULL_MIN.z);
+			}
 		}
 
 		bool bScreenBottom = UTIL_WorldToScreen(vecBottom, vecScreenBottom);
@@ -479,6 +499,22 @@ void CVisual::ESP()
 
 		if ( bScreenBottom && bScreenTop )
 		{
+			if (bPlayer && g_Config.cvars.esp_show_visible_players)
+			{
+				pmtrace_t trace;
+
+				Vector vecStart = Client()->GetOrigin() + Client()->GetViewOffset();
+				Vector vecEnd = vecBottom + ((vecTop - vecBottom) * 0.5f);
+
+				g_pEventAPI->EV_SetTraceHull(PM_HULL_POINT);
+				g_pEventAPI->EV_PlayerTrace(vecStart, vecEnd, PM_WORLD_ONLY, -1, &trace);
+
+				if (trace.fraction != 1.f)
+				{
+					continue;
+				}
+			}
+
 			int iHealth = bPlayer ? g_pPlayerUtils->GetHealth(i) : 0;
 
 			bool bIsEntityFriend = IsEntityClassFriend(classInfo);
@@ -495,6 +531,8 @@ void CVisual::ESP()
 
 			if ( bItem )
 			{
+				boxHeight = 0.f;
+
 				r = int(255.f * g_Config.cvars.esp_item_color[0]);
 				g = int(255.f * g_Config.cvars.esp_item_color[1]);
 				b = int(255.f * g_Config.cvars.esp_item_color[2]);
@@ -512,158 +550,488 @@ void CVisual::ESP()
 				b = int(255.f * g_Config.cvars.esp_enemy_color[2]);
 			}
 
-			int nBox = g_Config.cvars.esp_box;
-			bool bOutline = g_Config.cvars.esp_box_outline;
-
-			g_Drawing.FillArea(int(vecScreenBottom[0] - (boxHeight * 0.25f)), int(vecScreenBottom[1]), int(boxHeight / 2), int(boxHeight), r, g, b, g_Config.cvars.esp_box_fill);
-
-			if (nBox == 1)
-			{
-				g_Drawing.Box(int(vecScreenBottom[0] - (boxHeight * 0.25f)), int(vecScreenBottom[1]), int(boxHeight / 2), int(boxHeight), 1, r, g, b, 200);
-				
-				if (bOutline)
-					g_Drawing.BoxOutline(vecScreenBottom[0] - (boxHeight * 0.25f), vecScreenBottom[1], boxHeight / 2, boxHeight, 1, r, g, b, 200);
-			}
-			else if (nBox == 2)
-			{
-				g_Drawing.DrawCoalBox(int(vecScreenBottom[0] - (boxHeight * 0.25f)), int(vecScreenBottom[1]), int(boxHeight / 2), int(boxHeight), 1, r, g, b, 255);
-
-				if (bOutline)
-					g_Drawing.DrawOutlineCoalBox(int(vecScreenBottom[0] - (boxHeight * 0.25f)), int(vecScreenBottom[1]), int(boxHeight / 2), int(boxHeight), 1, r, g, b, 255);
-			}
-			else if (nBox == 3)
-			{
-				g_Drawing.BoxCorner(int(vecScreenBottom[0] - (boxHeight * 0.25f)), int(vecScreenBottom[1]), int(boxHeight / 2), int(boxHeight), 1, r, g, b, 255);
-
-				if (bOutline)
-					g_Drawing.BoxCornerOutline(int(vecScreenBottom[0] - (boxHeight * 0.25f)), int(vecScreenBottom[1]), int(boxHeight / 2), int(boxHeight), 1, r, g, b, 255);
-			}
-
-			if (g_Config.cvars.esp_box_index)
-			{
-				int y = int(vecScreenBottom[1] + (boxHeight / 2));
-				g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%d", i);
-			}
-			
-			if (g_Config.cvars.esp_box_distance)
-			{
-				int y = int(vecScreenTop[1] + (-8.f - boxHeight));
-				g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
-			}
+			boxWidth = boxHeight * boxWidth;
 
 			if (bPlayer)
 			{
-				if (g_Config.cvars.esp_box_player_health && iHealth != 0)
+				// Box Fill
+				if ( g_Config.cvars.esp_box_targets != 1 )
 				{
-					int r, g, b;
-
-					int iActualHealth = iHealth;
-
-					if (iHealth == -1)
-						iActualHealth = iHealth = 0;
-					else if (iHealth > 100)
-						iHealth = 100;
-
-					int y = int(vecScreenBottom[1] + (boxHeight - 8.0f));
-
-					if (bIsEntityFriend)
-					{
-						r = int( 255.f * (iHealth > 50 ? 1.f - 2.f * (iHealth - 50) / 100.f : 1.f) );
-						g = int( 255.f * ((iHealth > 50 ? 1.f : 2.f * iHealth / 100.f)) );
-						b = 0;
-					}
-					else
-					{
-						iActualHealth = -1;
-
-						r = 0;
-						g = 255;
-						b = 255;
-					}
-
-					g_Drawing.DrawStringF(g_hESP,
-											int(vecScreenBottom[0]),
-											y,
-											r,
-											g,
-											b,
-											255,
-											FONT_ALIGN_CENTER,
-											"%d",
-											iActualHealth);
+					DrawBox(bPlayer, bItem, iHealth, boxHeight, boxWidth, vecScreenBottom, r, g, b);
 				}
 
-				if (g_Config.cvars.esp_box_player_armor)
+				// Distance
+				if ( g_Config.cvars.esp_box_distance && g_Config.cvars.esp_distance_mode != 1 )
 				{
-					float flArmor = g_pPlayerUtils->GetArmor(i);
-					int y = int(vecScreenBottom[1] + (boxHeight + 8.f));
-
-					if (flArmor >= 0.f)
-						g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, 153, 191, 255, 255, FONT_ALIGN_CENTER, "%.1f", flArmor);
+					int y = int(vecScreenTop[1] + (-8.f - boxHeight));
+					g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
 				}
 
-				if (g_Config.cvars.esp_box_player_name)
+				// General Info
+				if (g_Config.cvars.esp_player_style == 0) // Default
 				{
-					int y = int(vecScreenTop[1] + (8.f - boxHeight));
-					player_info_s *pPlayer = g_pEngineStudio->PlayerInfo(i - 1);
-
-					g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_ALIGN_CENTER, "%s", pPlayer->name);
+					DrawPlayerInfo_Default(i, iHealth, bIsEntityFriend, boxHeight, vecScreenBottom, vecScreenTop);
+				}
+				else if (g_Config.cvars.esp_player_style == 1) // SAMP
+				{
+					DrawPlayerInfo_SAMP(i, iHealth, (bool)pEntity->curstate.usehull, bIsEntityFriend, vecTop);
+				}
+				else if (g_Config.cvars.esp_player_style == 2) // Left 4 Dead
+				{
+					DrawPlayerInfo_L4D(i, iHealth, (bool)pEntity->curstate.usehull, bIsEntityFriend, vecTop);
 				}
 
-				if (g_Config.cvars.esp_skeleton_type == 1)
+				if ( g_Config.cvars.esp_skeleton_type == 1 )
 					continue;
 			}
 			else
 			{
-				if (g_Config.cvars.esp_box_entity_name)
+				// Box Fill
+				if ( g_Config.cvars.esp_box_targets != 2 )
 				{
-					int y = int(vecScreenTop[1] + (8.f - boxHeight));
-					g_Drawing.DrawStringF(g_hESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_ALIGN_CENTER, "%s", GetEntityClassname(classInfo));
+					DrawBox(bPlayer, bItem, iHealth, boxHeight, boxWidth, vecScreenBottom, r, g, b);
 				}
 
-				if (g_Config.cvars.esp_skeleton_type == 2)
+				// Distance
+				if ( g_Config.cvars.esp_box_distance && g_Config.cvars.esp_distance_mode != 2 )
+				{
+					int y = int(vecScreenTop[1] + (-8.f - boxHeight));
+					g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
+				}
+
+				// General Info
+				if (g_Config.cvars.esp_entity_style == 0) // Default
+				{
+					DrawEntityInfo_Default(i, classInfo, boxHeight, vecScreenBottom, vecScreenTop, r, g, b);
+				}
+				else if (g_Config.cvars.esp_entity_style == 1) // SAMP
+				{
+					DrawEntityInfo_SAMP(i, classInfo, vecTop, r, g, b);
+				}
+				else if (g_Config.cvars.esp_entity_style == 2) // Left 4 Dead
+				{
+					DrawEntityInfo_L4D(i, classInfo, vecTop, r, g, b);
+				}
+
+				if ( g_Config.cvars.esp_skeleton_type == 2 )
 					continue;
 			}
 
-			if (bItem)
+			if ( bItem )
 				continue;
 
-		#ifdef PROCESS_PLAYER_BONES_ONLY
-			if ((g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name) && bPlayer)
-		#else
-			if (g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name)
-		#endif
+			DrawBones(i, pStudioHeader);
+		}
+	}
+}
+
+void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFriend, float boxHeight, float vecScreenBottom[2], float vecScreenTop[2])
+{
+	if (g_Config.cvars.esp_box_player_health && iHealth != 0)
+	{
+		int r, g, b;
+
+		int iActualHealth = iHealth;
+
+		if (iHealth == -1)
+			iActualHealth = iHealth = 0;
+		else if (iHealth > 100)
+			iHealth = 100;
+
+		int y = int(vecScreenBottom[1] + (boxHeight - 8.0f));
+
+		if (bIsEntityFriend)
+		{
+			r = int( 255.f * (iHealth > 50 ? 1.f - 2.f * (iHealth - 50) / 100.f : 1.f) );
+			g = int( 255.f * ((iHealth > 50 ? 1.f : 2.f * iHealth / 100.f)) );
+			b = 0;
+		}
+		else
+		{
+			iActualHealth = -1;
+
+			r = 0;
+			g = 255;
+			b = 255;
+		}
+
+		g_Drawing.DrawStringF(g_hFontESP,
+								int(vecScreenBottom[0]),
+								y,
+								r,
+								g,
+								b,
+								255,
+								FONT_ALIGN_CENTER,
+								"%d",
+								iActualHealth);
+	}
+
+	if (g_Config.cvars.esp_box_player_armor)
+	{
+		float flArmor = g_pPlayerUtils->GetArmor(index);
+		int y = int(vecScreenBottom[1] + (boxHeight + 8.f));
+
+		if (flArmor > 0.f)
+			g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, 153, 191, 255, 255, FONT_ALIGN_CENTER, "%.1f", flArmor);
+	}
+
+	if (g_Config.cvars.esp_box_player_name || g_Config.cvars.esp_box_index)
+	{
+		static char szIndex[16];
+		player_info_t *pPlayer = NULL;
+
+		if (g_Config.cvars.esp_box_index)
+			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_player_name ? " (%d)" : "(%d)", index);
+
+		int nickname_r, nickname_g, nickname_b;
+		int y = int(vecScreenTop[1] + (8.f - boxHeight));
+
+		if (bIsEntityFriend)
+		{
+			nickname_r = int(255.f * g_Config.cvars.esp_friend_player_color[0]);
+			nickname_g = int(255.f * g_Config.cvars.esp_friend_player_color[1]);
+			nickname_b = int(255.f * g_Config.cvars.esp_friend_player_color[2]);
+		}
+		else
+		{
+			nickname_r = int(255.f * g_Config.cvars.esp_enemy_player_color[0]);
+			nickname_g = int(255.f * g_Config.cvars.esp_enemy_player_color[1]);
+			nickname_b = int(255.f * g_Config.cvars.esp_enemy_player_color[2]);
+		}
+
+		g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, nickname_r, nickname_g, nickname_b, 255, FONT_ALIGN_CENTER, "%s%s",
+								g_Config.cvars.esp_box_player_name ? (pPlayer = g_pEngineStudio->PlayerInfo(index - 1), pPlayer->name) : "",
+								g_Config.cvars.esp_box_index ? szIndex : "");
+	}
+}
+
+void CVisual::DrawPlayerInfo_SAMP(int index, int iHealth, bool bDucking, bool bIsEntityFriend, Vector vecTop)
+{
+	constexpr int iBarWidth = 42;
+	constexpr int iBarHeight = 4;
+	constexpr int iThickness = 1;
+
+	float vecScreen[2];
+
+	if (bDucking)
+		vecTop.z += 12.f;
+	else
+		vecTop.z += 6.f;
+
+	if ( !UTIL_WorldToScreen(vecTop, vecScreen) )
+		return;
+
+	int offset_x = int(vecScreen[0]);
+	int offset_y = int(vecScreen[1]);
+
+	int health_offset_y = offset_y;
+
+	if (g_Config.cvars.esp_box_player_armor)
+	{
+		float flArmor = g_pPlayerUtils->GetArmor(index);
+
+		if (flArmor > 0.f)
+		{
+			if (flArmor > 100.f)
+				flArmor = 100.f;
+
+			float flFraction = flArmor / 100.f;
+
+			// Thickness
 			{
-			#pragma warning(push)
-			#pragma warning(disable : 6011)
+				constexpr int iWidth = iBarWidth + 2 * iThickness;
+				constexpr int iHeight = iBarHeight + 2 * iThickness;
 
-				mstudiobone_t *pBone = (mstudiobone_t *)((byte *)pStudioHeader + pStudioHeader->boneindex);
+				g_Drawing.FillArea(offset_x - iWidth / 2, offset_y - iHeight / 2, iWidth, iHeight, 0, 0, 0, 255);
+			}
 
-				for (int j = 0; j < pStudioHeader->numbones; ++j)
-				{
-					bool bBonePoint = false;
-					float vBonePoint[2];
+			if (flArmor != 100.f)
+			{
+				g_Drawing.FillArea(offset_x - iBarWidth / 2, offset_y - iBarHeight / 2, iBarWidth, iBarHeight, 40, 40, 40, 255);
+			}
 
-					if ((bBonePoint = UTIL_WorldToScreen(g_Bones[i].vecPoint[j], vBonePoint)) && g_Config.cvars.esp_bones_name)
-						g_Drawing.DrawStringF(g_hESP, int(vBonePoint[0]), int(vBonePoint[1]), 255, 255, 255, 255, FONT_ALIGN_CENTER, "%s", pBone[j].name);
+			g_Drawing.FillArea(offset_x - iBarWidth / 2, offset_y - iBarHeight / 2, int((float)iBarWidth * flFraction), iBarHeight, 200, 200, 200, 255);
 
-					if (g_Config.cvars.esp_skeleton)
-					{
-						float vParentPoint[2];
+			health_offset_y += ((iBarHeight + 2 * iThickness) / 2) + 5;
+		}
+	}
 
-						if (!bBonePoint || g_Bones[i].nParent[j] == -1)
-							continue;
+	if (g_Config.cvars.esp_box_player_health && iHealth != 0)
+	{
+		if (iHealth < 0)
+			iHealth = 0;
+		else if (iHealth > 100)
+			iHealth = 100;
 
-						if (!UTIL_WorldToScreen(g_Bones[i].vecPoint[g_Bones[i].nParent[j]], vParentPoint))
-							continue;
+		int y = health_offset_y;
+		float flFraction = (float)iHealth / 100.f;
 
-						g_Drawing.DrawLine(int(vBonePoint[0]), int(vBonePoint[1]), int(vParentPoint[0]), int(vParentPoint[1]), 255, 255, 255, 255);
-					}
-				}
+		// Thickness
+		{
+			constexpr int iWidth = iBarWidth + 2 * iThickness;
+			constexpr int iHeight = iBarHeight + 2 * iThickness;
 
-			#pragma warning(pop)
+			g_Drawing.FillArea(offset_x - iWidth / 2, y - iHeight / 2, iWidth, iHeight, 0, 0, 0, 255);
+		}
+
+		if (iHealth != 100)
+		{
+			g_Drawing.FillArea(offset_x - iBarWidth / 2, y - iBarHeight / 2, iBarWidth, iBarHeight, 76, 11, 20, 255);
+		}
+
+		g_Drawing.FillArea(offset_x - iBarWidth / 2, y - iBarHeight / 2, int((float)iBarWidth * flFraction), iBarHeight, 187, 32, 40, 255);
+	}
+
+	if (g_Config.cvars.esp_box_player_name || g_Config.cvars.esp_box_index)
+	{
+		static char szIndex[16];
+		player_info_t *pPlayer = NULL;
+
+		if (g_Config.cvars.esp_box_index)
+			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_player_name ? " (%d)" : "(%d)", index);
+
+		int nickname_r, nickname_g, nickname_b;
+		int y = offset_y - ((iBarHeight + 2 * iThickness) / 2) - 14;
+
+		if (bIsEntityFriend)
+		{
+			nickname_r = int(255.f * g_Config.cvars.esp_friend_player_color[0]);
+			nickname_g = int(255.f * g_Config.cvars.esp_friend_player_color[1]);
+			nickname_b = int(255.f * g_Config.cvars.esp_friend_player_color[2]);
+		}
+		else
+		{
+			nickname_r = int(255.f * g_Config.cvars.esp_enemy_player_color[0]);
+			nickname_g = int(255.f * g_Config.cvars.esp_enemy_player_color[1]);
+			nickname_b = int(255.f * g_Config.cvars.esp_enemy_player_color[2]);
+		}
+
+		g_Drawing.DrawStringF(g_hFontESP, offset_x, y, nickname_r, nickname_g, nickname_b, 255, FONT_ALIGN_CENTER, "%s%s",
+								g_Config.cvars.esp_box_player_name ? (pPlayer = g_pEngineStudio->PlayerInfo(index - 1), pPlayer->name) : "",
+								g_Config.cvars.esp_box_index ? szIndex : "");
+	}
+}
+
+void CVisual::DrawPlayerInfo_L4D(int index, int iHealth, bool bDucking, bool bIsEntityFriend, Vector vecTop)
+{
+	float vecScreen[2];
+
+	if (bDucking)
+		vecTop.z += 24.f;
+	else
+		vecTop.z += 14.f;
+
+	if ( !UTIL_WorldToScreen(vecTop, vecScreen) )
+		return;
+
+	int offset_x = vecScreen[0];
+	int offset_y = vecScreen[1] + 25;
+
+	if (g_Config.cvars.esp_box_player_name || g_Config.cvars.esp_box_player_health || g_Config.cvars.esp_box_player_armor)
+	{
+		const char *szFormatString;
+		static char szInfo[16];
+
+		player_info_t *pPlayer;
+
+		szFormatString = g_Config.cvars.esp_box_player_name ? " (%d)" : "(%d)";
+
+		if (g_Config.cvars.esp_box_player_health && g_Config.cvars.esp_box_player_armor)
+		{
+			if (iHealth < 0)
+				iHealth = 0;
+			else if (iHealth > 100)
+				iHealth = 100;
+			
+			float flArmor = g_pPlayerUtils->GetArmor(index);
+
+			if (flArmor > 0.f)
+				snprintf(szInfo, sizeof(szInfo), g_Config.cvars.esp_box_player_name ? " (%d) [%.1f]" : "(%d) [%.1f]", iHealth, flArmor);
+			else
+				snprintf(szInfo, sizeof(szInfo), g_Config.cvars.esp_box_player_name ? " (%d)" : "(%d)", iHealth);
+		}
+		else if (g_Config.cvars.esp_box_player_health)
+		{
+			if (iHealth < 0)
+				iHealth = 0;
+			else if (iHealth > 100)
+				iHealth = 100;
+
+			snprintf(szInfo, sizeof(szInfo), g_Config.cvars.esp_box_player_name ? " (%d)" : "(%d)", iHealth);
+		}
+		else if (g_Config.cvars.esp_box_player_armor)
+		{
+			float flArmor = g_pPlayerUtils->GetArmor(index);
+
+			if (flArmor > 0.f)
+				snprintf(szInfo, sizeof(szInfo), g_Config.cvars.esp_box_player_name ? " [%.1f]" : "[%.1f]", flArmor);
+			else
+				szInfo[0] = '\0';
+		}
+		else
+		{
+			szInfo[0] = '\0';
+		}
+
+		int nickname_r, nickname_g, nickname_b;
+
+		int x = vecScreen[0];
+		int y = vecScreen[1];
+
+		if (bIsEntityFriend)
+		{
+			nickname_r = int(255.f * g_Config.cvars.esp_friend_player_color[0]);
+			nickname_g = int(255.f * g_Config.cvars.esp_friend_player_color[1]);
+			nickname_b = int(255.f * g_Config.cvars.esp_friend_player_color[2]);
+		}
+		else
+		{
+			nickname_r = int(255.f * g_Config.cvars.esp_enemy_player_color[0]);
+			nickname_g = int(255.f * g_Config.cvars.esp_enemy_player_color[1]);
+			nickname_b = int(255.f * g_Config.cvars.esp_enemy_player_color[2]);
+		}
+
+		g_Drawing.DrawStringF(g_hFontESP2, x, y, nickname_r, nickname_g, nickname_b, 255, FONT_ALIGN_CENTER, "%s%s",
+								g_Config.cvars.esp_box_player_name ? (pPlayer = g_pEngineStudio->PlayerInfo(index - 1), pPlayer->name) : "",
+								szInfo);
+	}
+}
+
+void CVisual::DrawEntityInfo_Default(int index, class_info_t classInfo, float boxHeight, float vecScreenBottom[2], float vecScreenTop[2], int r, int g, int b)
+{
+	if (g_Config.cvars.esp_box_entity_name || g_Config.cvars.esp_box_index)
+	{
+		static char szIndex[16];
+
+		if (g_Config.cvars.esp_box_index)
+			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_entity_name ? " (%d)" : "(%d)", index);
+
+		int y = int(vecScreenTop[1] + (8.f - boxHeight));
+		g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_ALIGN_CENTER, "%s%s",
+								g_Config.cvars.esp_box_entity_name ? GetEntityClassname(classInfo) : "",
+								g_Config.cvars.esp_box_index ? szIndex : "");
+	}
+}
+
+void CVisual::DrawEntityInfo_SAMP(int index, class_info_t classInfo, Vector vecTop, int r, int g, int b)
+{
+	if (g_Config.cvars.esp_box_entity_name || g_Config.cvars.esp_box_index)
+	{
+		float vecScreen[2];
+		vecTop.z += 6.f;
+
+		UTIL_WorldToScreen(vecTop, vecScreen);
+
+		int x = int(vecScreen[0]);
+		int y = int(vecScreen[1]);
+
+		static char szIndex[16];
+
+		if (g_Config.cvars.esp_box_index)
+			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_entity_name ? " (%d)" : "(%d)", index);
+
+		g_Drawing.DrawStringF(g_hFontESP, x, y, r, g, b, 255, FONT_ALIGN_CENTER, "%s%s",
+								g_Config.cvars.esp_box_entity_name ? GetEntityClassname(classInfo) : "",
+								g_Config.cvars.esp_box_index ? szIndex : "");
+	}
+}
+
+void CVisual::DrawEntityInfo_L4D(int index, class_info_t classInfo, Vector vecTop, int r, int g, int b)
+{
+	if (g_Config.cvars.esp_box_entity_name || g_Config.cvars.esp_box_index)
+	{
+		float vecScreen[2];
+		vecTop.z += 14.f;
+
+		UTIL_WorldToScreen(vecTop, vecScreen);
+
+		int x = int(vecScreen[0]);
+		int y = int(vecScreen[1]);
+
+		static char szIndex[16];
+
+		if (g_Config.cvars.esp_box_index)
+			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_entity_name ? " (%d)" : "(%d)", index);
+
+		g_Drawing.DrawStringF(g_hFontESP2, x, y, r, g, b, 255, FONT_ALIGN_CENTER, "%s%s",
+								g_Config.cvars.esp_box_entity_name ? GetEntityClassname(classInfo) : "",
+								g_Config.cvars.esp_box_index ? szIndex : "");
+	}
+}
+
+void CVisual::DrawBox(bool bPlayer, bool bItem, int iHealth, float boxHeight, float boxWidth, float vecScreenBottom[2], int r, int g, int b)
+{
+	if ( (bPlayer && (iHealth > 0 || iHealth < -1)) || (!bPlayer && !bItem) )
+	{
+		int nBox = g_Config.cvars.esp_box;
+		bool bOutline = g_Config.cvars.esp_box_outline;
+
+		if ( g_Config.cvars.esp_box_fill != 0 )
+		{
+			g_Drawing.FillArea(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), r, g, b, g_Config.cvars.esp_box_fill);
+		}
+
+		if (nBox == 1)
+		{
+			g_Drawing.Box(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 200);
+				
+			if (bOutline)
+				g_Drawing.BoxOutline(vecScreenBottom[0] - (boxWidth * 0.5f), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 200);
+		}
+		else if (nBox == 2)
+		{
+			g_Drawing.DrawCoalBox(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+
+			if (bOutline)
+				g_Drawing.DrawOutlineCoalBox(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+		}
+		else if (nBox == 3)
+		{
+			g_Drawing.BoxCorner(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+
+			if (bOutline)
+				g_Drawing.BoxCornerOutline(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+		}
+	}
+}
+
+void CVisual::DrawBones(int index, studiohdr_t *pStudioHeader)
+{
+	#ifdef PROCESS_PLAYER_BONES_ONLY
+	if ((g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name) && bPlayer)
+#else
+	if (g_Config.cvars.esp_skeleton || g_Config.cvars.esp_bones_name)
+#endif
+	{
+	#pragma warning(push)
+	#pragma warning(disable : 6011)
+
+		mstudiobone_t *pBone = (mstudiobone_t *)((byte *)pStudioHeader + pStudioHeader->boneindex);
+
+		for (int j = 0; j < pStudioHeader->numbones; ++j)
+		{
+			bool bBonePoint = false;
+			float vBonePoint[2];
+
+			if ((bBonePoint = UTIL_WorldToScreen(g_Bones[index].vecPoint[j], vBonePoint)) && g_Config.cvars.esp_bones_name)
+				g_Drawing.DrawStringF(g_hFontESP, int(vBonePoint[0]), int(vBonePoint[1]), 255, 255, 255, 255, FONT_ALIGN_CENTER, "%s", pBone[j].name);
+
+			if (g_Config.cvars.esp_skeleton)
+			{
+				float vParentPoint[2];
+
+				if ( !bBonePoint || g_Bones[index].nParent[j] == -1 )
+					continue;
+
+				if ( !UTIL_WorldToScreen(g_Bones[index].vecPoint[g_Bones[index].nParent[j]], vParentPoint) )
+					continue;
+
+				g_Drawing.DrawLine(int(vBonePoint[0]), int(vBonePoint[1]), int(vParentPoint[0]), int(vParentPoint[1]), 255, 255, 255, 255);
 			}
 		}
+
+	#pragma warning(pop)
 	}
 }
 
@@ -833,7 +1201,7 @@ bool CVisual::Load()
 
 	if ( !r_drawentities )
 	{
-		Warning("Can't find cvar r_drawentities\n");
+		Warning("Can't find cvar \"r_drawentities\"\n");
 		return false;
 	}
 

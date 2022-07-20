@@ -132,7 +132,7 @@ bool UTIL_WorldToScreen(float *pflOrigin, float *pflVecScreen)
 {
 	int iResult = g_pTriangleAPI->WorldToScreen(pflOrigin, pflVecScreen);
 
-	if (pflVecScreen[0] <= 1 && pflVecScreen[1] <= 1 && pflVecScreen[0] >= -1 && pflVecScreen[1] >= -1 && !iResult)
+	if (!iResult && pflVecScreen[0] <= 1 && pflVecScreen[1] <= 1 && pflVecScreen[0] >= -1 && pflVecScreen[1] >= -1)
 	{
 		pflVecScreen[0] = (g_ScreenInfo.width / 2 * pflVecScreen[0]) + (pflVecScreen[0] + g_ScreenInfo.width / 2);
 		pflVecScreen[1] = -(g_ScreenInfo.height / 2 * pflVecScreen[1]) + (pflVecScreen[1] + g_ScreenInfo.height / 2);

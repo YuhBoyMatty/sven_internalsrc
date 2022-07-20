@@ -120,8 +120,9 @@ inline void CDrawing::ApplyTextAlignment(FontAlignFlags_t alignment, int &x, int
 
 extern CDrawing g_Drawing;
 
-extern vgui::HFont g_hESP;
-extern vgui::HFont g_hESP2;
+extern vgui::HFont g_hFontESP;
+extern vgui::HFont g_hFontESP2;
+extern vgui::HFont g_hFontSpeedometer;
 extern vgui::HFont g_hFontVotePopup;
 //extern vgui::HFont MENU;
 
