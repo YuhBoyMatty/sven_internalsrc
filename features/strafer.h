@@ -7,6 +7,17 @@
 
 #include <base_feature.h>
 
+#include "../strafe/strafe.h"
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+extern void UpdateStrafeData(Strafe::StrafeData &strafeData, bool bStrafe, Strafe::StrafeDir dir, Strafe::StrafeType type, float flYaw, float flPointX, float flPointY);
+
+//-----------------------------------------------------------------------------
+// Strafer
+//-----------------------------------------------------------------------------
+
 class CStrafer : public CBaseFeature
 {
 public:

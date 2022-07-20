@@ -9,7 +9,6 @@
 #include "strafer.h"
 
 #include "../game/utils.h"
-#include "../strafe/strafe.h"
 
 #include "../config.h"
 
@@ -29,34 +28,52 @@ cvar_s *sv_stopspeed = NULL;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-static void UpdateStrafeData(float flYaw)
+void UpdateStrafeData(Strafe::StrafeData &strafeData, bool bStrafe, Strafe::StrafeDir dir, Strafe::StrafeType type, float flYaw, float flPointX, float flPointY)
 {
-	*reinterpret_cast<Vector *>(g_strafeData.player.Velocity) = g_pPlayerMove->velocity;
-	*reinterpret_cast<Vector *>(g_strafeData.player.Origin) = g_pPlayerMove->origin;
+	*reinterpret_cast<Vector *>(strafeData.player.Velocity) = g_pPlayerMove->velocity;
+	*reinterpret_cast<Vector *>(strafeData.player.Origin) = g_pPlayerMove->origin;
 
-	g_strafeData.vars.OnGround = g_pPlayerMove->onground != -1;
-	g_strafeData.vars.EntFriction = g_pPlayerMove->friction;
-	g_strafeData.vars.ReduceWishspeed = g_strafeData.vars.OnGround && (g_pPlayerMove->flags & FL_DUCKING);
-	g_strafeData.vars.Maxspeed = g_pPlayerMove->maxspeed;
-	g_strafeData.vars.Stopspeed = sv_stopspeed->value;
-	g_strafeData.vars.Friction = sv_friction->value;
-	g_strafeData.vars.Accelerate = sv_accelerate->value;
-	g_strafeData.vars.Airaccelerate = sv_airaccelerate->value;
-	g_strafeData.vars.Frametime = g_pPlayerMove->frametime; // 1.0f / 200.0f (1.0f / fps_max)
+	strafeData.vars.OnGround = g_pPlayerMove->onground != -1;
+	strafeData.vars.EntFriction = g_pPlayerMove->friction;
+	strafeData.vars.Maxspeed = g_pPlayerMove->maxspeed;
+	strafeData.vars.ReduceWishspeed = strafeData.vars.OnGround && (g_pPlayerMove->flags & FL_DUCKING);
 
-	g_strafeData.frame.Strafe = static_cast<bool>(g_Config.cvars.strafe);
-	g_strafeData.frame.SetDir(static_cast<Strafe::StrafeDir>(static_cast<int>(g_Config.cvars.strafe_dir)));
-	g_strafeData.frame.SetType(static_cast<Strafe::StrafeType>(static_cast<int>(g_Config.cvars.strafe_type)));
+	if (g_pPlayerMove->movevars)
+	{
+		strafeData.vars.Stopspeed = g_pPlayerMove->movevars->stopspeed;
+		strafeData.vars.Friction = g_pPlayerMove->movevars->friction;
+		strafeData.vars.Accelerate = g_pPlayerMove->movevars->accelerate;
+		strafeData.vars.Airaccelerate = g_pPlayerMove->movevars->airaccelerate;
+	}
+	else
+	{
+		strafeData.vars.Stopspeed = sv_stopspeed->value;
+		strafeData.vars.Friction = sv_friction->value;
+		strafeData.vars.Accelerate = sv_accelerate->value;
+		strafeData.vars.Airaccelerate = sv_airaccelerate->value;
+	}
+
+	strafeData.vars.Frametime = g_pPlayerMove->frametime; // 1.0f / 200.0f (1.0f / fps_max)
+
+	strafeData.frame.Strafe = bStrafe;
+	strafeData.frame.SetDir( dir );
+	strafeData.frame.SetType( type );
+
+	strafeData.frame.SetX( flPointX );
+	strafeData.frame.SetY( flPointY );
 
 	//if (!*strafe_yaw->string)
-		g_strafeData.frame.SetYaw(static_cast<double>(flYaw));
+		strafeData.frame.SetYaw(static_cast<double>(flYaw));
 	//else
-	//	g_strafeData.frame.SetYaw(static_cast<double>(strafe_yaw->value));
+	//	strafeData.frame.SetYaw(static_cast<double>(strafe_yaw->value));
 }
 
 //-----------------------------------------------------------------------------
-// ConCommands
+// ConCommands/CVars
 //-----------------------------------------------------------------------------
+
+ConVar sc_strafe_point_x("sc_strafe_point_x", "0", FCVAR_CLIENTDLL, "Coordinate X to point strafe");
+ConVar sc_strafe_point_y("sc_strafe_point_y", "0", FCVAR_CLIENTDLL, "Coordinate Y to point strafe");
 
 CON_COMMAND_NO_WRAPPER(sc_strafe, "Toggle Vectorial Strafing")
 {
@@ -70,15 +87,19 @@ CON_COMMAND_NO_WRAPPER(sc_strafe_ignore_ground, "Ignore ground when strafe")
 	g_Config.cvars.strafe_ignore_ground = !g_Config.cvars.strafe_ignore_ground;
 }
 
-CON_COMMAND(sc_strafe_dir, "Set strafing direction. Directions:\n\t0 - to the left\n\t1 - to the right\n\t2 - best strafe\n\t3 - to view angles")
+CON_COMMAND(sc_strafe_dir, "Set strafing direction. Directions:\n\t0 - to the left\n\t1 - to the right\n\t2 - best strafe\n\t3 - to view angles\n\t4 - to the point")
 {
 	if (args.ArgC() > 1)
 	{
 		int dir = atoi(args[1]);
 
-		if (dir >= 0 && dir <= 3)
+		if (dir >= 0 && dir <= 4)
 		{
 			g_Config.cvars.strafe_dir = dir;
+		}
+		else
+		{
+			Msg("Invalid direction\n");
 		}
 	}
 	else
@@ -96,6 +117,10 @@ CON_COMMAND(sc_strafe_type, "Set strafing type. Types:\n\t0 - Max acceleration s
 		if (type >= 0 && type <= 3)
 		{
 			g_Config.cvars.strafe_type = type;
+		}
+		else
+		{
+			Msg("Invalid strafing type\n");
 		}
 	}
 	else
@@ -121,15 +146,21 @@ void CStrafer::StrafeVectorial(struct usercmd_s *pCmd)
 	if (g_Config.cvars.antiafk || g_pPlayerMove->dead || g_pPlayerMove->iuser1 != 0 || g_pPlayerMove->movetype != MOVETYPE_WALK || g_pPlayerMove->waterlevel > WL_FEET)
 		return;
 
-	Vector viewangles;
-	g_pEngineFuncs->GetViewAngles(viewangles);
+	Vector va;
+	g_pEngineFuncs->GetViewAngles(va);
 
-	UpdateStrafeData(viewangles[1]);
+	UpdateStrafeData(g_strafeData,
+					 g_Config.cvars.strafe,
+					 static_cast<Strafe::StrafeDir>(g_Config.cvars.strafe_dir),
+					 static_cast<Strafe::StrafeType>(g_Config.cvars.strafe_type),
+					 va[1],
+					 sc_strafe_point_x.GetFloat(),
+					 sc_strafe_point_y.GetFloat());
 
 	if (g_strafeData.frame.Strafe)
 	{
 		Strafe::ProcessedFrame out;
-		out.Yaw = viewangles[1];
+		out.Yaw = va[1];
 
 		Strafe::Friction(g_strafeData);
 
@@ -140,11 +171,11 @@ void CStrafer::StrafeVectorial(struct usercmd_s *pCmd)
 			pCmd->forwardmove = out.Forwardspeed;
 			pCmd->sidemove = out.Sidespeed;
 
-			viewangles[1] = static_cast<float>(out.Yaw);
+			va[1] = static_cast<float>(out.Yaw);
 		}
 	}
 
-	g_pEngineFuncs->SetViewAngles(viewangles);
+	g_pEngineFuncs->SetViewAngles(va);
 }
 
 //-----------------------------------------------------------------------------
