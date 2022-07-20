@@ -58,6 +58,8 @@ const char *g_szClassName[] =
 	"Spore Ammo",
 	"Spore",
 	"Human Grunt",
+	"Torch | Human Grunt",
+	"Medic | Human Grunt",
 	"Gonome",
 	"Pit Drone",
 	"Shock Trooper",
@@ -192,7 +194,7 @@ CClassTable::CClassTable()
 
 	g_HashModelsTable.Insert("barney.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNEY, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("intro_barney.mdl", LINK_CLASS_INFO(CLASS_NPC_BARNEY, FL_CLASS_FRIEND));
-	g_HashModelsTable.Insert("otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND));
+	g_HashModelsTable.Insert("otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("intro_otis.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_FRIEND));
 	g_HashModelsTable.Insert("hungerbarney.mdl", LINK_CLASS_INFO(CLASS_NPC_OTIS, FL_CLASS_ENEMY | FL_CLASS_DEAD_BODY));
 
@@ -257,11 +259,11 @@ CClassTable::CClassTable()
 	g_HashModelsTable.Insert("spore.mdl", LINK_CLASS_INFO(CLASS_NPC_SPORE, FL_CLASS_ENEMY));
 
 	g_HashModelsTable.Insert("hgrunt_opforf.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
-	g_HashModelsTable.Insert("hgrunt_torchf.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
-	g_HashModelsTable.Insert("hgrunt_medicf.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 	g_HashModelsTable.Insert("hgrunt_opfor.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
-	g_HashModelsTable.Insert("hgrunt_torch.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
-	g_HashModelsTable.Insert("hgrunt_medic.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
+	g_HashModelsTable.Insert("hgrunt_torchf.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR_TORCH, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
+	g_HashModelsTable.Insert("hgrunt_torch.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR_TORCH, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
+	g_HashModelsTable.Insert("hgrunt_medicf.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR_MEDIC, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
+	g_HashModelsTable.Insert("hgrunt_medic.mdl", LINK_CLASS_INFO(CLASS_NPC_HUMAN_GRUNT_OPFOR_MEDIC, FL_CLASS_FRIEND | FL_CLASS_DEAD_BODY));
 
 	g_HashModelsTable.Insert("massn.mdl", LINK_CLASS_INFO(CLASS_NPC_MALE_ASSASSIN, FL_CLASS_ENEMY));
 	g_HashModelsTable.Insert("massnf.mdl", LINK_CLASS_INFO(CLASS_NPC_MALE_SNIPER_ASSASSIN, FL_CLASS_ENEMY));
