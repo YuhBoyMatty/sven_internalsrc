@@ -83,6 +83,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>svenmod\public;imgui;imgui_impl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,6 +108,7 @@
     <ClCompile Include="features\keyspam.cpp" />
     <ClCompile Include="features\message_spammer.cpp" />
     <ClCompile Include="features\misc.cpp" />
+    <ClCompile Include="features\models_manager.cpp" />
     <ClCompile Include="features\skybox.cpp" />
     <ClCompile Include="features\strafer.cpp" />
     <ClCompile Include="features\visual.cpp" />
@@ -144,6 +146,7 @@
     <ClInclude Include="features\keyspam.h" />
     <ClInclude Include="features\message_spammer.h" />
     <ClInclude Include="features\misc.h" />
+    <ClInclude Include="features\models_manager.h" />
     <ClInclude Include="features\skybox.h" />
     <ClInclude Include="features\strafer.h" />
     <ClInclude Include="features\visual.h" />

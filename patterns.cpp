@@ -14,6 +14,7 @@ namespace Patterns
 		DEFINE_PATTERN(R_LoadSkyboxInt, "81 EC ? ? 00 00 A1 ? ? ? ? 33 C4 89 84 24 ? ? 00 00 53 8B 9C 24 ? ? 00 00 55 56 57 89 5C 24 24");
 		
 		DEFINE_PATTERN(CRC_MapFile, "81 EC ? ? ? ? A1 ? ? ? ? 33 C4 89 84 24 84 04 00 00");
+		DEFINE_PATTERN(UserInfo_Offset, "8D B8 ? ? ? ? 75 20 8B 0D");
 	}
 
 	namespace Client

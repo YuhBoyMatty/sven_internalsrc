@@ -131,6 +131,9 @@
     <ClCompile Include="features\aim.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
+    <ClCompile Include="features\models_manager.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
@@ -233,6 +236,9 @@
       <Filter>Sven Internal\Modules</Filter>
     </ClInclude>
     <ClInclude Include="features\aim.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\models_manager.h">
       <Filter>Sven Internal\Features</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 #include <sys.h>
 #include <dbg.h>
 #include <convar.h>
+#include <ISvenModAPI.h>
 
 #include "menu.h"
 
@@ -8,6 +9,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
 
+#include "../features/models_manager.h"
 #include "../utils/menu_styles.h"
 #include "../config.h"
 
@@ -216,18 +218,9 @@ void CMenuModule::DrawWindowAim()
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					extern ConVar sc_no_recoil;
-					extern ConVar sc_no_recoil_visual;
-
-					if (ImGui::Checkbox("No Recoil", &g_Config.cvars.no_recoil))
-					{
-						sc_no_recoil.SetValue( !sc_no_recoil.GetBool() );
-					}
+					ImGui::Checkbox("No Recoil", &g_Config.cvars.no_recoil);
 					
-					if (ImGui::Checkbox("No Recoil [Visual]", &g_Config.cvars.no_recoil_visual))
-					{
-						sc_no_recoil_visual.SetValue( !sc_no_recoil_visual.GetBool() );
-					}
+					ImGui::Checkbox("No Recoil [Visual]", &g_Config.cvars.no_recoil_visual);
 
 					ImGui::Spacing();
 					ImGui::Spacing();
@@ -374,36 +367,41 @@ void CMenuModule::DrawWindowVisuals()
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					ImGui::Checkbox("Draw Entity Index", &g_Config.cvars.esp_box_index); ImGui::SameLine();
-					ImGui::Text(" "); ImGui::SameLine();
+					ImGui::Checkbox("Draw Entity Index", &g_Config.cvars.esp_box_index);
 					ImGui::Checkbox("Draw Distance", &g_Config.cvars.esp_box_distance);
 
 					ImGui::Spacing();
-
-					ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health); ImGui::SameLine();
-					ImGui::Text(""); ImGui::SameLine();
-					ImGui::Checkbox("Draw Player Armor", &g_Config.cvars.esp_box_player_armor);
-
 					ImGui::Spacing();
 
-					ImGui::Checkbox("Draw Entity Name", &g_Config.cvars.esp_box_entity_name); ImGui::SameLine();
-					ImGui::Text("  "); ImGui::SameLine();
+					ImGui::Checkbox("Show Only Visible Players", &g_Config.cvars.esp_show_visible_players);
+					ImGui::Checkbox("Draw Player Health", &g_Config.cvars.esp_box_player_health);
+					ImGui::Checkbox("Draw Player Armor", &g_Config.cvars.esp_box_player_armor);
 					ImGui::Checkbox("Draw Nicknames", &g_Config.cvars.esp_box_player_name);
 
 					ImGui::Spacing();
+					ImGui::Spacing();
 
+					ImGui::Checkbox("Draw Entity Name", &g_Config.cvars.esp_box_entity_name);
 					ImGui::Checkbox("Draw Skeleton", &g_Config.cvars.esp_skeleton); ImGui::SameLine();
-					ImGui::Text("     "); ImGui::SameLine();
-					ImGui::Checkbox("Draw Bones Name", &g_Config.cvars.esp_bones_name);
+					ImGui::Checkbox("Draw Names of Bones", &g_Config.cvars.esp_bones_name);
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Text("Colors");
 
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					ImGui::Text("ESP Colors");
+					ImGui::ColorEdit3("Friend Player Color", g_Config.cvars.esp_friend_player_color);
 
 					ImGui::Spacing();
-					ImGui::Spacing();
 
+					ImGui::ColorEdit3("Enemy Player Color", g_Config.cvars.esp_enemy_player_color);
+
+					ImGui::Spacing();
+					
 					ImGui::ColorEdit3("Friend Color", g_Config.cvars.esp_friend_color);
 
 					ImGui::Spacing();
@@ -421,31 +419,83 @@ void CMenuModule::DrawWindowVisuals()
 					ImGui::Spacing();
 					ImGui::Spacing();
 					ImGui::Spacing();
+
+					ImGui::Text("Misc.");
+
+					ImGui::Spacing();
 					ImGui::Spacing();
 
+					static const char* esp_style[] = { "0 - Default", "1 - SAMP", "2 - Left 4 Dead" };
+					if (ImGui::Combo("Player Style##style", &g_Config.cvars.esp_player_style, esp_style, IM_ARRAYSIZE(esp_style)))
+					{
+						if (g_Config.cvars.esp_player_style == 0)
+						{
+							g_Config.cvars.esp_friend_player_color[0] = 0.f;
+							g_Config.cvars.esp_friend_player_color[1] = 1.f;
+							g_Config.cvars.esp_friend_player_color[2] = 0.f;
+						}
+						else if (g_Config.cvars.esp_player_style == 1)
+						{
+							g_Config.cvars.esp_box_player_health = true;
+							g_Config.cvars.esp_box_player_armor = true;
+
+							g_Config.cvars.esp_box_distance = false;
+							g_Config.cvars.esp_box_index = true;
+
+							g_Config.cvars.esp_friend_player_color[0] = 1.f;
+							g_Config.cvars.esp_friend_player_color[1] = 1.f;
+							g_Config.cvars.esp_friend_player_color[2] = 1.f;
+						}
+						else if (g_Config.cvars.esp_player_style == 2)
+						{
+							g_Config.cvars.esp_box_player_health = false;
+							g_Config.cvars.esp_box_player_armor = false;
+
+							g_Config.cvars.esp_box_distance = false;
+							g_Config.cvars.esp_box_index = false;
+
+							g_Config.cvars.esp_friend_player_color[0] = 0.6f;
+							g_Config.cvars.esp_friend_player_color[1] = 0.75f;
+							g_Config.cvars.esp_friend_player_color[2] = 1.f;
+						}
+					}
+
+					ImGui::Spacing();
+					
+					ImGui::Combo("Entity Style##style2", &g_Config.cvars.esp_entity_style, esp_style, IM_ARRAYSIZE(esp_style));
+
+					ImGui::Spacing();
+					
 					static const char* esp_process_items[] = { "0 - Everyone", "1 - Entities", "2 - Players" };
-					ImGui::Combo("ESP Targets", &g_Config.cvars.esp_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+					ImGui::Combo("Targets##esp", &g_Config.cvars.esp_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+
+					ImGui::Spacing();
+					
+					ImGui::Combo("Box Targets##esp", &g_Config.cvars.esp_box_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+
+					ImGui::Spacing();
+					
+					ImGui::Combo("Draw Distance Mode##esp", &g_Config.cvars.esp_distance_mode, esp_process_items, IM_ARRAYSIZE(esp_process_items));
 
 					ImGui::Spacing();
 
-					ImGui::Combo("Draw Skeleton Type", &g_Config.cvars.esp_skeleton_type, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+					ImGui::Combo("Draw Skeleton Mode##esp", &g_Config.cvars.esp_skeleton_type, esp_process_items, IM_ARRAYSIZE(esp_process_items));
 
 					ImGui::Spacing();
 
 					static const char* esp_box_items[] = { "0 - Off", "1 - Default", "2 - Coal", "3 - Corner" };
-					ImGui::Combo("Box Type", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
+					ImGui::Combo("Box Type##esp", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
 
 					ImGui::Spacing();
 					ImGui::Spacing();
+					ImGui::Spacing();
 
-					ImGui::SliderFloat("ESP Distance", &g_Config.cvars.esp_distance, 1.0f, 10000.0f);
+					ImGui::SliderFloat("Distance##esp", &g_Config.cvars.esp_distance, 1.0f, 8192.0f);
 						
 					ImGui::Spacing();
-					ImGui::Spacing();
 
-					ImGui::SliderInt("Box Alpha", &g_Config.cvars.esp_box_fill, 0, 255);
+					ImGui::SliderInt("Box Fill Alpha##esp", &g_Config.cvars.esp_box_fill, 0, 255);
 
-					ImGui::Spacing();
 					ImGui::Spacing();
 
 					ImGui::Separator();
@@ -836,6 +886,109 @@ void CMenuModule::DrawWindowVisuals()
 					ImGui::Spacing();
 
 					ImGui::ColorEdit3("Wireframe Color", g_Config.cvars.wh_wireframe_color);
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Separator();
+
+					ImGui::Text("");
+					ImGui::Spacing();
+
+					ImGui::EndTabItem();
+				}
+				
+				// Models Manager
+				if (ImGui::BeginTabItem("Models Manager"))
+				{
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Text("Replace Models of All Players");
+
+					ImGui::Spacing();
+
+					ImGui::Separator();
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					if (ImGui::Checkbox("Replace Models of All Players", &g_Config.cvars.replace_players_models))
+					{
+						if ( SvenModAPI()->GetClientState() == CLS_ACTIVE )
+							g_ModelsManager.ResetPlayersInfo();
+					}
+					if (ImGui::Checkbox("Replace Model on Self", &g_Config.cvars.replace_model_on_self))
+					{
+						if ( SvenModAPI()->GetClientState() == CLS_ACTIVE )
+							g_ModelsManager.ResetLocalPlayerInfo();
+					}
+
+					ImGui::Spacing();
+
+					ImGui::InputText("Model to Replace", g_szReplacePlayerModelBuffer, IM_ARRAYSIZE(g_szReplacePlayerModelBuffer));
+
+					if (ImGui::Button("Change Model##mm"))
+					{
+						g_ReplacePlayerModel = g_szReplacePlayerModelBuffer;
+
+						if ( SvenModAPI()->GetClientState() == CLS_ACTIVE )
+							g_ModelsManager.ResetPlayersInfo();
+					}
+					
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					if (ImGui::Checkbox("Replace Models of All Players with Random Ones", &g_Config.cvars.replace_players_models_with_randoms))
+					{
+						if ( SvenModAPI()->GetClientState() == CLS_ACTIVE )
+							g_ModelsManager.ResetPlayersInfo();
+					}
+
+					ImGui::Spacing();
+					
+					if (ImGui::Button("Reload List of Random Models"))
+					{
+						g_ModelsManager.ReloadRandomModels();
+					}
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+					
+					ImGui::Text("Replace Models of Specified Players");
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Separator();
+					
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					if (ImGui::Checkbox("Replace Models of Specified Players", &g_Config.cvars.replace_specified_players_models))
+					{
+						if ( SvenModAPI()->GetClientState() == CLS_ACTIVE )
+							g_ModelsManager.ResetPlayersInfo();
+					}
+					if (ImGui::Checkbox("Don't Replace Models of Specified Players", &g_Config.cvars.dont_replace_specified_players_models))
+					{
+						if ( SvenModAPI()->GetClientState() == CLS_ACTIVE )
+							g_ModelsManager.ResetPlayersInfo();
+					}
+
+					ImGui::Spacing();
+					
+					if (ImGui::Button("Reload List of Players##mm"))
+					{
+						g_ModelsManager.ReloadTargetPlayers();
+					}
+
+					ImGui::Spacing();
+
+					if (ImGui::Button("Reload List of Ignored Players##mm"))
+					{
+						g_ModelsManager.ReloadIgnoredPlayers();
+					}
 
 					ImGui::Spacing();
 					ImGui::Spacing();
@@ -1278,29 +1431,29 @@ void CMenuModule::DrawWindowHUD()
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					ImGui::SliderInt("VP: Width Size", &g_Config.cvars.vote_popup_width_size, 0, 1000);
+					ImGui::SliderInt("Width Size##cvp", &g_Config.cvars.vote_popup_width_size, 0, 1000);
 
 					ImGui::Spacing();
 
-					ImGui::SliderInt("VP: Height Size", &g_Config.cvars.vote_popup_height_size, 0, 1000);
-
-					ImGui::Spacing();
-					ImGui::Spacing();
-
-					ImGui::SliderInt("VP: Width Border Pixels", &g_Config.cvars.vote_popup_w_border_pix, 0, 100);
-
-					ImGui::Spacing();
-
-					ImGui::SliderInt("VP: Height Border Pixels", &g_Config.cvars.vote_popup_h_border_pix, 0, 100);
+					ImGui::SliderInt("Height Size##cvp", &g_Config.cvars.vote_popup_height_size, 0, 1000);
 
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					ImGui::SliderFloat("VP: Width Fraction", &g_Config.cvars.vote_popup_width_frac, 0.0f, 1.0f);
+					ImGui::SliderInt("Width Border Pixels##cvp", &g_Config.cvars.vote_popup_w_border_pix, 0, 100);
 
 					ImGui::Spacing();
 
-					ImGui::SliderFloat("VP: Height Fraction", &g_Config.cvars.vote_popup_height_frac, 0.0f, 1.0f);
+					ImGui::SliderInt("Height Border Pixels##cvp", &g_Config.cvars.vote_popup_h_border_pix, 0, 100);
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::SliderFloat("Width Fraction##cvp", &g_Config.cvars.vote_popup_width_frac, 0.0f, 1.0f);
+
+					ImGui::Spacing();
+
+					ImGui::SliderFloat("Height Fraction##cvp", &g_Config.cvars.vote_popup_height_frac, 0.0f, 1.0f);
 
 					ImGui::Spacing();
 					ImGui::Spacing();
@@ -1901,7 +2054,7 @@ void CMenuModule::DrawWindowUtility()
 					ImGui::SliderInt("##one_tick_exploit_lag_interval", &g_Config.cvars.one_tick_exploit_lag_interval, 1, 256);
 						
 					ImGui::Text("Speedhack");
-					ImGui::SliderFloat("##one_tick_exploit_speedhack", &g_Config.cvars.one_tick_exploit_speedhack, 0.01f, 1000000000.0f);
+					ImGui::SliderFloat("##one_tick_exploit_speedhack", &g_Config.cvars.one_tick_exploit_speedhack, 0.01f, 100000.0f);
 						
 					ImGui::Spacing();
 					ImGui::Spacing();

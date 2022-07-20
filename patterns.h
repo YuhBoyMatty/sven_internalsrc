@@ -21,6 +21,7 @@ namespace Patterns
 		EXTERN_PATTERN(R_LoadSkyboxInt);
 
 		EXTERN_PATTERN(CRC_MapFile);
+		EXTERN_PATTERN(UserInfo_Offset);
 	}
 
 	namespace Client

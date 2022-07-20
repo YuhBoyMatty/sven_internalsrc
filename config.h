@@ -69,13 +69,21 @@ public:
 		bool esp_box_entity_name = true;
 		bool esp_box_player_name = true;
 		bool esp_show_items = true;
+		bool esp_show_visible_players = false;
 		bool esp_ignore_unknown_ents = false;
 		bool esp_skeleton = false;
 		bool esp_bones_name = false;
+		int esp_player_style = 0;
+		int esp_entity_style = 0;
 		int esp_targets = 0;
+		int esp_box_targets = 0;
+		int esp_distance_mode = 0;
 		int esp_skeleton_type = 1;
 
-		float esp_distance = 5000.0f;
+		float esp_distance = 8192.0f;
+
+		float esp_friend_player_color[3] = { 0.0f, 1.0f, 0.0f };
+		float esp_enemy_player_color[3] = { 1.0f, 0.0f, 0.0f };
 
 		float esp_friend_color[3] = { 0.0f, 1.0f, 0.0f };
 		float esp_enemy_color[3] = { 1.0f, 0.0f, 0.0f };
@@ -125,6 +133,18 @@ public:
 
 		float wh_wireframe_width = 1.5f;
 		float wh_wireframe_color[3] = { 0.0f, 1.0f, 0.0f };
+
+		//-----------------------------------------------------------------------------
+		// Models Manager
+		//-----------------------------------------------------------------------------
+		
+		const char *replace_model = NULL;
+
+		bool replace_players_models = false;
+		bool replace_model_on_self = false;
+		bool replace_players_models_with_randoms = false;
+		bool replace_specified_players_models = false;
+		bool dont_replace_specified_players_models = false;
 
 		//-----------------------------------------------------------------------------
 		// Crosshair
@@ -274,6 +294,8 @@ public:
 		float spin_pitch_rotation_angle = 0.5f;
 
 		bool ignore_different_map_versions = false;
+		bool use_only_helmet_models = false;
+		bool use_helmet_model_on_self = false;
 
 		bool fast_crowbar = false;
 		bool fast_crowbar2 = false;

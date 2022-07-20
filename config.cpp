@@ -7,6 +7,8 @@
 #include "config.h"
 
 #include "features/skybox.h"
+#include "features/models_manager.h"
+
 #include "utils/menu_styles.h"
 
 extern void WindowStyle();
@@ -161,12 +163,23 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("ShowPlayerArmor", cvars.esp_box_player_armor);
 			ConfigManager()->ImportParam("ShowEntityName", cvars.esp_box_entity_name);
 			ConfigManager()->ImportParam("ShowPlayerName", cvars.esp_box_player_name);
+			ConfigManager()->ImportParam("ShowVisiblePlayers", cvars.esp_show_visible_players);
 			ConfigManager()->ImportParam("ShowItems", cvars.esp_show_items);
 			ConfigManager()->ImportParam("IgnoreUnknownEnts", cvars.esp_ignore_unknown_ents);
+			ConfigManager()->ImportParam("PlayerStyle", cvars.esp_player_style);
+			ConfigManager()->ImportParam("EntityStyle", cvars.esp_entity_style);
 			ConfigManager()->ImportParam("Targets", cvars.esp_targets);
+			ConfigManager()->ImportParam("BoxTargets", cvars.esp_box_targets);
+			ConfigManager()->ImportParam("DistanceMode", cvars.esp_distance_mode);
 			ConfigManager()->ImportParam("ShowSkeleton", cvars.esp_skeleton);
 			ConfigManager()->ImportParam("ShowBonesName", cvars.esp_bones_name);
 			ConfigManager()->ImportParam("ShowSkeletonType", cvars.esp_skeleton_type);
+			ConfigManager()->ImportParam("FriendPlayerColor_R", cvars.esp_friend_player_color[0]);
+			ConfigManager()->ImportParam("FriendPlayerColor_G", cvars.esp_friend_player_color[1]);
+			ConfigManager()->ImportParam("FriendPlayerColor_B", cvars.esp_friend_player_color[2]);
+			ConfigManager()->ImportParam("EnemyPlayerColor_R", cvars.esp_enemy_player_color[0]);
+			ConfigManager()->ImportParam("EnemyPlayerColor_G", cvars.esp_enemy_player_color[1]);
+			ConfigManager()->ImportParam("EnemyPlayerColor_B", cvars.esp_enemy_player_color[2]);
 			ConfigManager()->ImportParam("FriendColor_R", cvars.esp_friend_color[0]);
 			ConfigManager()->ImportParam("FriendColor_G", cvars.esp_friend_color[1]);
 			ConfigManager()->ImportParam("FriendColor_B", cvars.esp_friend_color[2]);
@@ -194,6 +207,21 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("Wireframe_R", cvars.wh_wireframe_color[0]);
 			ConfigManager()->ImportParam("Wireframe_G", cvars.wh_wireframe_color[2]);
 			ConfigManager()->ImportParam("Wireframe_B", cvars.wh_wireframe_color[1]);
+
+			ConfigManager()->EndSectionImport();
+		}
+
+		if (ConfigManager()->BeginSectionImport("MODELSMANAGER"))
+		{
+			cvars.replace_model = NULL;
+
+			ConfigManager()->ImportParam("ReplacePlayersModels", cvars.replace_players_models);
+			ConfigManager()->ImportParam("ReplaceModelOnSelf", cvars.replace_model_on_self);
+			ConfigManager()->ImportParam("ReplaceModel", cvars.replace_model);
+
+			ConfigManager()->ImportParam("ReplacePlayersModelsWithRandoms", cvars.replace_players_models_with_randoms);
+			ConfigManager()->ImportParam("ReplaceSpecifiedPlayersModels", cvars.replace_specified_players_models);
+			ConfigManager()->ImportParam("IgnoreSpecifiedPlayersModels", cvars.dont_replace_specified_players_models);
 
 			ConfigManager()->EndSectionImport();
 		}
@@ -413,6 +441,8 @@ bool CConfig::Load()
 			ConfigManager()->ImportParam("ColorPulsatorBottom", cvars.color_pulsator_bottom);
 			ConfigManager()->ImportParam("ColorPulsatorDelay", cvars.color_pulsator_delay);
 			ConfigManager()->ImportParam("IgnoreDifferentMapVersions", cvars.ignore_different_map_versions);
+			ConfigManager()->ImportParam("UseOnlyHelmetModels", cvars.use_only_helmet_models);
+			ConfigManager()->ImportParam("UseHelmetModelOnSelf", cvars.use_helmet_model_on_self);
 			ConfigManager()->ImportParam("OneTickExploit", cvars.one_tick_exploit);
 			ConfigManager()->ImportParam("OneTickExploitLagInterval", cvars.one_tick_exploit_lag_interval);
 			ConfigManager()->ImportParam("OneTickExploitSpeedhack", cvars.one_tick_exploit_speedhack);
@@ -534,6 +564,7 @@ bool CConfig::Load()
 		ConfigManager()->EndImport();
 
 		// Callbacks
+		g_ModelsManager.OnConfigLoad();
 		g_Skybox.OnConfigLoad();
 
 		return true;
@@ -587,12 +618,23 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("ShowPlayerArmor", cvars.esp_box_player_armor);
 			ConfigManager()->ExportParam("ShowEntityName", cvars.esp_box_entity_name);
 			ConfigManager()->ExportParam("ShowPlayerName", cvars.esp_box_player_name);
+			ConfigManager()->ExportParam("ShowVisiblePlayers", cvars.esp_show_visible_players);
 			ConfigManager()->ExportParam("ShowItems", cvars.esp_show_items);
 			ConfigManager()->ExportParam("IgnoreUnknownEnts", cvars.esp_ignore_unknown_ents);
+			ConfigManager()->ExportParam("PlayerStyle", cvars.esp_player_style);
+			ConfigManager()->ExportParam("EntityStyle", cvars.esp_entity_style);
 			ConfigManager()->ExportParam("Targets", cvars.esp_targets);
+			ConfigManager()->ExportParam("BoxTargets", cvars.esp_box_targets);
+			ConfigManager()->ExportParam("DistanceMode", cvars.esp_distance_mode);
 			ConfigManager()->ExportParam("ShowSkeleton", cvars.esp_skeleton);
 			ConfigManager()->ExportParam("ShowBonesName", cvars.esp_bones_name);
 			ConfigManager()->ExportParam("ShowSkeletonType", cvars.esp_skeleton_type);
+			ConfigManager()->ExportParam("FriendPlayerColor_R", cvars.esp_friend_player_color[0]);
+			ConfigManager()->ExportParam("FriendPlayerColor_G", cvars.esp_friend_player_color[1]);
+			ConfigManager()->ExportParam("FriendPlayerColor_B", cvars.esp_friend_player_color[2]);
+			ConfigManager()->ExportParam("EnemyPlayerColor_R", cvars.esp_enemy_player_color[0]);
+			ConfigManager()->ExportParam("EnemyPlayerColor_G", cvars.esp_enemy_player_color[1]);
+			ConfigManager()->ExportParam("EnemyPlayerColor_B", cvars.esp_enemy_player_color[2]);
 			ConfigManager()->ExportParam("FriendColor_R", cvars.esp_friend_color[0]);
 			ConfigManager()->ExportParam("FriendColor_G", cvars.esp_friend_color[1]);
 			ConfigManager()->ExportParam("FriendColor_B", cvars.esp_friend_color[2]);
@@ -620,6 +662,19 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("Wireframe_R", cvars.wh_wireframe_color[0]);
 			ConfigManager()->ExportParam("Wireframe_G", cvars.wh_wireframe_color[2]);
 			ConfigManager()->ExportParam("Wireframe_B", cvars.wh_wireframe_color[1]);
+
+			ConfigManager()->EndSectionExport();
+		}
+	
+		if (ConfigManager()->BeginSectionExport("MODELSMANAGER"))
+		{
+			ConfigManager()->ExportParam("ReplacePlayersModels", cvars.replace_players_models);
+			ConfigManager()->ExportParam("ReplaceModelOnSelf", cvars.replace_model_on_self);
+			ConfigManager()->ExportParam("ReplaceModel", g_ReplacePlayerModel.c_str());
+
+			ConfigManager()->ExportParam("ReplacePlayersModelsWithRandoms", cvars.replace_players_models_with_randoms);
+			ConfigManager()->ExportParam("ReplaceSpecifiedPlayersModels", cvars.replace_specified_players_models);
+			ConfigManager()->ExportParam("IgnoreSpecifiedPlayersModels", cvars.dont_replace_specified_players_models);
 
 			ConfigManager()->EndSectionExport();
 		}
@@ -841,6 +896,8 @@ void CConfig::Save()
 			ConfigManager()->ExportParam("ColorPulsatorBottom", cvars.color_pulsator_bottom);
 			ConfigManager()->ExportParam("ColorPulsatorDelay", cvars.color_pulsator_delay);
 			ConfigManager()->ExportParam("IgnoreDifferentMapVersions", cvars.ignore_different_map_versions);
+			ConfigManager()->ExportParam("UseOnlyHelmetModels", cvars.use_only_helmet_models);
+			ConfigManager()->ExportParam("UseHelmetModelOnSelf", cvars.use_helmet_model_on_self);
 			ConfigManager()->ExportParam("OneTickExploit", cvars.one_tick_exploit);
 			ConfigManager()->ExportParam("OneTickExploitLagInterval", cvars.one_tick_exploit_lag_interval);
 			ConfigManager()->ExportParam("OneTickExploitSpeedhack", cvars.one_tick_exploit_speedhack);
@@ -1055,7 +1112,7 @@ CON_COMMAND(sc_load_config, "Load a config file from folder \"../sven_internal/c
 	}
 }
 
-CON_COMMAND(sc_save_config, "Save a config to folder \"../sven_internal/config/\"")
+CON_COMMAND(sc_save_config, "Save a config to folder \"../sven_internal/config/*.ini\"")
 {
 	g_Config.Save();
 }
