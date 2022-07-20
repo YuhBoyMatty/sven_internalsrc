@@ -11,6 +11,7 @@
 #include <dbg.h>
 
 #include <hl_sdk/cl_dll/hud.h>
+#include <hl_sdk/cl_dll/in_defs.h>
 #include <hl_sdk/common/entity_types.h>
 #include <hl_sdk/common/com_model.h>
 #include <hl_sdk/engine/APIProxy.h>
@@ -21,6 +22,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "../features/strafer.h"
 #include "../modules/patches.h"
 #include "../game/utils.h"
 
@@ -53,7 +55,9 @@ cvar_t *default_fov = NULL;
 
 Vector g_vecSpinAngles(0.f, 0.f, 0.f);
 
+static Strafe::StrafeData s_StickStrafeData;
 static int s_iStickTarget = 0;
+static bool s_bStickUseStrafe = false;
 static Vector s_vecStickPrevPos;
 
 static int s_nSinkState = 0;
@@ -346,6 +350,12 @@ CON_COMMAND(sc_stick, "Follow a player")
 	{
 		Msg("Usage:  sc_stick <player index>\n");
 	}
+}
+
+CON_COMMAND_NO_WRAPPER(sc_stick_strafe, "Use strafer when follow a player")
+{
+	Msg(s_bStickUseStrafe ? "Strafer on stick disabled\n" : "Strafer on stick enabled\n");
+	s_bStickUseStrafe = !s_bStickUseStrafe;
 }
 
 CON_COMMAND_NO_WRAPPER(sc_one_tick_exploit, "Exploits an action on one tick")
@@ -1254,28 +1264,68 @@ void CMisc::Stick(struct usercmd_s *cmd)
 
 		if ( pPlayer && pPlayer->curstate.messagenum >= g_pEngineFuncs->GetLocalPlayer()->curstate.messagenum && !Client()->IsDead() )
 		{
-			Vector2D vecForward;
-			Vector2D vecRight;
-
 			Vector vPredictPos = pPlayer->curstate.origin + (pPlayer->curstate.origin - s_vecStickPrevPos);
 
-			Vector2D vecDir = vPredictPos.AsVector2D() - g_pPlayerMove->origin.AsVector2D();
-			vecDir.NormalizeInPlace();
+			if ( !s_bStickUseStrafe )
+			{
+				Vector2D vecForward;
+				Vector2D vecRight;
 
-			vecForward.x = cosf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
-			vecForward.y = sinf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
+				Vector2D vecDir = vPredictPos.AsVector2D() - g_pPlayerMove->origin.AsVector2D();
+				vecDir.NormalizeInPlace();
 
-			vecRight.x = vecForward.y;
-			vecRight.y = -vecForward.x;
+				vecForward.x = cosf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
+				vecForward.y = sinf(cmd->viewangles.y * static_cast<float>(M_PI) / 180.f);
 
-			vecForward *= Client()->GetMaxSpeed();
-			vecRight *= Client()->GetMaxSpeed();
+				vecRight.x = vecForward.y;
+				vecRight.y = -vecForward.x;
 
-			float forwardmove = DotProduct(vecForward, vecDir);
-			float sidemove = DotProduct(vecRight, vecDir);
+				vecForward *= Client()->GetMaxSpeed();
+				vecRight *= Client()->GetMaxSpeed();
 
-			cmd->forwardmove = forwardmove;
-			cmd->sidemove = sidemove;
+				float forwardmove = DotProduct(vecForward, vecDir);
+				float sidemove = DotProduct(vecRight, vecDir);
+
+				cmd->forwardmove = forwardmove;
+				cmd->sidemove = sidemove;
+			}
+			else
+			{
+				Vector va;
+				g_pEngineFuncs->GetViewAngles(va);
+
+				UpdateStrafeData(s_StickStrafeData,
+								 true,
+								 Strafe::StrafeDir::POINT,
+								 Strafe::StrafeType::MAXACCEL,
+								 va[1],
+								 vPredictPos.x,
+								 vPredictPos.y);
+
+				Strafe::ProcessedFrame out;
+				out.Yaw = va[1];
+
+				Strafe::Friction(s_StickStrafeData);
+
+				Strafe::StrafeVectorial(s_StickStrafeData, out, false);
+
+				if (out.Processed)
+				{
+					cmd->forwardmove = out.Forwardspeed;
+					cmd->sidemove = out.Sidespeed;
+
+					//va[1] = static_cast<float>(out.Yaw);
+				}
+			}
+
+			if ( (vPredictPos.AsVector2D() - g_pPlayerMove->origin.AsVector2D()).LengthSqr() > M_SQR(300.f) )
+			{
+				// Jump
+				if ( Client()->IsOnGround() )
+				{
+					cmd->buttons |= IN_JUMP;
+				}
+			}
 
 			if (Client()->GetWaterLevel() > WL_NOT_IN_WATER && pPlayer->curstate.origin.z >= g_pPlayerMove->origin.z)
 			{
@@ -1653,6 +1703,11 @@ CMisc::CMisc()
 
 	m_iFakeLagCounter = 0;
 	m_iOneTickExploitLagInterval = 0;
+
+	s_StickStrafeData.frame.UseGivenButtons = true;
+	s_StickStrafeData.frame.buttons = Strafe::StrafeButtons();
+	s_StickStrafeData.frame.buttons.AirLeft = Strafe::Button::LEFT;
+	s_StickStrafeData.frame.buttons.AirRight = Strafe::Button::RIGHT;
 }
 
 CMisc::~CMisc()
