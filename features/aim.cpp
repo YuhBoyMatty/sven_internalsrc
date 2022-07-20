@@ -27,8 +27,17 @@ Vector *ev_punchangle = NULL;
 // ConCommands/CVars
 //-----------------------------------------------------------------------------
 
-ConVar sc_no_recoil("sc_no_recoil", "0", FCVAR_CLIENTDLL, "Compensates recoil");
-ConVar sc_no_recoil_visual("sc_no_recoil_visual", "0", FCVAR_CLIENTDLL, "Removes visual effect of recoil");
+//CON_COMMAND(sc_no_recoil, "Compensates recoil")
+//{
+//	Msg(g_Config.cvars.no_recoil ? "No Recoil disabled\n" : "No Recoil enabled\n");
+//	g_Config.cvars.no_recoil = !g_Config.cvars.no_recoil;
+//}
+//
+//CON_COMMAND(sc_no_recoil_visual, "Removes visual effect of recoil")
+//{
+//	Msg(g_Config.cvars.no_recoil_visual ? "No Recoil Visual disabled\n" : "No Recoil Visual enabled\n");
+//	g_Config.cvars.no_recoil_visual = !g_Config.cvars.no_recoil_visual;
+//}
 
 //-----------------------------------------------------------------------------
 // CAim implementations
@@ -46,7 +55,7 @@ void CAim::CreateMove(float frametime, usercmd_t *cmd, int active)
 
 void CAim::NoRecoil(usercmd_t *cmd)
 {
-	if ( sc_no_recoil.GetBool() && !Client()->IsDead() && Client()->HasWeapon() && Client()->CanAttack() )
+	if ( g_Config.cvars.no_recoil && !Client()->IsDead() && Client()->HasWeapon() && Client()->CanAttack() )
 	{
 		// Can be wrong..
 
@@ -81,7 +90,7 @@ void CAim::Pre_V_CalcRefdef(ref_params_t *pparams)
 
 void CAim::Post_V_CalcRefdef(ref_params_t *pparams)
 {
-	if ( sc_no_recoil_visual.GetBool() )
+	if ( g_Config.cvars.no_recoil_visual )
 	{
 		*reinterpret_cast<Vector *>(pparams->viewangles) -= m_vecPunchAngle + m_vecEVPunchAngle;
 	}

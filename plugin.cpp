@@ -71,6 +71,9 @@ private:
 	float m_flPlatTime;
 };
 
+CSvenInternal g_SvenInternal;
+IClientPlugin *g_pClientPlugin = &g_SvenInternal;
+
 //-----------------------------------------------------------------------------
 // Implement plugin methods
 //-----------------------------------------------------------------------------
@@ -229,7 +232,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.11";
+	return "2.0.12";
 }
 
 const char *CSvenInternal::GetDescription(void)
@@ -285,7 +288,7 @@ void CSvenInternal::InitFolders(ISvenModAPI *pSvenModAPI)
 // Export the plugin's interface
 //-----------------------------------------------------------------------------
 
-EXPOSE_SINGLE_INTERFACE(CSvenInternal, IClientPlugin, CLIENT_PLUGIN_INTERFACE_VERSION);
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CSvenInternal, IClientPlugin, CLIENT_PLUGIN_INTERFACE_VERSION, g_SvenInternal);
 
 //-----------------------------------------------------------------------------
 // Weirdo function

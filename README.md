@@ -70,6 +70,17 @@ Example for the file:
 
 File `chat_colors_players.txt` automatically loads when cheat loaded. Also, you can use the console command `sc_chat_colors_load_players` to reload the list of players.
 
+# Models Manager
+Lets you change the models of players the working directory is `models_manager`
+
+File `random_models.txt` contains the list of models that will be randomly used
+
+File `target_players.txt` contains the list of pairs of type `STEAM64ID = MODELNAME` to replace models for specified players
+
+File `ignored_players.txt` contains the list of Steam64 ID's that will be ignored when you replace models for specified players
+
+For more information, check the files above, they contain comments
+
 # Message Spammer
 Roughly, it's some kind of AHK.
 

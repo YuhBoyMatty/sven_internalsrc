@@ -1,5 +1,12 @@
 Changelog for Sven Internal
 
+20/07/2022 - Version 2.0.12:
+- Added point strafing (sc_strafe_dir 4, sc_strafe_point_x <coordinate>, sc_strafe_point_y <coordinate>)
+- Added strafer for Stick feature (sc_stick, sc_stick_strafe)
+- Added Models Manager to change models for players (experimental)
+- Added Human Grunt Medic & Torch in the class table
+- Added styles for ESP, changed the font of ESP, added feature to disable ESP through walls (for players)
+
 18/07/2022 - Version 2.0.11:
 - Some fixes in the code
 - Added feature No Recoil (experimental)

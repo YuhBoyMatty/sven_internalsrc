@@ -35,6 +35,7 @@
 #include "../features/skybox.h"
 #include "../features/dynamic_glow.h"
 #include "../features/chat_colors.h"
+#include "../features/models_manager.h"
 
 //-----------------------------------------------------------------------------
 // Declare hooks
@@ -109,7 +110,6 @@ private:
 	void *m_pfnNetchan_CanPacket;
 	void *m_pfnScaleColors;
 	void *m_pfnScaleColors_RGBA;
-	void *m_pfnSPR_Set;
 	void *m_pfnglBegin;
 	void *m_pfnglColor4f;
 	void *m_pfnV_RenderView;
@@ -399,6 +399,10 @@ DECLARE_FUNC(int, __cdecl, HOOKED_CRC_MapFile, uint32 *ulCRC, char *pszMapName)
 	return result;
 }
 
+//-----------------------------------------------------------------------------
+// Studio renderer hooks
+//-----------------------------------------------------------------------------
+
 DECLARE_CLASS_FUNC(void, HOOKED_StudioRenderModel, CStudioModelRenderer *thisptr)
 {
 	bool bRenderHandled = false;
@@ -429,6 +433,7 @@ HOOK_RESULT CClientHooks::HUD_VidInit(void)
 	g_CamHack.OnVideoInit();
 	g_AntiAFK.OnVideoInit();
 	g_Misc.OnVideoInit();
+	g_ModelsManager.OnVideoInit();
 
 	return HOOK_CONTINUE;
 }
@@ -648,7 +653,7 @@ HOOK_RESULT CClientPostHooks::HUD_Redraw(float time, int intermission)
 
 HOOK_RESULT HOOK_RETURN_VALUE CClientPostHooks::HUD_UpdateClientData(int *changed, client_data_t *pcldata, float flTime)
 {
-	g_bLoading = (flTime < g_flClientDataLastUpdate) || (g_flClientDataLastUpdate == -1.f);
+	g_bLoading = (flTime < g_flClientDataLastUpdate) /* || (g_flClientDataLastUpdate == -1.f) */;
 
 	if (*changed)
 		g_flClientDataLastUpdate = flTime;
@@ -917,8 +922,6 @@ bool CHooksModule::Load()
 		return false;
 	}
 
-	m_pfnSPR_Set = g_pEngineFuncs->SPR_Set;
-
 	return true;
 }
 
@@ -928,7 +931,7 @@ void CHooksModule::PostLoad()
 	m_hNetchan_CanPacket = DetoursAPI()->DetourFunction( m_pfnNetchan_CanPacket, HOOKED_Netchan_CanPacket, GET_FUNC_PTR(ORIG_Netchan_CanPacket) );
 	m_hScaleColors = DetoursAPI()->DetourFunction( m_pfnScaleColors, HOOKED_ScaleColors, GET_FUNC_PTR(ORIG_ScaleColors) );
 	m_hScaleColors_RGBA = DetoursAPI()->DetourFunction( m_pfnScaleColors_RGBA, HOOKED_ScaleColors_RGBA, GET_FUNC_PTR(ORIG_ScaleColors_RGBA) );
-	m_hSPR_Set = DetoursAPI()->DetourFunction( m_pfnSPR_Set, HOOKED_SPR_Set, GET_FUNC_PTR(ORIG_SPR_Set) );
+	m_hSPR_Set = DetoursAPI()->DetourFunction( g_pEngineFuncs->SPR_Set, HOOKED_SPR_Set, GET_FUNC_PTR(ORIG_SPR_Set) );
 	m_hglBegin = DetoursAPI()->DetourFunction( m_pfnglBegin, HOOKED_glBegin, GET_FUNC_PTR(ORIG_glBegin) );
 	m_hglColor4f = DetoursAPI()->DetourFunction( m_pfnglColor4f, HOOKED_glColor4f, GET_FUNC_PTR(ORIG_glColor4f) );
 	m_hV_RenderView = DetoursAPI()->DetourFunction( m_pfnV_RenderView, HOOKED_V_RenderView, GET_FUNC_PTR(ORIG_V_RenderView) );
