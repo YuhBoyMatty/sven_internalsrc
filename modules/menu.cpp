@@ -198,6 +198,61 @@ void CMenuModule::DrawWindowAim()
 		{
 			if (ImGui::BeginTabBar("##tabs"))
 			{
+				// Aimbot
+				if (ImGui::BeginTabItem("Aimbot"))
+				{
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Text("Aimbot");
+
+					ImGui::Spacing();
+
+					ImGui::Separator();
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Checkbox("Aimbot", &g_Config.cvars.aimbot);
+					
+					ImGui::Spacing();
+
+					ImGui::Checkbox("Silent Aimbot", &g_Config.cvars.silent_aimbot);
+
+					ImGui::Spacing();
+
+					ImGui::Checkbox("Ragebot", &g_Config.cvars.ragebot);
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+					
+					ImGui::Text("Advanced");
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Checkbox("Consider FOV", &g_Config.cvars.aimbot_consider_fov);
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+					
+					ImGui::SliderFloat("Aimbot FOV", &g_Config.cvars.aimbot_fov, 0.0f, 180.0f);
+					
+					ImGui::Spacing();
+					
+					ImGui::SliderFloat("Aimbot Distance", &g_Config.cvars.aimbot_distance, 0.0f, 8192.0f);
+
+					ImGui::Spacing();
+					ImGui::Spacing();
+
+					ImGui::Separator();
+
+					ImGui::Text("");
+					ImGui::Spacing();
+
+					ImGui::EndTabItem();
+				}
+
 				// Recoil & Spread
 				if (ImGui::BeginTabItem("Recoil & Spread"))
 				{
@@ -355,12 +410,18 @@ void CMenuModule::DrawWindowVisuals()
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp);
+					ImGui::Checkbox("Enable ESP", &g_Config.cvars.esp); ImGui::SameLine();
+					ImGui::Checkbox("Debug##esp", &g_Config.cvars.esp_debug);
 
 					ImGui::Spacing();
 					ImGui::Spacing();
 
-					ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline); ImGui::SameLine();
+					ImGui::Checkbox("Optimize##esp", &g_Config.cvars.esp_optimize); ImGui::SameLine();
+					ImGui::Checkbox("Snap Lines##esp", &g_Config.cvars.esp_snaplines); ImGui::SameLine();
+					ImGui::Checkbox("Outline Box", &g_Config.cvars.esp_box_outline);
+
+					ImGui::Spacing();
+
 					ImGui::Checkbox("Show Items", &g_Config.cvars.esp_show_items); ImGui::SameLine();
 					ImGui::Checkbox("Ignore Unknown Entities", &g_Config.cvars.esp_ignore_unknown_ents);
 
@@ -439,6 +500,7 @@ void CMenuModule::DrawWindowVisuals()
 							g_Config.cvars.esp_box_player_health = true;
 							g_Config.cvars.esp_box_player_armor = true;
 
+							g_Config.cvars.esp_show_visible_players = true;
 							g_Config.cvars.esp_box_distance = false;
 							g_Config.cvars.esp_box_index = true;
 
@@ -471,10 +533,6 @@ void CMenuModule::DrawWindowVisuals()
 
 					ImGui::Spacing();
 					
-					ImGui::Combo("Box Targets##esp", &g_Config.cvars.esp_box_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
-
-					ImGui::Spacing();
-					
 					ImGui::Combo("Draw Distance Mode##esp", &g_Config.cvars.esp_distance_mode, esp_process_items, IM_ARRAYSIZE(esp_process_items));
 
 					ImGui::Spacing();
@@ -483,8 +541,12 @@ void CMenuModule::DrawWindowVisuals()
 
 					ImGui::Spacing();
 
+					ImGui::Combo("Draw Box Targets##esp", &g_Config.cvars.esp_box_targets, esp_process_items, IM_ARRAYSIZE(esp_process_items));
+
+					ImGui::Spacing();
+
 					static const char* esp_box_items[] = { "0 - Off", "1 - Default", "2 - Coal", "3 - Corner" };
-					ImGui::Combo("Box Type##esp", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
+					ImGui::Combo("Draw Box Type##esp", &g_Config.cvars.esp_box, esp_box_items, IM_ARRAYSIZE(esp_box_items));
 
 					ImGui::Spacing();
 					ImGui::Spacing();

@@ -83,7 +83,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>svenmod\public;imgui;imgui_impl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -114,6 +114,7 @@
     <ClCompile Include="features\visual.cpp" />
     <ClCompile Include="game\class_table.cpp" />
     <ClCompile Include="game\drawing.cpp" />
+    <ClCompile Include="game\entitylist.cpp" />
     <ClCompile Include="game\utils.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="features\visual.h" />
     <ClInclude Include="game\class_table.h" />
     <ClInclude Include="game\drawing.h" />
+    <ClInclude Include="game\entitylist.h" />
     <ClInclude Include="game\utils.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />

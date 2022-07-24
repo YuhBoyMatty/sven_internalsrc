@@ -51,6 +51,12 @@ public:
 		// Aim
 		//-----------------------------------------------------------------------------
 		
+		bool aimbot = false;
+		bool ragebot = false;
+		bool silent_aimbot = false;
+		bool aimbot_consider_fov = false;
+		float aimbot_fov = 90.f;
+		float aimbot_distance = 2048.f;
 		bool no_recoil = false;
 		bool no_recoil_visual = false;
 
@@ -59,7 +65,10 @@ public:
 		//-----------------------------------------------------------------------------
 
 		bool esp = true;
+		bool esp_debug = false;
 		int esp_box = 1;
+		bool esp_optimize = false;
+		bool esp_snaplines = false;
 		bool esp_box_outline = true;
 		int esp_box_fill = 0;
 		bool esp_box_index = false;

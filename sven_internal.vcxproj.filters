@@ -134,6 +134,9 @@
     <ClCompile Include="features\models_manager.cpp">
       <Filter>Sven Internal\Features</Filter>
     </ClCompile>
+    <ClCompile Include="game\entitylist.cpp">
+      <Filter>Sven Internal\Game Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
@@ -240,6 +243,9 @@
     </ClInclude>
     <ClInclude Include="features\models_manager.h">
       <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entitylist.h">
+      <Filter>Sven Internal\Game Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

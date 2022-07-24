@@ -144,6 +144,12 @@ bool CConfig::Load()
 
 		if (ConfigManager()->BeginSectionImport("AIM"))
 		{
+			ConfigManager()->ImportParam("Aimbot", cvars.aimbot);
+			ConfigManager()->ImportParam("SilentAimbot", cvars.silent_aimbot);
+			ConfigManager()->ImportParam("Ragebot", cvars.ragebot);
+			ConfigManager()->ImportParam("ConsiderFOV", cvars.aimbot_consider_fov);
+			ConfigManager()->ImportParam("FOV", cvars.aimbot_fov);
+			ConfigManager()->ImportParam("AimbotDistance", cvars.aimbot_distance);
 			ConfigManager()->ImportParam("NoRecoil", cvars.no_recoil);
 			ConfigManager()->ImportParam("NoRecoilVisual", cvars.no_recoil_visual);
 
@@ -153,6 +159,8 @@ bool CConfig::Load()
 		if (ConfigManager()->BeginSectionImport("ESP"))
 		{
 			ConfigManager()->ImportParam("Enable", cvars.esp);
+			ConfigManager()->ImportParam("Optimize", cvars.esp_optimize);
+			ConfigManager()->ImportParam("SnapLines", cvars.esp_snaplines);
 			ConfigManager()->ImportParam("Distance", cvars.esp_distance);
 			ConfigManager()->ImportParam("Box", cvars.esp_box);
 			ConfigManager()->ImportParam("Outline", cvars.esp_box_outline);
@@ -599,6 +607,12 @@ void CConfig::Save()
 		
 		if (ConfigManager()->BeginSectionExport("AIM"))
 		{
+			ConfigManager()->ExportParam("Aimbot", cvars.aimbot);
+			ConfigManager()->ExportParam("SilentAimbot", cvars.silent_aimbot);
+			ConfigManager()->ExportParam("Ragebot", cvars.ragebot);
+			ConfigManager()->ExportParam("ConsiderFOV", cvars.aimbot_consider_fov);
+			ConfigManager()->ExportParam("FOV", cvars.aimbot_fov);
+			ConfigManager()->ExportParam("AimbotDistance", cvars.aimbot_distance);
 			ConfigManager()->ExportParam("NoRecoil", cvars.no_recoil);
 			ConfigManager()->ExportParam("NoRecoilVisual", cvars.no_recoil_visual);
 
@@ -608,6 +622,8 @@ void CConfig::Save()
 		if (ConfigManager()->BeginSectionExport("ESP"))
 		{
 			ConfigManager()->ExportParam("Enable", cvars.esp);
+			ConfigManager()->ExportParam("Optimize", cvars.esp_optimize);
+			ConfigManager()->ExportParam("SnapLines", cvars.esp_snaplines);
 			ConfigManager()->ExportParam("Distance", cvars.esp_distance);
 			ConfigManager()->ExportParam("Box", cvars.esp_box);
 			ConfigManager()->ExportParam("Outline", cvars.esp_box_outline);
