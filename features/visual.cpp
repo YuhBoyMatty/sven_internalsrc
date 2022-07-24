@@ -2,7 +2,6 @@
 
 #include <Windows.h>
 #include <gl/GL.h>
-#include <omp.h>
 
 #include <algorithm>
 
@@ -24,6 +23,7 @@
 
 #include "../game/utils.h"
 #include "../game/drawing.h"
+#include "../game/entitylist.h"
 #include "../game/class_table.h"
 
 #include "../config.h"
@@ -33,8 +33,6 @@
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
-
-typedef float bone_matrix3x4_t[MAXSTUDIOBONES][3][4];
 
 struct bone_s
 {
@@ -378,98 +376,66 @@ void CVisual::ESP()
 	if ( !g_Config.cvars.esp )
 		return;
 
+	static Vector vecAABBPoints[8];
+	static Vector2D vecScreenProj[8];
+
+	static Vector vecBottom;
+	static Vector vecTop;
+
+	bool bSpectating = Client()->IsSpectating();
+
 	cl_entity_s *pLocal = g_pEngineFuncs->GetLocalPlayer();
-	cl_entity_s *pViewModel = g_pEngineFuncs->GetViewModel();
+	CEntity *pEnts = g_EntityList.GetList();
 
-	int nLocalPlayer = pLocal->index;
-
-#pragma omp parallel for /* num_threads(2) */ // not sure if it's worth it
-	for (register int i = 1; i <= MAXENTS; ++i)
+	for (register int i = 1; i <= g_EntityList.GetMaxEntities(); i++)
 	{
-		// What a mess lol
+		CEntity &ent = pEnts[i];
 
-		if ( i == nLocalPlayer )
+		if ( !ent.m_bValid )
 			continue;
 
-		bool bPlayer;
-		bool bItem;
-		bool bClassInfoRetrieved = false;
+		cl_entity_t *pEntity = ent.m_pEntity;
 
-		float flDistance;
-		float vecScreenBottom[2], vecScreenTop[2];
+		bool bPlayer = ent.m_bPlayer;
+		bool bItem = ent.m_bItem;
 
-		const char *pszModelName;
-		const char *pszSlashLastOccur;
-
-		studiohdr_t *pStudioHeader = NULL;
-		model_s *pModel = NULL;
-
-		cl_entity_s *pEntity = g_pEngineFuncs->GetEntityByIndex(i);
-		class_info_t classInfo = { CLASS_PLAYER, FL_CLASS_FRIEND };
-
-		if ( !pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || pEntity == pViewModel || pEntity->curstate.messagenum < pLocal->curstate.messagenum )
+		if ( !g_Config.cvars.esp_show_items )
 			continue;
 
-		if ( pszSlashLastOccur = strrchr(pModel->name, '/') )
-			pszModelName = pszSlashLastOccur + 1;
-		else
+		if ( !ent.m_bVisible )
 			continue;
 
-		if ( bItem = IsWorldModelItem(pszModelName) )
-		{
-			classInfo = GetEntityClassInfo(pModel->name);
-			bClassInfoRetrieved = true;
-
-			if ( !(classInfo.flags & FL_CLASS_ITEM) )
-				bItem = false;
-		}
-
-		if ( !bItem )
-		{
-			if ( (!pEntity->player && pEntity->curstate.solid <= SOLID_TRIGGER) || pEntity->curstate.movetype == MOVETYPE_NONE )
-				continue;
-
-			if ( pEntity->curstate.maxs.z == 0.0f && pEntity->curstate.mins.z == 0.0f )
-				continue;
-
-			if ( !(pStudioHeader = (studiohdr_t *)g_pEngineStudio->Mod_Extradata(pModel)) || pStudioHeader->numhitboxes == 0 )
-				continue;
-		}
-		else if ( !g_Config.cvars.esp_show_items )
-		{
-			continue;
-		}
-
-		bPlayer = pEntity->player;
-		flDistance = (pEntity->origin - pLocal->origin).Length();
+		float flDistance = (pEntity->origin - pLocal->origin).Length();
 
 		if ( flDistance > g_Config.cvars.esp_distance )
 			continue;
 
-		float boxWidth;
+		float x, y, w, h;
+		float top_mid_x, top_mid_y, bottom_mid_x, bottom_mid_y;
 
-		Vector vecBottom = pEntity->origin;
-		Vector vecTop = pEntity->origin;
+		vecBottom = pEntity->origin;
+		vecTop = pEntity->origin;
+
+		float boxWidth;
+		float vecScreenBottom[2], vecScreenTop[2];
 
 		if ( !bPlayer )
 		{
-			if ( !bClassInfoRetrieved )
-				classInfo = GetEntityClassInfo(pModel->name);
-
-			if ( classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents )
+			if ( ent.m_classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents )
 				continue;
 
-			// Don't process if entity isn't an ESP's target, or its dead body or some kind of trash
-			if ( g_Config.cvars.esp_targets == 2 || IsEntityClassDeadbody(classInfo, pEntity->curstate.solid) || IsEntityClassTrash(classInfo) )
+			// Don't process if entity isn't an ESP's target
+			if ( g_Config.cvars.esp_targets == 2 )
 				continue;
 
 			if ( !bItem )
 			{
-				vecTop.z += pEntity->curstate.maxs.z;
-				vecBottom.z -= pEntity->curstate.mins.z;
+				vecTop.z += ent.m_vecMaxs.z;
+				vecBottom.z -= ent.m_vecMins.z;
 
-				boxWidth = max(pEntity->curstate.maxs.x - pEntity->curstate.mins.x, pEntity->curstate.maxs.y - pEntity->curstate.mins.y) /
-					(pEntity->curstate.maxs.z - pEntity->curstate.mins.z);
+				float height = ( ent.m_vecMaxs.z - ent.m_vecMins.z );
+
+				boxWidth = ( height != 0.f ) ? ( max(ent.m_vecMaxs.x - ent.m_vecMins.x, ent.m_vecMaxs.y - ent.m_vecMins.y) / height ) : 0.f;
 			}
 		}
 		else
@@ -477,8 +443,7 @@ void CVisual::ESP()
 			if ( g_Config.cvars.esp_targets == 1 )
 				continue;
 
-			// Ducking
-			if ( pEntity->curstate.usehull )
+			if ( ent.m_bDucked )
 			{
 				vecTop.z += VEC_DUCK_HULL_MAX.z;
 				vecBottom.z += VEC_DUCK_HULL_MIN.z;
@@ -487,145 +452,249 @@ void CVisual::ESP()
 			}
 			else
 			{
-				vecTop.z += pEntity->curstate.maxs.z;
-				vecBottom.z -= pEntity->curstate.maxs.z;
+				vecTop.z += ent.m_vecMaxs.z;
+				vecBottom.z -= ent.m_vecMaxs.z;
 
 				boxWidth = (VEC_HULL_MAX.x - VEC_HULL_MIN.x) / (VEC_HULL_MAX.z - VEC_HULL_MIN.z);
 			}
 		}
 
-		bool bScreenBottom = UTIL_WorldToScreen(vecBottom, vecScreenBottom);
-		bool bScreenTop = UTIL_WorldToScreen(vecTop, vecScreenTop);
+		if ( !UTIL_WorldToScreen(vecBottom, vecScreenBottom) || !UTIL_WorldToScreen(vecTop, vecScreenTop) )
+			continue;
 
-		if ( bScreenBottom && bScreenTop )
+		float boxHeight = vecScreenBottom[1] - vecScreenTop[1];
+		boxWidth = boxHeight * boxWidth;
+
+		top_mid_x = vecScreenTop[0];
+		top_mid_y = vecScreenTop[1];
+			
+		bottom_mid_x = vecScreenBottom[0];
+		bottom_mid_y = vecScreenBottom[1];
+
+		//x = vecScreenTop[0] - (boxWidth * 0.5f); // rotate around the head
+		//y = vecScreenTop[1];
+		x = vecScreenBottom[0] - (boxWidth * 0.5f); // rotate around the pivot/legs
+		y = vecScreenBottom[1] - boxHeight;
+		w = boxWidth;
+		h = boxHeight;
+
+		if ( !g_Config.cvars.esp_optimize && !bItem )
 		{
-			if (bPlayer && g_Config.cvars.esp_show_visible_players)
+			Vector vecMins = pEntity->origin + ent.m_vecMins;
+			Vector vecMaxs = pEntity->origin + ent.m_vecMaxs;
+
+			vecAABBPoints[0].x = vecMins.x;
+			vecAABBPoints[0].y = vecMins.y;
+			vecAABBPoints[0].z = vecMins.z;
+		
+			vecAABBPoints[1].x = vecMins.x;
+			vecAABBPoints[1].y = vecMaxs.y;
+			vecAABBPoints[1].z = vecMins.z;
+		
+			vecAABBPoints[2].x = vecMaxs.x;
+			vecAABBPoints[2].y = vecMaxs.y;
+			vecAABBPoints[2].z = vecMins.z;
+		
+			vecAABBPoints[3].x = vecMaxs.x;
+			vecAABBPoints[3].y = vecMins.y;
+			vecAABBPoints[3].z = vecMins.z;
+		
+			vecAABBPoints[4].x = vecMaxs.x;
+			vecAABBPoints[4].y = vecMaxs.y;
+			vecAABBPoints[4].z = vecMaxs.z;
+		
+			vecAABBPoints[5].x = vecMins.x;
+			vecAABBPoints[5].y = vecMaxs.y;
+			vecAABBPoints[5].z = vecMaxs.z;
+		
+			vecAABBPoints[6].x = vecMins.x;
+			vecAABBPoints[6].y = vecMins.y;
+			vecAABBPoints[6].z = vecMaxs.z;
+		
+			vecAABBPoints[7].x = vecMaxs.x;
+			vecAABBPoints[7].y = vecMins.y;
+			vecAABBPoints[7].z = vecMaxs.z;
+
+			if ( !UTIL_WorldToScreen(vecAABBPoints[3], vecScreenProj[0]) || !UTIL_WorldToScreen(vecAABBPoints[5], vecScreenProj[1])
+				|| !UTIL_WorldToScreen(vecAABBPoints[0], vecScreenProj[2]) || !UTIL_WorldToScreen(vecAABBPoints[4], vecScreenProj[3])
+				|| !UTIL_WorldToScreen(vecAABBPoints[2], vecScreenProj[4]) || !UTIL_WorldToScreen(vecAABBPoints[1], vecScreenProj[5])
+				|| !UTIL_WorldToScreen(vecAABBPoints[6], vecScreenProj[6]) || !UTIL_WorldToScreen(vecAABBPoints[7], vecScreenProj[7]) )
 			{
-				pmtrace_t trace;
-
-				Vector vecStart = Client()->GetOrigin() + Client()->GetViewOffset();
-				Vector vecEnd = vecBottom + ((vecTop - vecBottom) * 0.5f);
-
-				g_pEventAPI->EV_SetTraceHull(PM_HULL_POINT);
-				g_pEventAPI->EV_PlayerTrace(vecStart, vecEnd, PM_WORLD_ONLY, -1, &trace);
-
-				if (trace.fraction != 1.f)
-				{
-					continue;
-				}
+				continue;
 			}
 
-			int iHealth = bPlayer ? g_pPlayerUtils->GetHealth(i) : 0;
+			float left = vecScreenProj[0].x;
+			float top = vecScreenProj[0].y;
+			float right = vecScreenProj[0].x;
+			float bottom = vecScreenProj[0].y;
 
-			bool bIsEntityFriend = IsEntityClassFriend(classInfo);
-			bool bIsEntityNeutral = IsEntityClassNeutral(classInfo);
-
-			int r = int(255.f * g_Config.cvars.esp_friend_color[0]);
-			int g = int(255.f * g_Config.cvars.esp_friend_color[1]);
-			int b = int(255.f * g_Config.cvars.esp_friend_color[2]);
-
-			float boxHeight = vecScreenTop[1] - vecScreenBottom[1];
-
-			if ( bPlayer && iHealth < -1 ) // enemy team
-				bIsEntityFriend = false;
-
-			if ( bItem )
+			for (int i = 1; i < 8; i++)
 			{
-				boxHeight = 0.f;
+				if ( left > vecScreenProj[i].x )
+					left = vecScreenProj[i].x;
 
-				r = int(255.f * g_Config.cvars.esp_item_color[0]);
-				g = int(255.f * g_Config.cvars.esp_item_color[1]);
-				b = int(255.f * g_Config.cvars.esp_item_color[2]);
+				if ( bottom < vecScreenProj[i].y )
+					bottom = vecScreenProj[i].y;
+
+				if ( right < vecScreenProj[i].x )
+					right = vecScreenProj[i].x;
+
+				if ( top > vecScreenProj[i].y )
+					top = vecScreenProj[i].y;
 			}
-			else if ( bIsEntityNeutral )
+
+			x = left;
+			y = top;
+			w = right - left;
+			h = bottom - top;
+
+			top_mid_y = y;
+			bottom_mid_y = y + h;
+		}
+
+		if (bPlayer && g_Config.cvars.esp_show_visible_players)
+		{
+			pmtrace_t trace;
+
+			Vector vecStart = Client()->GetOrigin() + Client()->GetViewOffset();
+			Vector vecEnd = vecBottom + (vecTop - vecBottom) * 0.5f;
+
+			g_pEventAPI->EV_SetTraceHull(PM_HULL_POINT);
+			g_pEventAPI->EV_PlayerTrace(vecStart, vecEnd, PM_WORLD_ONLY, -1, &trace);
+
+			if (trace.fraction != 1.f)
 			{
-				r = int(255.f * g_Config.cvars.esp_neutral_color[0]);
-				g = int(255.f * g_Config.cvars.esp_neutral_color[1]);
-				b = int(255.f * g_Config.cvars.esp_neutral_color[2]);
+				continue;
 			}
-			else if ( !bIsEntityFriend )
+		}
+
+		int iHealth = (int)ent.m_flHealth;
+
+		bool bIsEntityFriend = ent.m_bFriend;
+		bool bIsEntityNeutral = ent.m_bNeutral;
+
+		int r = int(255.f * g_Config.cvars.esp_friend_color[0]);
+		int g = int(255.f * g_Config.cvars.esp_friend_color[1]);
+		int b = int(255.f * g_Config.cvars.esp_friend_color[2]);
+
+		if ( bPlayer && ent.m_bEnemy )
+			bIsEntityFriend = false;
+
+		if ( bItem )
+		{
+			bottom_mid_x = top_mid_x = x = x + w / 2;
+			bottom_mid_y = top_mid_y = y = y + h / 2;
+
+			if (ent.m_bEnemy)
 			{
 				r = int(255.f * g_Config.cvars.esp_enemy_color[0]);
 				g = int(255.f * g_Config.cvars.esp_enemy_color[1]);
 				b = int(255.f * g_Config.cvars.esp_enemy_color[2]);
 			}
-
-			boxWidth = boxHeight * boxWidth;
-
-			if (bPlayer)
-			{
-				// Box Fill
-				if ( g_Config.cvars.esp_box_targets != 1 )
-				{
-					DrawBox(bPlayer, bItem, iHealth, boxHeight, boxWidth, vecScreenBottom, r, g, b);
-				}
-
-				// Distance
-				if ( g_Config.cvars.esp_box_distance && g_Config.cvars.esp_distance_mode != 1 )
-				{
-					int y = int(vecScreenTop[1] + (-8.f - boxHeight));
-					g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
-				}
-
-				// General Info
-				if (g_Config.cvars.esp_player_style == 0) // Default
-				{
-					DrawPlayerInfo_Default(i, iHealth, bIsEntityFriend, boxHeight, vecScreenBottom, vecScreenTop);
-				}
-				else if (g_Config.cvars.esp_player_style == 1) // SAMP
-				{
-					DrawPlayerInfo_SAMP(i, iHealth, (bool)pEntity->curstate.usehull, bIsEntityFriend, vecTop);
-				}
-				else if (g_Config.cvars.esp_player_style == 2) // Left 4 Dead
-				{
-					DrawPlayerInfo_L4D(i, iHealth, (bool)pEntity->curstate.usehull, bIsEntityFriend, vecTop);
-				}
-
-				if ( g_Config.cvars.esp_skeleton_type == 1 )
-					continue;
-			}
 			else
 			{
-				// Box Fill
-				if ( g_Config.cvars.esp_box_targets != 2 )
-				{
-					DrawBox(bPlayer, bItem, iHealth, boxHeight, boxWidth, vecScreenBottom, r, g, b);
-				}
+				r = int(255.f * g_Config.cvars.esp_item_color[0]);
+				g = int(255.f * g_Config.cvars.esp_item_color[1]);
+				b = int(255.f * g_Config.cvars.esp_item_color[2]);
+			}
+		}
+		else if ( bIsEntityNeutral )
+		{
+			r = int(255.f * g_Config.cvars.esp_neutral_color[0]);
+			g = int(255.f * g_Config.cvars.esp_neutral_color[1]);
+			b = int(255.f * g_Config.cvars.esp_neutral_color[2]);
+		}
+		else if ( !bIsEntityFriend )
+		{
+			r = int(255.f * g_Config.cvars.esp_enemy_color[0]);
+			g = int(255.f * g_Config.cvars.esp_enemy_color[1]);
+			b = int(255.f * g_Config.cvars.esp_enemy_color[2]);
+		}
 
-				// Distance
-				if ( g_Config.cvars.esp_box_distance && g_Config.cvars.esp_distance_mode != 2 )
-				{
-					int y = int(vecScreenTop[1] + (-8.f - boxHeight));
-					g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
-				}
+		if ( g_Config.cvars.esp_debug )
+		{
+			g_Drawing.DrawStringF(g_hFontESP, bottom_mid_x, bottom_mid_y + 20.f, 255, 255, 255, 255, FONT_ALIGN_CENTER,
+								  "Solid: %d | Movetype: %d", pEntity->curstate.solid, pEntity->curstate.movetype);
+			g_Drawing.DrawStringF(g_hFontESP, bottom_mid_x, bottom_mid_y + 30.f, 255, 255, 255, 255, FONT_ALIGN_CENTER,
+								  "Sequence: %d", pEntity->curstate.sequence);
+		}
 
-				// General Info
-				if (g_Config.cvars.esp_entity_style == 0) // Default
-				{
-					DrawEntityInfo_Default(i, classInfo, boxHeight, vecScreenBottom, vecScreenTop, r, g, b);
-				}
-				else if (g_Config.cvars.esp_entity_style == 1) // SAMP
-				{
-					DrawEntityInfo_SAMP(i, classInfo, vecTop, r, g, b);
-				}
-				else if (g_Config.cvars.esp_entity_style == 2) // Left 4 Dead
-				{
-					DrawEntityInfo_L4D(i, classInfo, vecTop, r, g, b);
-				}
+		if ( g_Config.cvars.esp_snaplines && !bSpectating )
+		{
+			g_Drawing.DrawLine(g_ScreenInfo.width / 2, g_ScreenInfo.height, bottom_mid_x, bottom_mid_y, r, g, b, 255);
+		}
 
-				if ( g_Config.cvars.esp_skeleton_type == 2 )
-					continue;
+		if (bPlayer)
+		{
+			// Box Fill
+			if ( g_Config.cvars.esp_box_targets != 1 && w != 0.f && h != 0.f )
+			{
+				DrawBox(bPlayer, bItem, iHealth, x, y, w, h, r, g, b);
 			}
 
-			if ( bItem )
-				continue;
+			// Distance
+			if ( g_Config.cvars.esp_box_distance && g_Config.cvars.esp_distance_mode != 1 )
+			{
+				g_Drawing.DrawStringF(g_hFontESP, bottom_mid_x, bottom_mid_y - 8.f, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
+			}
 
-			DrawBones(i, pStudioHeader);
+			// General Info
+			if (g_Config.cvars.esp_player_style == 0) // Default
+			{
+				DrawPlayerInfo_Default(i, iHealth, bIsEntityFriend, top_mid_x, top_mid_y, bottom_mid_x, bottom_mid_y);
+			}
+			else if (g_Config.cvars.esp_player_style == 1) // SAMP
+			{
+				DrawPlayerInfo_SAMP(i, iHealth, (bool)pEntity->curstate.usehull, bIsEntityFriend, vecTop);
+			}
+			else if (g_Config.cvars.esp_player_style == 2) // Left 4 Dead
+			{
+				DrawPlayerInfo_L4D(i, iHealth, (bool)pEntity->curstate.usehull, bIsEntityFriend, vecTop);
+			}
+
+			if ( g_Config.cvars.esp_skeleton_type == 1 )
+				continue;
 		}
+		else
+		{
+			// Box Fill
+			if ( g_Config.cvars.esp_box_targets != 2 )
+			{
+				DrawBox(bPlayer, bItem, iHealth, x, y, w, h, r, g, b);
+			}
+
+			// Distance
+			if ( g_Config.cvars.esp_box_distance && g_Config.cvars.esp_distance_mode != 2 )
+			{
+				g_Drawing.DrawStringF(g_hFontESP, bottom_mid_x, bottom_mid_y - 8.f, 255, 255, 255, 255, FONT_ALIGN_CENTER, "%.1f", flDistance);
+			}
+
+			// General Info
+			if (g_Config.cvars.esp_entity_style == 0) // Default
+			{
+				DrawEntityInfo_Default(i, ent.m_classInfo, bottom_mid_x, bottom_mid_y, r, g, b);
+			}
+			else if (g_Config.cvars.esp_entity_style == 1) // SAMP
+			{
+				DrawEntityInfo_SAMP(i, ent.m_classInfo, vecTop, r, g, b);
+			}
+			else if (g_Config.cvars.esp_entity_style == 2) // Left 4 Dead
+			{
+				DrawEntityInfo_L4D(i, ent.m_classInfo, vecTop, r, g, b);
+			}
+
+			if ( g_Config.cvars.esp_skeleton_type == 2 )
+				continue;
+		}
+
+		if ( bItem )
+			continue;
+
+		DrawBones(i, ent.m_pStudioHeader);
 	}
 }
 
-void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFriend, float boxHeight, float vecScreenBottom[2], float vecScreenTop[2])
+void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFriend, float top_mid_x, float top_mid_y, float bottom_mid_x, float bottom_mid_y)
 {
 	if (g_Config.cvars.esp_box_player_health && iHealth != 0)
 	{
@@ -637,8 +706,6 @@ void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFrien
 			iActualHealth = iHealth = 0;
 		else if (iHealth > 100)
 			iHealth = 100;
-
-		int y = int(vecScreenBottom[1] + (boxHeight - 8.0f));
 
 		if (bIsEntityFriend)
 		{
@@ -656,8 +723,8 @@ void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFrien
 		}
 
 		g_Drawing.DrawStringF(g_hFontESP,
-								int(vecScreenBottom[0]),
-								y,
+								top_mid_x,
+								top_mid_y - 8.f,
 								r,
 								g,
 								b,
@@ -670,10 +737,9 @@ void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFrien
 	if (g_Config.cvars.esp_box_player_armor)
 	{
 		float flArmor = g_pPlayerUtils->GetArmor(index);
-		int y = int(vecScreenBottom[1] + (boxHeight + 8.f));
 
 		if (flArmor > 0.f)
-			g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, 153, 191, 255, 255, FONT_ALIGN_CENTER, "%.1f", flArmor);
+			g_Drawing.DrawStringF(g_hFontESP, top_mid_x, top_mid_y + 8.f, 153, 191, 255, 255, FONT_ALIGN_CENTER, "%.1f", flArmor);
 	}
 
 	if (g_Config.cvars.esp_box_player_name || g_Config.cvars.esp_box_index)
@@ -685,7 +751,6 @@ void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFrien
 			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_player_name ? " (%d)" : "(%d)", index);
 
 		int nickname_r, nickname_g, nickname_b;
-		int y = int(vecScreenTop[1] + (8.f - boxHeight));
 
 		if (bIsEntityFriend)
 		{
@@ -700,7 +765,7 @@ void CVisual::DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFrien
 			nickname_b = int(255.f * g_Config.cvars.esp_enemy_player_color[2]);
 		}
 
-		g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, nickname_r, nickname_g, nickname_b, 255, FONT_ALIGN_CENTER, "%s%s",
+		g_Drawing.DrawStringF(g_hFontESP, bottom_mid_x, bottom_mid_y + 8.f, nickname_r, nickname_g, nickname_b, 255, FONT_ALIGN_CENTER, "%s%s",
 								g_Config.cvars.esp_box_player_name ? (pPlayer = g_pEngineStudio->PlayerInfo(index - 1), pPlayer->name) : "",
 								g_Config.cvars.esp_box_index ? szIndex : "");
 	}
@@ -757,7 +822,7 @@ void CVisual::DrawPlayerInfo_SAMP(int index, int iHealth, bool bDucking, bool bI
 		}
 	}
 
-	if (g_Config.cvars.esp_box_player_health && iHealth != 0)
+	if (g_Config.cvars.esp_box_player_health)
 	{
 		if (iHealth < 0)
 			iHealth = 0;
@@ -898,7 +963,7 @@ void CVisual::DrawPlayerInfo_L4D(int index, int iHealth, bool bDucking, bool bIs
 	}
 }
 
-void CVisual::DrawEntityInfo_Default(int index, class_info_t classInfo, float boxHeight, float vecScreenBottom[2], float vecScreenTop[2], int r, int g, int b)
+void CVisual::DrawEntityInfo_Default(int index, class_info_t classInfo, float bottom_mid_x, float bottom_mid_y, int r, int g, int b)
 {
 	if (g_Config.cvars.esp_box_entity_name || g_Config.cvars.esp_box_index)
 	{
@@ -907,8 +972,7 @@ void CVisual::DrawEntityInfo_Default(int index, class_info_t classInfo, float bo
 		if (g_Config.cvars.esp_box_index)
 			snprintf(szIndex, sizeof(szIndex), g_Config.cvars.esp_box_entity_name ? " (%d)" : "(%d)", index);
 
-		int y = int(vecScreenTop[1] + (8.f - boxHeight));
-		g_Drawing.DrawStringF(g_hFontESP, int(vecScreenBottom[0]), y, r, g, b, 255, FONT_ALIGN_CENTER, "%s%s",
+		g_Drawing.DrawStringF(g_hFontESP, bottom_mid_x, bottom_mid_y + 8.f, r, g, b, 255, FONT_ALIGN_CENTER, "%s%s",
 								g_Config.cvars.esp_box_entity_name ? GetEntityClassname(classInfo) : "",
 								g_Config.cvars.esp_box_index ? szIndex : "");
 	}
@@ -960,7 +1024,7 @@ void CVisual::DrawEntityInfo_L4D(int index, class_info_t classInfo, Vector vecTo
 	}
 }
 
-void CVisual::DrawBox(bool bPlayer, bool bItem, int iHealth, float boxHeight, float boxWidth, float vecScreenBottom[2], int r, int g, int b)
+void CVisual::DrawBox(bool bPlayer, bool bItem, int iHealth, int x, int y, int w, int h, int r, int g, int b)
 {
 	if ( (bPlayer && (iHealth > 0 || iHealth < -1)) || (!bPlayer && !bItem) )
 	{
@@ -969,29 +1033,29 @@ void CVisual::DrawBox(bool bPlayer, bool bItem, int iHealth, float boxHeight, fl
 
 		if ( g_Config.cvars.esp_box_fill != 0 )
 		{
-			g_Drawing.FillArea(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), r, g, b, g_Config.cvars.esp_box_fill);
+			g_Drawing.FillArea(x, y, w, h, r, g, b, g_Config.cvars.esp_box_fill);
 		}
 
 		if (nBox == 1)
 		{
-			g_Drawing.Box(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 200);
+			g_Drawing.Box(x, y, w, h, 1, r, g, b, 200);
 				
 			if (bOutline)
-				g_Drawing.BoxOutline(vecScreenBottom[0] - (boxWidth * 0.5f), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 200);
+				g_Drawing.BoxOutline(x, y, w, h, 1, r, g, b, 200);
 		}
 		else if (nBox == 2)
 		{
-			g_Drawing.DrawCoalBox(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+			g_Drawing.DrawCoalBox(x, y, w, h, 1, r, g, b, 255);
 
 			if (bOutline)
-				g_Drawing.DrawOutlineCoalBox(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+				g_Drawing.DrawOutlineCoalBox(x, y, w, h, 1, r, g, b, 255);
 		}
 		else if (nBox == 3)
 		{
-			g_Drawing.BoxCorner(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+			g_Drawing.BoxCorner(x, y, w, h, 1, r, g, b, 255);
 
 			if (bOutline)
-				g_Drawing.BoxCornerOutline(int(vecScreenBottom[0] - (boxWidth * 0.5f)), int(vecScreenBottom[1]), int(boxWidth), int(boxHeight), 1, r, g, b, 255);
+				g_Drawing.BoxCornerOutline(x, y, w, h, 1, r, g, b, 255);
 		}
 	}
 }
@@ -1040,71 +1104,83 @@ void CVisual::DrawBones(int index, studiohdr_t *pStudioHeader)
 
 void CVisual::ProcessBones()
 {
-	if (!g_Config.cvars.esp)
+	if ( !g_Config.cvars.esp )
 		return;
 
 	cl_entity_s *pEntity = g_pEngineStudio->GetCurrentEntity();
-	cl_entity_s *pViewModel = g_pEngineFuncs->GetViewModel();
-	cl_entity_s *pLocal = g_pEngineFuncs->GetLocalPlayer();
+
+	int index = pEntity->index;
 
 #ifdef PROCESS_PLAYER_BONES_ONLY
-	if (!pEntity->player)
+	if ( !pEntity->player )
 		return;
 #endif
 
-	int index = pEntity->index;
-	int nLocalPlayer = pLocal->index;
+	cl_entity_s *pLocal = g_pEngineFuncs->GetLocalPlayer();
+	CEntity &ent = g_EntityList.GetList()[index];
 
-	studiohdr_t *pStudioHeader = NULL;
-	model_s *pModel = NULL;
-
-	if (index == nLocalPlayer)
+	if ( index == pLocal->index )
 		return;
 
-	if (!pEntity || !(pModel = pEntity->model) || *pModel->name != 'm' || (!pEntity->player && pEntity->curstate.solid <= SOLID_TRIGGER) || pEntity->curstate.movetype == MOVETYPE_NONE)
+	if ( !ent.m_bValid )
 		return;
 
-	if (pEntity == pViewModel || pEntity->curstate.messagenum < pLocal->curstate.messagenum || pEntity->curstate.maxs.z == 0.0f && pEntity->curstate.mins.z == 0.0f)
+	bool bPlayer = ent.m_bPlayer;
+	bool bItem = ent.m_bItem;
+
+	if ( !ent.m_bVisible )
 		return;
 
-	if (!(pStudioHeader = (studiohdr_t *)g_pEngineStudio->Mod_Extradata(pModel)) || pStudioHeader->numhitboxes == 0)
-		return;
-
-	float vecScreenBottom[2], vecScreenTop[2];
+	if ( !bPlayer )
+	{
+		if ( ent.m_classInfo.id == CLASS_NONE && g_Config.cvars.esp_ignore_unknown_ents )
+			return;
+	}
 
 	Vector vecBottom = pEntity->origin;
 	Vector vecTop = pEntity->origin;
 
-#ifndef PROCESS_PLAYER_BONES_ONLY
-	if (pEntity->player)
-#endif
-		vecBottom.z -= pEntity->curstate.maxs.z;
+	float vecScreenBottom[2], vecScreenTop[2];
 
-	vecTop.z += pEntity->curstate.maxs.z;
-
-	bool bScreenBottom = UTIL_WorldToScreen(vecBottom, vecScreenBottom);
-	bool bScreenTop = UTIL_WorldToScreen(vecTop, vecScreenTop);
-
-	//memset(g_Bones[index].vecPoint, 0, sizeof(bone_s::vecPoint));
-	//memset(g_Bones[index].nParent, -1, sizeof(bone_s::nParent));
-
-	if (bScreenBottom && bScreenTop)
+	if ( !bPlayer )
 	{
-		memset(g_Bones[index].nParent, -1, sizeof(int) * MAXSTUDIOBONES);
-
-		//mstudiobbox_t *pHitbox = (mstudiobbox_t *)((byte *)pStudioHeader + pStudioHeader->hitboxindex);
-		mstudiobone_t *pBone = (mstudiobone_t *)((byte *)pStudioHeader + pStudioHeader->boneindex);
-		Vector vecFrameVelocity = pEntity->curstate.velocity * (pEntity->curstate.animtime - pEntity->prevstate.animtime);
-
-		Assert( pStudioHeader->numbones < MAXSTUDIOBONES );
-
-		for (int i = 0; i < pStudioHeader->numbones; ++i)
+		if ( !bItem )
 		{
-			Vector vecBone = Vector( (*g_pBoneTransform)[i][0][3], (*g_pBoneTransform)[i][1][3], (*g_pBoneTransform)[i][2][3] ) + vecFrameVelocity;
-
-			g_Bones[index].vecPoint[i] = vecBone;
-			g_Bones[index].nParent[i] = pBone[i].parent;
+			vecTop.z += pEntity->curstate.maxs.z;
+			vecBottom.z -= pEntity->curstate.mins.z;
 		}
+	}
+	else
+	{
+		if ( ent.m_bDucked )
+		{
+			vecTop.z += VEC_DUCK_HULL_MAX.z;
+			vecBottom.z += VEC_DUCK_HULL_MIN.z;
+		}
+		else
+		{
+			vecTop.z += pEntity->curstate.maxs.z;
+			vecBottom.z -= pEntity->curstate.maxs.z;
+		}
+	}
+
+	if ( !UTIL_WorldToScreen(vecBottom, vecScreenBottom) || !UTIL_WorldToScreen(vecTop, vecScreenTop) )
+		return;
+
+	memset(g_Bones[index].nParent, -1, sizeof(int) * MAXSTUDIOBONES);
+
+	//mstudiobbox_t *pHitbox = (mstudiobbox_t *)((byte *)pStudioHeader + pStudioHeader->hitboxindex);
+	mstudiobone_t *pBone = (mstudiobone_t *)((byte *)ent.m_pStudioHeader + ent.m_pStudioHeader->boneindex);
+	Vector vecFrameVelocity = ent.m_vecVelocity * ent.m_frametime;
+
+	Assert( ent.m_pStudioHeader->numbones < MAXSTUDIOBONES );
+
+	for (int i = 0; i < ent.m_pStudioHeader->numbones; ++i)
+	{
+		Vector vecBone = Vector( (*g_pBoneTransform)[i][0][3], (*g_pBoneTransform)[i][1][3], (*g_pBoneTransform)[i][2][3] ) + vecFrameVelocity;
+
+		g_Bones[index].vecPoint[i] = vecBone;
+		g_Bones[index].nParent[i] = pBone[i].parent;
 	}
 }
 

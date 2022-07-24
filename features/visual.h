@@ -10,6 +10,12 @@
 
 #include "../game/class_table.h"
 
+typedef float bone_matrix3x4_t[MAXSTUDIOBONES][3][4];
+
+//-----------------------------------------------------------------------------
+// Visuals
+//-----------------------------------------------------------------------------
+
 class CVisual : public CBaseFeature
 {
 public:
@@ -35,8 +41,8 @@ private:
 	void ShowSpeed();
 	void Lightmap();
 
-	void DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFriend, float boxHeight, float vecScreenBottom[2], float vecScreenTop[2]);
-	void DrawEntityInfo_Default(int index, class_info_t classInfo, float boxHeight, float vecScreenBottom[2], float vecScreenTop[2], int r, int g, int b);
+	void DrawPlayerInfo_Default(int index, int iHealth, bool bIsEntityFriend, float top_mid_x, float top_mid_y, float bottom_mid_x, float bottom_mid_y);
+	void DrawEntityInfo_Default(int index, class_info_t classInfo, float bottom_mid_x, float bottom_mid_y, int r, int g, int b);
 
 	void DrawPlayerInfo_SAMP(int index, int iHealth, bool bDucking, bool bIsEntityFriend, Vector vecTop);
 	void DrawEntityInfo_SAMP(int index, class_info_t classInfo, Vector vecTop, int r, int g, int b);
@@ -44,7 +50,7 @@ private:
 	void DrawPlayerInfo_L4D(int index, int iHealth, bool bDucking, bool bIsEntityFriend, Vector vecTop);
 	void DrawEntityInfo_L4D(int index, class_info_t classInfo, Vector vecTop, int r, int g, int b);
 
-	void DrawBox(bool bPlayer, bool bItem, int iHealth, float boxHeight, float boxWidth, float vecScreenBottom[2], int r, int g, int b);
+	void DrawBox(bool bPlayer, bool bItem, int iHealth, int x, int y, int w, int h, int r, int g, int b);
 	void DrawBones(int index, studiohdr_t *pStudioHeader);
 
 	void ProcessBones();
