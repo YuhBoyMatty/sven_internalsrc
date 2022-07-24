@@ -3,6 +3,9 @@
 #include <Windows.h>
 #include <gl/GL.h>
 
+#include <dbg.h>
+#include <convar.h>
+
 #include <hl_sdk/common/cl_entity.h>
 #include <hl_sdk/common/r_studioint.h>
 #include <hl_sdk/engine/APIProxy.h>
@@ -26,6 +29,22 @@ bool g_bOverrideColor = false;
 float g_flOverrideColor_R = 0.0f;
 float g_flOverrideColor_G = 0.1f;
 float g_flOverrideColor_B = 0.0f;
+
+//-----------------------------------------------------------------------------
+// ConCommands
+//-----------------------------------------------------------------------------
+
+CON_COMMAND_NO_WRAPPER(sc_chams, "Toggle chams on models")
+{
+	Msg(g_Config.cvars.chams ? "Chams disabled\n" : "Chams enabled\n");
+	g_Config.cvars.chams = !g_Config.cvars.chams;
+}
+
+CON_COMMAND_NO_WRAPPER(sc_glow, "Toggle glow on models")
+{
+	Msg(g_Config.cvars.glow ? "Glow disabled\n" : "Glow enabled\n");
+	g_Config.cvars.glow = !g_Config.cvars.glow;
+}
 
 //-----------------------------------------------------------------------------
 // Chams Implementation

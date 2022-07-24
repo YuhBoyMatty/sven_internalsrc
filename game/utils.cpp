@@ -9,6 +9,9 @@
 #include <sys.h>
 #include <dbg.h>
 
+#include <IClient.h>
+#include <IClientWeapon.h>
+
 #include <hl_sdk/engine/APIProxy.h>
 
 //-----------------------------------------------------------------------------
@@ -205,6 +208,125 @@ void UTIL_SetAnglesSilent(float *angles, struct usercmd_s *cmd)
 	FixMoveEnd(cmd);
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+bool UTIL_IsContiniousFiring(struct usercmd_s *cmd)
+{
+	if ( Client()->HasWeapon() )
+	{
+		switch ( Client()->GetCurrentWeaponID() )
+		{
+		case WEAPON_M16:
+			if ( ClientWeapon()->GetWeaponData()->fuser2 != 0.f )
+				return true;
+
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool UTIL_IsFiring(struct usercmd_s *cmd)
+{
+	static int throw_nade_state = 0;
+
+	if ( Client()->HasWeapon() )
+	{
+		switch ( Client()->GetCurrentWeaponID() )
+		{
+		case WEAPON_M16:
+			if ( ClientWeapon()->GetWeaponData()->fuser2 != 0.f )
+				return true;
+
+			break;
+
+		case WEAPON_RPG:
+			if ( ClientWeapon()->GetWeaponData()->iuser4 && ClientWeapon()->GetWeaponData()->fuser1 != 0.f )
+				return true;
+
+			if ( cmd->buttons & IN_ATTACK2 )
+				return false;
+
+			break;
+
+		case WEAPON_GAUSS:
+			if ( ClientWeapon()->GetWeaponData()->fuser4 > 0.f )
+			{
+				if ( Client()->ButtonLast() & IN_ATTACK2 )
+				{
+					if ( !(cmd->buttons & IN_ATTACK2) )
+						return true;
+				}
+				else if ( Client()->ButtonLast() & IN_ALT1 )
+				{
+					if ( !(cmd->buttons & IN_ALT1) )
+						return true;
+				}
+				else if ( ClientWeapon()->GetWeaponData()->fuser4 == 1.f )
+				{
+					return true;
+				}
+
+				return false;
+			}
+			else if ( cmd->buttons & IN_ATTACK2 )
+			{
+				return false;
+			}
+
+			break;
+
+		case WEAPON_HANDGRENADE:
+			if ( ClientWeapon()->GetWeaponData()->fuser1 < 0.f && throw_nade_state != 2 )
+			{
+				throw_nade_state = 1;
+
+				if ( Client()->ButtonLast() & (IN_ATTACK | IN_ATTACK2) )
+				{
+					if ( !(cmd->buttons & (IN_ATTACK | IN_ATTACK2)) )
+						return true;
+				}
+				else
+				{
+					if ( !(cmd->buttons & (IN_ATTACK | IN_ATTACK2)) )
+						throw_nade_state = 2;
+				}
+			}
+
+			if ( ClientWeapon()->GetWeaponData()->fuser2 < 0.f && throw_nade_state == 2 )
+				return true;
+
+			throw_nade_state = 0;
+			return false;
+
+		case WEAPON_DISPLACER:
+			if ( ClientWeapon()->GetWeaponData()->fuser1 == 1.f )
+				return true;
+
+			return false;
+		}
+
+		if ( cmd->buttons & (IN_ATTACK | IN_ATTACK2) && Client()->CanAttack() && !ClientWeapon()->IsReloading() )
+		{
+			if (cmd->buttons & IN_ATTACK)
+			{
+				if ( ClientWeapon()->CanPrimaryAttack() )
+					return true;
+			}
+			else
+			{
+				if ( ClientWeapon()->CanSecondaryAttack() )
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
 void UTIL_SetGameSpeed(double dbSpeed)

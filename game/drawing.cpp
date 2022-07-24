@@ -33,8 +33,8 @@ vgui::HFont g_hFontSpeedometer;
 vgui::HFont g_hFontVotePopup;
 //vgui::HFont MENU;
 
-static char s_szBuffer[4196];
-static wchar_t s_wszBuffer[4196];
+static char s_szBuffer[4096];
+static wchar_t s_wszBuffer[4096];
 
 static int s_swap_buffer = 0;
 
@@ -66,6 +66,7 @@ void CDrawing::Init()
 void CDrawing::SetupFonts()
 {
 	//g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP = g_pVGUI->Surface()->CreateFont(), "Choktoff", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
+	//g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP2 = g_pVGUI->Surface()->CreateFont(), "Choktoff", 26, FW_SEMIBOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
 	//g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontSpeedometer = g_pVGUI->Surface()->CreateFont(), "Choktoff", 38, FW_MEDIUM, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
 	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP = g_pVGUI->Surface()->CreateFont(), "Verdana", 12, FW_BOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
 	g_pVGUI->Surface()->AddGlyphSetToFont(g_hFontESP2 = g_pVGUI->Surface()->CreateFont(), "Verdana", 26, FW_SEMIBOLD, NULL, NULL, vgui::ISurface::FONTFLAG_DROPSHADOW, 0, 0);
@@ -438,7 +439,7 @@ void CDrawing::DrawStringF(vgui::HFont font, int x, int y, int r, int g, int b, 
 {
 	va_list va_alist;
 	va_start(va_alist, pszString);
-	_vsnprintf(s_szBuffer, sizeof(s_szBuffer), pszString, va_alist);
+	vsnprintf(s_szBuffer, sizeof(s_szBuffer), pszString, va_alist);
 	va_end(va_alist);
 	MultiByteToWideChar(CP_UTF8, 0, s_szBuffer, 256, s_wszBuffer, 256);
 
@@ -457,7 +458,7 @@ void CDrawing::DrawStringACPF(vgui::HFont font, int x, int y, int r, int g, int 
 {
 	va_list va_alist;
 	va_start(va_alist, pszString);
-	_vsnprintf(s_szBuffer, sizeof(s_szBuffer), pszString, va_alist);
+	vsnprintf(s_szBuffer, sizeof(s_szBuffer), pszString, va_alist);
 	va_end(va_alist);
 	MultiByteToWideChar(CP_ACP, 0, s_szBuffer, 256, s_wszBuffer, 256);
 
@@ -476,7 +477,7 @@ void CDrawing::DrawWideStringF(vgui::HFont font, int x, int y, int r, int g, int
 {
 	va_list va_alist;
 	va_start(va_alist, pwszString);
-	swprintf(s_wszBuffer, sizeof(s_wszBuffer), pwszString, va_alist);
+	vswprintf(s_wszBuffer, sizeof(s_wszBuffer) / sizeof(wchar_t), pwszString, va_alist);
 	va_end(va_alist);
 
 	int width, height;

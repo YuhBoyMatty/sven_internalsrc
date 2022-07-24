@@ -6,12 +6,14 @@ Currently supported version of the game: 5.25
 Imagine cheating in a co-op game =)
 
 # How to install
-First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/svenmod)). Download the archive `svenint.rar` from (releases [releases](https://github.com/sw1ft747/sven_internal/releases)) and place all files from the archive in the root folder of the game. Next, add the plugin `sven_internal.dll` to the file `plugins.txt` (see the header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/svenmod)). 
+First, if you don't have installed SvenMod then download it and install (see [readme](https://github.com/sw1ft747/svenmod)). Download the archive `svenint.rar` from ([releases](https://github.com/sw1ft747/sven_internal/releases)) and place all files from the archive in the root folder of the game. Next, add the plugin (`sven_internal.dll`) to the file `plugins.txt` (see the header `Adding plugins` in SvenMod's [readme](https://github.com/sw1ft747/svenmod)). 
 
 # Features
 - Menu (key **INSERT** as default)
 - Customizable Configs
 - ESP
+- Aimbot
+- No Recoil
 - Wallhack
 - Glow & Chams
 - Vectorial Strafer
@@ -27,18 +29,19 @@ First, if you don't have installed SvenMod then download it and install (see [re
 - First-Person Roaming
 - Various Visual Hacks (Velometer, Crosshair, etc.)
 - Message Spammer
+- Models Manager
 - Skybox Replacement
 - Custom Vote Popup
 - Custom Chat Colors
 
-# Files of plugin
+# Files of the plugin
 The plugin uses subfolder `sven_internal` in the root directory of the game.
 
 How it looks: `../Sven Co-op/sven_internal/`.
 
 This folder is used to save the config, load list of players (their Steam64 ID) for **Chat Colors** and load spam tasks for **Message Spammer**.
 
-Folder `config` contains all config files. You can save your config via menu or console command `sc_save_config`, also you can load a config via concommand `sc_save_config <optional: filename>`. Automatically the plugin load the config named `default.ini`.
+Folder `config` contains all config files. You can save your config via menu or console command `sc_save_config`, also you can load a config via concommand `sc_load_config <optional: filename>`. Automatically the plugin load the config named `default.ini`.
 
 File `chat_colors_players.txt` allows to change the color of nickname for a specific player, will be automatically loaded at plugin load.
 
@@ -78,6 +81,8 @@ File `random_models.txt` contains the list of models that will be randomly used
 File `target_players.txt` contains the list of pairs of type `STEAM64ID = MODELNAME` to replace models for specified players
 
 File `ignored_players.txt` contains the list of Steam64 ID's that will be ignored when you replace models for specified players
+
+The files above will be automatically loaded when the plugin is loaded
 
 For more information, check the files above, they contain comments
 

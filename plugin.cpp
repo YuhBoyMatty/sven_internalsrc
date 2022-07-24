@@ -232,7 +232,7 @@ const char *CSvenInternal::GetAuthor(void)
 
 const char *CSvenInternal::GetVersion(void)
 {
-	return "2.0.12";
+	return "2.0.13";
 }
 
 const char *CSvenInternal::GetDescription(void)

@@ -1,5 +1,15 @@
 Changelog for Sven Internal
 
+24/07/2022 - Version 2.0.13:
+- Added entity list
+- Added snap lines in ESP
+- Added aimbot, silent aimbot and ragebot [for a while it doesn't target hitboxes] (experimental)
+- Added console commands to toggle Chams & Glow (sc_chams, sc_glow)
+- Added support of wrench when use Fast Crowbar
+- Added several models in class table
+- Enhanced render of the box in ESP (you can disable it in the menu for better performance) [Menu > Visual > ESP > Optimize]
+- Fixed size of the buffer in the module for drawing
+
 20/07/2022 - Version 2.0.12:
 - Added point strafing (sc_strafe_dir 4, sc_strafe_point_x <coordinate>, sc_strafe_point_y <coordinate>)
 - Added strafer for Stick feature (sc_stick, sc_stick_strafe)

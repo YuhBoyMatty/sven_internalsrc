@@ -19,6 +19,7 @@
 #include "../config.h"
 
 #include "../game/drawing.h"
+#include "../game/entitylist.h"
 
 // Features
 #include "../features/misc.h"
@@ -140,10 +141,10 @@ FORCEINLINE void RunClientMoveHooks(float frametime, usercmd_t *cmd, int active)
 	g_Strafer.CreateMove(frametime, cmd, active);
 	g_KeySpam.CreateMove(frametime, cmd, active);
 	g_Misc.CreateMove(frametime, cmd, active);
-	g_Aim.CreateMove(frametime, cmd, active);
 	g_AntiAFK.CreateMove(frametime, cmd, active);
 	g_CamHack.CreateMove(frametime, cmd, active);
 	g_MessageSpammer.CreateMove(frametime, cmd, active);
+	g_Aim.CreateMove(frametime, cmd, active);
 }
 
 //-----------------------------------------------------------------------------
@@ -407,6 +408,10 @@ DECLARE_CLASS_FUNC(void, HOOKED_StudioRenderModel, CStudioModelRenderer *thisptr
 {
 	bool bRenderHandled = false;
 
+#if 0
+	g_EntityList.UpdateHitboxes(thisptr->m_pCurrentEntity->index);
+#endif
+
 	// Calling many functions will take down our performance
 	bRenderHandled = g_FirstPersonRoaming.StudioRenderModel();
 	bRenderHandled = g_Chams.StudioRenderModel() || bRenderHandled;
@@ -500,6 +505,8 @@ HOOK_RESULT CClientHooks::CL_CreateMove(float frametime, usercmd_t *cmd, int act
 
 		SetCursorPos(g_pUtils->GetScreenWidth() / 2, g_pUtils->GetScreenHeight() / 2);
 	}
+
+	g_EntityList.Update();
 
 	return HOOK_CONTINUE;
 }

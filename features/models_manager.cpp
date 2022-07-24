@@ -254,36 +254,32 @@ void CModelsManager::UpdatePlayerModel(int index)
 	uint64 *pIgnoreSteamID = NULL;
 	std::string *pTargetModel = NULL;
 
-	if (g_Config.cvars.dont_replace_specified_players_models)
-	{
-		pIgnoreSteamID = m_IgnorePlayers.Find(g_PlayerModelReplacementInfo[index].steamid);
-	}
-
-	if (g_Config.cvars.replace_specified_players_models)
+	if ( g_Config.cvars.replace_specified_players_models )
 	{
 		pTargetModel = m_TargetPlayers.Find(g_PlayerModelReplacementInfo[index].steamid);
-	}
 
-	if ( g_Config.cvars.replace_players_models )
-	{
-		if ( !g_Config.cvars.replace_players_models_with_randoms )
+		if ( pTargetModel != NULL )
 		{
-			if ( index != g_pPlayerMove->player_index || (index == g_pPlayerMove->player_index && g_Config.cvars.replace_model_on_self) )
+			if ( !g_PlayerModelReplacementInfo[index].model_replaced )
 			{
-				if ( !g_PlayerModelReplacementInfo[index].model_replaced )
-				{
-					if ( pIgnoreSteamID == NULL && pTargetModel == NULL )
-					{
-						const char *pszModel = (const char *)(&g_pUserInfo[UserInfo_ModelOffset * index]);
+				const char *pszModel = (const char *)(&g_pUserInfo[UserInfo_ModelOffset * index]);
 
-						memcpy( (char *)pszModel, g_ReplacePlayerModel.c_str(), g_ReplacePlayerModel.length() + 1 );
+				memcpy( (char *)pszModel, (*pTargetModel).c_str(), (*pTargetModel).length() + 1 );
 
-						g_PlayerModelReplacementInfo[index].random_model = 0;
-						g_PlayerModelReplacementInfo[index].model_replaced = true;
-					}
-				}
+				g_PlayerModelReplacementInfo[index].random_model = 0;
+				g_PlayerModelReplacementInfo[index].model_replaced = true;
+
+				return;
 			}
 		}
+	}
+
+	if ( g_Config.cvars.dont_replace_specified_players_models )
+	{
+		pIgnoreSteamID = m_IgnorePlayers.Find(g_PlayerModelReplacementInfo[index].steamid);
+
+		if ( pIgnoreSteamID != NULL )
+			return;
 	}
 
 	if ( g_Config.cvars.replace_players_models_with_randoms && !m_RandomModels.empty() )
@@ -307,23 +303,28 @@ void CModelsManager::UpdatePlayerModel(int index)
 
 					g_PlayerModelReplacementInfo[index].random_model = model_index + 1;
 					g_PlayerModelReplacementInfo[index].model_replaced = true;
+
+					return;
 				}
 			}
 		}
 	}
 
-	if ( g_Config.cvars.replace_specified_players_models )
+	if ( g_Config.cvars.replace_players_models )
 	{
-		if ( pTargetModel != NULL )
+		if ( index != g_pPlayerMove->player_index || (index == g_pPlayerMove->player_index && g_Config.cvars.replace_model_on_self) )
 		{
 			if ( !g_PlayerModelReplacementInfo[index].model_replaced )
 			{
-				const char *pszModel = (const char *)(&g_pUserInfo[UserInfo_ModelOffset * index]);
+				if ( pIgnoreSteamID == NULL && pTargetModel == NULL )
+				{
+					const char *pszModel = (const char *)(&g_pUserInfo[UserInfo_ModelOffset * index]);
 
-				memcpy( (char *)pszModel, (*pTargetModel).c_str(), (*pTargetModel).length() + 1 );
+					memcpy( (char *)pszModel, g_ReplacePlayerModel.c_str(), g_ReplacePlayerModel.length() + 1 );
 
-				g_PlayerModelReplacementInfo[index].random_model = 0;
-				g_PlayerModelReplacementInfo[index].model_replaced = true;
+					g_PlayerModelReplacementInfo[index].random_model = 0;
+					g_PlayerModelReplacementInfo[index].model_replaced = true;
+				}
 			}
 		}
 	}

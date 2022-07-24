@@ -27,6 +27,7 @@ const wchar_t *UTIL_CStringToWideCString(const char *pszString);
 bool UTIL_WorldToScreen(float *pflOrigin, float *pflVecScreen);
 void UTIL_ScreenToWorld(float *pflNDC, float *pflWorldOrigin);
 void UTIL_SetAnglesSilent(float *angles, struct usercmd_s *cmd);
+bool UTIL_IsFiring(struct usercmd_s *cmd);
 
 void UTIL_SetGameSpeed(double dbSpeed);
 void UTIL_SendPacket(bool bSend);

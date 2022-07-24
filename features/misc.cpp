@@ -755,7 +755,7 @@ void CMisc::OneTickExploit(struct usercmd_s *cmd)
 
 		if ( g_Config.cvars.fast_crowbar )
 		{
-			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR )
+			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR || Client()->GetCurrentWeaponID() == WEAPON_WRENCH )
 			{
 				if ( cmd->buttons & IN_ATTACK )
 				{
@@ -777,7 +777,7 @@ void CMisc::OneTickExploit(struct usercmd_s *cmd)
 
 		if ( g_Config.cvars.fast_crowbar2 )
 		{
-			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR )
+			if ( Client()->GetCurrentWeaponID() == WEAPON_CROWBAR || Client()->GetCurrentWeaponID() == WEAPON_WRENCH )
 			{
 				if ( cmd->buttons & IN_ATTACK )
 				{
@@ -1072,97 +1072,6 @@ void CMisc::FastRun(struct usercmd_s *cmd)
 // Spinner
 //-----------------------------------------------------------------------------
 
-static bool IsFiring(usercmd_t *cmd)
-{
-	static float last_displacer_state = 0.f;
-	static int throw_nade_state = 0;
-
-	if ( Client()->GetCurrentWeaponID() > WEAPON_NONE )
-	{
-		switch ( Client()->GetCurrentWeaponID() )
-		{
-		case WEAPON_RPG:
-			if ( ClientWeapon()->GetWeaponData()->iuser4 && ClientWeapon()->GetWeaponData()->fuser1 != 0.f )
-				return true;
-
-			if ( cmd->buttons & IN_ATTACK2 )
-				return false;
-
-			break;
-
-		case WEAPON_GAUSS:
-			if ( ClientWeapon()->GetWeaponData()->fuser4 > 0.f )
-			{
-				if ( Client()->ButtonLast() & IN_ATTACK2 )
-				{
-					if ( !(cmd->buttons & IN_ATTACK2) )
-						return true;
-				}
-				else if ( Client()->ButtonLast() & IN_ALT1 )
-				{
-					if ( !(cmd->buttons & IN_ALT1) )
-						return true;
-				}
-				else if ( ClientWeapon()->GetWeaponData()->fuser4 == 1.f )
-				{
-					return true;
-				}
-
-				return false;
-			}
-
-			break;
-
-		case WEAPON_HANDGRENADE:
-			if ( ClientWeapon()->GetWeaponData()->fuser1 < 0.f && throw_nade_state != 2 )
-			{
-				throw_nade_state = 1;
-
-				if ( Client()->ButtonLast() & (IN_ATTACK | IN_ATTACK2) )
-				{
-					if ( !(cmd->buttons & (IN_ATTACK | IN_ATTACK2)) )
-						return true;
-				}
-				else
-				{
-					if ( !(cmd->buttons & (IN_ATTACK | IN_ATTACK2)) )
-						throw_nade_state = 2;
-				}
-			}
-
-			if ( ClientWeapon()->GetWeaponData()->fuser2 < 0.f && throw_nade_state == 2 )
-				return true;
-
-			throw_nade_state = 0;
-			return false;
-
-		case WEAPON_DISPLACER:
-			last_displacer_state = ClientWeapon()->GetWeaponData()->fuser1;
-
-			if ( last_displacer_state == 1.f )
-				return true;
-
-			return false;
-		}
-
-		if ( cmd->buttons & (IN_ATTACK | IN_ATTACK2) && Client()->CanAttack() && !ClientWeapon()->IsReloading() )
-		{
-			if (cmd->buttons & IN_ATTACK)
-			{
-				if ( ClientWeapon()->CanPrimaryAttack() )
-					return true;
-			}
-			else
-			{
-				if ( ClientWeapon()->CanSecondaryAttack() )
-					return true;
-			}
-		}
-	}
-
-	return false;
-}
-
 static bool IsBusyWithLongJump(usercmd_t *cmd)
 {
 	if ( cmd->buttons & IN_JUMP && Client()->IsOnGround() )
@@ -1235,7 +1144,7 @@ void CMisc::Spinner(struct usercmd_s *cmd)
 	{
 		if (Client()->GetMoveType() == MOVETYPE_WALK && Client()->GetWaterLevel() <= WL_FEET)
 		{
-			if ( !(cmd->buttons & IN_USE || cmd->impulse == 201 || IsFiring(cmd) || IsBusyWithLongJump(cmd)) )
+			if ( !(cmd->buttons & IN_USE || cmd->impulse == 201 || UTIL_IsFiring(cmd) || IsBusyWithLongJump(cmd)) )
 			{
 				m_flSpinPitchAngle = g_vecSpinAngles.x / -3.0f;
 				UTIL_SetAnglesSilent(g_vecSpinAngles, cmd);
