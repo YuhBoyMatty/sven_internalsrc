@@ -1,0 +1,9 @@
+[submodule "libdasm"]
+	path = sven_internal/libdasm
+	url = https://github.com/jtpereyda/libdasm.git
+[submodule "ini-parser"]
+	path = sven_internal/ini-parser
+	url = https://github.com/sw1ft747/ini-parser.git
+[submodule "imgui"]
+	path = sven_internal/imgui
+	url = https://github.com/ocornut/imgui.git

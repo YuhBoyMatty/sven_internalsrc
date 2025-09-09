@@ -1,0 +1,355 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Sven Internal">
+      <UniqueIdentifier>{df642c06-121b-4cb6-a599-2f0ca0e1307d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\Utils">
+      <UniqueIdentifier>{05c135b0-569e-4bb5-bb2c-5dfc441a2714}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\Strafe">
+      <UniqueIdentifier>{6e4bf60f-5007-40a6-86b8-55fe6ec879ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\libdasm">
+      <UniqueIdentifier>{0b0eca3f-f187-4d3a-aa7e-13093c8b06d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\Modules">
+      <UniqueIdentifier>{cc17f797-5537-4572-8ed7-43cb2dc9b9e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\Game">
+      <UniqueIdentifier>{92fd9aa5-ce3e-4e13-ad56-36e6c8484bef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\Features">
+      <UniqueIdentifier>{094972be-d730-4f0f-9faa-aaac9fca443d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\ImGui">
+      <UniqueIdentifier>{4b556c89-530c-4601-a435-d3db2e207ad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\ini-parser">
+      <UniqueIdentifier>{f13aa36c-518b-43d7-a8e3-31f9aec9b08c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\ImGui Implementations">
+      <UniqueIdentifier>{903b05c5-aca7-48f4-9aa9-6cde168f8b3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sven Internal\Data Structures">
+      <UniqueIdentifier>{2081de0d-7527-4f6c-850a-ee5ca2aab80d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Sven Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\signature_scanner.cpp">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="patterns.cpp">
+      <Filter>Sven Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="strafe\strafe.cpp">
+      <Filter>Sven Internal\Strafe</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\trampoline_hook.cpp">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="libdasm\libdasm.c">
+      <Filter>Sven Internal\libdasm</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\client.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\vtable_hook.cpp">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="features\antiafk.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\strafer.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\keyspam.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\opengl.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="features\camhack.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="game\drawing.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\vgui.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="game\utils.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="features\visual.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\advanced_mute_system.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_demo.cpp">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_widgets.cpp">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\menu.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp">
+      <Filter>Sven Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="ini-parser\ini_parser.c">
+      <Filter>Sven Internal\ini-parser</Filter>
+    </ClCompile>
+    <ClCompile Include="features\misc.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="game\studio.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\patcher.cpp">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="features\chams.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="game\class_table.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\usermsg.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="game\console.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="features\firstperson_roaming.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="game\ammo.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="features\message_spammer.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl\imgui_impl_opengl2.cpp">
+      <Filter>Sven Internal\ImGui Implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl\imgui_impl_win32.cpp">
+      <Filter>Sven Internal\ImGui Implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="game\mathlib.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="features\skybox.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\SDL2.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\engine.cpp">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="features\custom_vote_popup.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\chat_colors.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="game\player_utils.cpp">
+      <Filter>Sven Internal\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="features\dynamic_glow.cpp">
+      <Filter>Sven Internal\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\styles.cpp">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils\patterns_base.h">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\signature_scanner.h">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk.h">
+      <Filter>Sven Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="patterns.h">
+      <Filter>Sven Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="strafe\strafe.h">
+      <Filter>Sven Internal\Strafe</Filter>
+    </ClInclude>
+    <ClInclude Include="strafe\strafe_utils.h">
+      <Filter>Sven Internal\Strafe</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\trampoline_hook.h">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="libdasm\opcode_tables.h">
+      <Filter>Sven Internal\libdasm</Filter>
+    </ClInclude>
+    <ClInclude Include="libdasm\libdasm.h">
+      <Filter>Sven Internal\libdasm</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\client.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\vtable_hook.h">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="game\votepopup.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\antiafk.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="interfaces.h">
+      <Filter>Sven Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="features\strafer.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\utils.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\keyspam.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\opengl.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="features\camhack.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\drawing.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\vgui.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="features\visual.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\advanced_mute_system.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>Sven Internal\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\menu.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Sven Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="ini-parser\ini_parser.h">
+      <Filter>Sven Internal\ini-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="features\misc.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\studio.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\patcher.h">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="features\chams.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\class_table.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\usermsg.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="game\console.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\firstperson_roaming.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ammo.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\message_spammer.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl\imgui_impl_opengl2.h">
+      <Filter>Sven Internal\ImGui Implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl\imgui_impl_win32.h">
+      <Filter>Sven Internal\ImGui Implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="game\mathlib.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\skybox.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\SDL2.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\engine.h">
+      <Filter>Sven Internal\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct\hash.h">
+      <Filter>Sven Internal\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct\hashdict.h">
+      <Filter>Sven Internal\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct\hashtable.h">
+      <Filter>Sven Internal\Data Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="features\custom_vote_popup.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\chat_colors.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="game\player_utils.h">
+      <Filter>Sven Internal\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="features\dynamic_glow.h">
+      <Filter>Sven Internal\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\styles.h">
+      <Filter>Sven Internal\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
